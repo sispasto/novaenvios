@@ -261,7 +261,7 @@ async function authenticateUser() {
     }
 
     // 2. Obtener perfil detallado desde Edge Function
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/mse_authUser`, {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/novaenvios_authUser`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
