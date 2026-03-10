@@ -1,0 +1,285 @@
+<style>   
+  .icono {
+    width: 32px;
+    height: 32px;
+    max-width: 60%;
+  }
+
+  /* Estilo adicional para texto */
+  .texto-icono {
+    font-size: 10px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* Tamaño para pantallas grandes (PC) */
+  @media screen and (min-width: 768px) {
+    .icono {
+      width: 48px;
+      height: 48px;
+    }
+
+    .texto-icono {
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+    }
+  }
+</style>
+<div>
+  <div class="container-fluid"> <!--deja un espacio minimo del borde de la pantalla-->
+    <h3></h3><!--este es el espacio-->
+    <!-- <div class="output"> </div> -->
+    <form id="formulario" onsubmit="nsRegistro.procesarFormulario(event,this)">
+      <div class="container-fluid p-0 m-0">
+        <div class="row justify-content-center">
+          <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-5">
+            <div class="card shadow border-0">
+              <div class="card-header bg-dark text-white d-flex align-items-center" style="height: 3rem;">
+                <h5 class="card-title mb-0 fw-bold">Registro de Asistencia</h5>
+              </div>
+              <div class="card-body">
+                <div class="text-center mb-4">
+                  <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    <i class="bi bi-camera-fill"></i>
+                  </button>                  
+                </div>
+
+                <div class="mb-3">
+                  <label for="codnomina" class="form-label">Código Nómina</label>
+                  <input type="number" class="form-control" id="codnomina" name="codnomina">
+                  <span id="namePromotor" class="form-text text-muted"></span>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-2">
+                    <input type="radio" class="btn-check" name="tiporegistro" id="rbtEntrada" value="ENTRADA" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary w-100" for="rbtEntrada">Entrada</label>
+                  </div>
+
+                  <div class="col-md-6 mb-2">
+                    <input type="radio" class="btn-check" name="tiporegistro" id="rbtSalida" value="SALIDA" autocomplete="off">
+                    <label class="btn btn-outline-primary w-100" for="rbtSalida">Salida</label>
+                  </div>
+                </div>
+
+
+                <div class="mb-3" style="display: none;">
+                  <label for="ubicacion" class="form-label">Ubicación</label>
+                  <input type="text" class="form-control" id="coordenadas" name="coordenadas" readonly>
+                  <!-- Campos ocultos para la imagen y mapa --> 
+                </div> 
+              </div>              
+              <div class="card-footer d-flex gap-2">
+                <button  type="submit"  class="btn btn-dark flex-fill" id="frmSubmit">
+                  MARCAR ASISTENCIA
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>      
+    </form>
+  </div>
+</div>
+<script>  
+var nsRegistro=(function(){ 
+    /******************************************************************************************************/ 
+    var dataForm = null;
+    const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+    const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
+  
+    /****************************************Obteniendo la ubicación actual********************************/
+    let latitude='';
+    let longitude='';
+    let options = {
+      enableHighAccuracy: true,
+      timeout: 30000,
+      maximumAge: 27000,
+    };
+
+    function success(pos) {//log("Tu ubicación actual:");.log(`Latitud : ${crd.latitude}`);log(`+- ${crd.accuracy} metros.`);
+      let crd = pos.coords;
+      latitude = crd.latitude;
+      longitude = crd.longitude;
+      document.getElementById("coordenadas").value= latitude+","+longitude;
+      document.getElementById("mapa").value= "https://www.google.com/maps?q=" + latitude+","+longitude;
+      saveImage(); 
+    }
+
+    function error(err) {
+      if(err.code == 1) {
+        alertSMS("Error: El acceso a la ubicación esta deshabilitado!");
+        latitude='';longitude='';
+      } else if( err.code == 2) {    
+        alertSMS("Error: No se pudo calcular la ubicación!");  
+        latitude='';longitude='';
+      }
+      //console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
+    
+   async function getLocation() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject("Geolocalización no soportada");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          const coords = `${lat},${lng}`;
+
+          // Solo visual
+          document.getElementById("coordenadas").value = coords;
+
+          resolve(coords);
+        },
+        err => {
+          reject("No se pudo obtener la ubicación");
+        },
+        options
+      );
+    });
+  }
+
+    
+    /****************************************Definiación de variables globales**************************************/   
+    //var arrayGlobal=[];//arreglo de promotores
+    var banPromotor=0;//variable para determinar si el promotor fue encontrado    
+    let submitDesdeBoton = false;    
+    let canvas = null;
+    /******************************************************************************************************/
+    /****************************************Definición de eventos HTML***********************************/  
+    document.querySelectorAll('input[type=number]').forEach( node => node.addEventListener('keypress', e => {
+      if(e.keyCode == 13) {e.preventDefault();                    
+      }
+    }));//Se captura la tecla enter para evitar el envio del formulario       
+    
+    
+    // Se pasa 1 para saber que es evento de boton 
+  
+    /***************************************************************************************************************/
+    /****************************************************procesarFormulario*****************************************/
+    async function procesarFormulario(event, formulario) {
+      event.preventDefault();
+
+      const boton = document.getElementById("frmSubmit");
+      boton.disabled = true;
+      boton.classList.add("disabled");
+
+      try {
+        const codigo = document.getElementById("codnomina").value.trim();
+        if (!codigo) {
+          document.getElementById("namePromotor").textContent = "";
+          alertSMS("Ingrese su código");
+          return;
+        }
+
+        const tipoRegistro = obtenerTipoRegistro();
+        if (!tipoRegistro) {
+          document.getElementById("namePromotor").textContent = "";
+          alertSMS("Seleccione el tipo de registro");
+          return;
+        }
+
+        // ✅ USO CORRECTO DEL MÓDULO
+        if (nsModal.getNumClic() <= 0) {
+          document.getElementById("namePromotor").textContent = "";
+          alertSMS("La fotografía es obligatoria");
+          return;
+        }
+
+        const ubicacion = await getLocation();
+
+        // 📸 obtener imagen como BLOB desde canvas
+        const canvas = nsModal.getCanvas();
+        const fotoBlob = await new Promise((resolve) => {
+          canvas.toBlob(
+            (blob) => resolve(blob),
+            "image/jpeg",
+            0.6
+          );
+        });
+
+        if (!fotoBlob) {
+          document.getElementById("namePromotor").textContent = "";
+          throw new Error("No se pudo generar la imagen");
+        }
+
+        // 📦 construir FormData
+        const formData = new FormData();
+        formData.append("codigo", codigo);
+        formData.append("tipo_registro", tipoRegistro);
+        formData.append("ubicacion", JSON.stringify(ubicacion));
+        formData.append("foto", fotoBlob, "foto.jpg");
+
+        // 🔥 enviar a Edge Function
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/registrar_marcacion`,
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+              "apikey": SUPABASE_ANON_KEY
+            },
+            body: formData
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          document.getElementById("namePromotor").textContent = "";
+          throw new Error(result.error || "Error al registrar marcación");
+        }
+
+        // ✅ respuesta correcta
+        document.getElementById("namePromotor").innerHTML = result.empleado.nombre.toUpperCase();
+
+        alertSMS(
+          `Marcación registrada correctamente para ${result.empleado.nombre}`
+        );
+
+        // ==========================
+        // ✅ RESET TOTAL (CLAVE)
+        // ==========================
+        nsModal.reset();      // limpia canvas + numClic = 0
+        formulario.reset();  // limpia inputs        
+
+      } catch (err) {
+        console.error(err);
+        alertSMS(err.message);
+      } finally {
+        boton.disabled = false;
+        boton.classList.remove("disabled");
+      }
+    }
+
+
+    /*************************************Guardar Imagen***************************************************/
+    function dataURLtoBlob(dataurl) {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) u8arr[n] = bstr.charCodeAt(n);
+      return new Blob([u8arr], { type: mime });
+    }    
+
+    function obtenerTipoRegistro() {
+      const seleccionado = document.querySelector(
+        'input[name="tiporegistro"]:checked'
+      );
+      return seleccionado ? seleccionado.value : null;
+    }
+
+      // Expone las funciones públicas del módulo
+    return {
+        procesarFormulario        
+    };
+    
+  })();
+
+  </script>
+

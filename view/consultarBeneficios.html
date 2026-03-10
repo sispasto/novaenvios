@@ -1,0 +1,142 @@
+<style>
+  .tabla-beneficios { font-size: 0.9rem; }
+  .badge-redimir { color: #dc3545; font-weight: bold; font-style: italic; }
+  .badge-activo { background-color: #198754; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; }
+  .badge-inactivo { background-color: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; }
+</style>
+
+<div class="container-fluid mt-3">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-11">
+      <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold">Consulta de Beneficios Asignados</h5>
+          <input
+            type="text"
+            class="form-control form-control-sm w-50"
+            placeholder="Buscar por cliente, celular o servicio..."
+            onkeyup="nsConsultarBeneficios.filtrar(this.value)"
+          >
+        </div>
+
+        <div class="card-body p-0">
+          <div id="alertaConsulta" class="p-3"></div>
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 tabla-beneficios">
+              <thead class="table-dark">
+                <tr>
+                  <th>Cliente (Nombre y Apellido)</th>
+                  <th>Celular</th>
+                  <th>Servicio / Redención</th>
+                  <th>Fecha expiración</th> 
+                  <th class="text-center">Estado Beneficio</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBeneficios"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var nsConsultarBeneficios = (function () {
+  const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
+  
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let beneficios = [];
+
+  async function cargar() {
+    const empresaId = sessionStorage.getItem('empresaId');
+    if (!empresaId) {
+      mostrarError("Error: No se encontró ID de empresa en la sesión.");
+      return;
+    }
+
+    try {
+      const { data: { session }, error: sessionErr } = await supabaseClient.auth.getSession();
+      if (sessionErr || !session) throw new Error("Su sesión ha expirado.");
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/mse_consultar_beneficios`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ empresa_id: empresaId }) 
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Error al consultar beneficios");
+
+      beneficios = result.data;
+      render(beneficios);
+    } catch (err) {
+      mostrarError(err.message);
+    }
+  }
+
+  function render(data) {
+    const tbody = document.getElementById("tbodyBeneficios");
+    tbody.innerHTML = "";
+
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3">No hay registros</td></tr>`;
+      return;
+    }
+
+    data.forEach(b => {
+      // Formatear la fecha
+      const fechaExp = b.expiracion 
+        ? new Date(b.expiracion).toLocaleDateString('es-ES') 
+        : 'Sin fecha';
+
+      tbody.innerHTML += `
+        <tr>
+          <td class="fw-bold">${b.cliente}</td>
+          <td>${b.celular}</td>
+          <td>
+            <span class="${b.nom_servicio === 'SIN REDIMIR' ? 'badge-redimir' : ''}">
+              ${b.nom_servicio}
+            </span>
+          </td>
+          <td>${fechaExp}</td>
+          <td class="text-center">
+            <span class="${b.estado === 'activo' ? 'badge-activo' : 'badge-inactivo'}">
+              ${b.estado.toUpperCase()}
+            </span>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  function filtrar(txt) {
+    txt = txt.toLowerCase();
+    const filtrados = beneficios.filter(b =>
+      b.cliente.toLowerCase().includes(txt) ||
+      b.celular.includes(txt) ||
+      b.nom_servicio.toLowerCase().includes(txt)
+    );
+    render(filtrados);
+  }
+
+  function mostrarError(msg) {
+    document.getElementById("alertaConsulta").innerHTML = `
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>⚠️ Error:</strong> ${msg}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+  }
+
+  return { cargar, filtrar };
+})();
+
+document.addEventListener("DOMContentLoaded", () => {
+  nsConsultarBeneficios.cargar();
+});
+</script>

@@ -1,0 +1,301 @@
+  <div>  
+    <div class="container-fluid">
+      <h3></h3><!--<div class="output"> </div>-->    
+      <form id="frmInforme">
+        <div class="container-fluid p-0 m-0">
+          <div class="card shadow border-0">
+            <div class="card-header bg-dark text-white d-flex align-items-center" style="height: 3rem;">
+              <h5 class="card-title mb-0 fw-bold">Informe de Promotores</h5>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-sm">
+                  <label for="codnomina" class="form-label">Código Nómina</label>
+                  <input type="text" class="form-control" id="codnomina" name="codnomina">   
+                </div>
+                <div class="col-sm">
+                  <label for="mes" class="form-label">Mes</label>
+                  <select class="form-select" id="listames">
+                    <option selected value="0">Seleccione una opción</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                  </select>
+                </div>
+                <div class="col-sm">
+                  <label for="year" class="form-label">Año</label>
+                  <select class="form-select" id="listyear">
+                    <option selected value="0">Seleccione una opción</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col">
+                  <label for="namePromotor" class="form-label">Nombre Promotor</label>
+                  <input type="text" class="form-control" id="namePromotor" name="namePromotor">   
+                </div>
+              </div>
+
+              <div class="text-end">
+                <button type="button" class="btn btn-primary" id="consultar" onclick="nsInforme.consultarDatos()">Consultar</button>
+              </div>
+            </div>
+            <div class="container-fluid">
+              <div id="containerTabla" class="d-flex justify-content-center"></div>
+              <div class="d-flex justify-content-center mt-3 overflow-auto" style="max-width: 100%;">
+                <div id="pagination" class="d-flex flex-wrap justify-content-center"></div>
+              </div>
+            </div>    
+          </div>
+        </div>
+      </form>      
+  </div>  
+  </div>
+  <template id="plantillaTabla">
+    <div style="overflow-x: auto; width: 100%;">
+      <table class="table table-dark table-striped table-bordered mb-0" style="min-width: 600px;">
+        <thead>
+          <tr>
+            <th scope="col">Día</th>
+            <th scope="col">Tipo Registro</th>
+            <th scope="col">Hora</th>
+            <th scope="col">Foto</th>
+            <th scope="col">Ubicación</th>
+          </tr>
+        </thead>
+        <tbody id="mainTable"></tbody>
+      </table>
+    </div>
+  </template>
+  <script>     
+  var nsInforme=(function(){ 
+    /*************************Inicializar***************************************/
+
+    if( parseInt(sessionStorage.getItem('rol')) === 2 ){//si es un usuario normal      
+      
+      document.getElementById("codnomina").value = sessionStorage.getItem('codigoUsuario').toString();  
+      document.getElementById("codnomina").readOnly = true;  
+      document.getElementById("namePromotor").readOnly = true;    
+
+    }
+    else if ( parseInt(sessionStorage.getItem('rol')) === 1 ){ // si es admin
+
+      document.getElementById("codnomina").readOnly = false;      
+      document.getElementById("namePromotor").readOnly = true; 
+
+    }
+
+    /***********************************Eventos********************************/
+    document.querySelectorAll('input[type=number]').forEach( node => node.addEventListener('keypress', e => {
+      if(e.keyCode == 13) {e.preventDefault();            
+        getPromotor();
+      }
+    }));//Se captura la tecla enter para evitar el envio del formulario 
+    //document.getElementById('codnomina').addEventListener('blur', getPromotor);
+    /**************************************************************************/
+
+    let banPromotor = 0;
+    let currentPage = 1;
+    let recordsPerPage = 8;
+    let dataTable = [];
+
+    function getPromotor(){ 
+      event.preventDefault();
+      let codnomina = document.getElementById("codnomina").value;
+      let promotor = [];      
+      arrayGlobal.forEach(elemento=>{
+        if (elemento[0] == codnomina ){
+          promotor.push(elemento);
+        }
+      });
+        
+      if ( promotor.length > 0 ){banPromotor=1; 
+        document.getElementById("namePromotor").style.display = "block";
+        document.getElementById("namePromotor").value = promotor[0][1].toString().toUpperCase();
+      }
+      else{ banPromotor=0; alert("");
+        document.getElementById("namePromotor").value= "";
+      }        
+    }//fin consulta de Promotor
+
+    function mostrarFoto(urlimg){
+        event.preventDefault();        
+        /************************************************************************************************/
+        let myModal = new bootstrap.Modal(document.getElementById('myModal'));         
+        let mbody = document.getElementById("myModalbody");
+        let modalcontainer = document.getElementById("modalcontainer");
+        modalcontainer.classList.remove("modal-xl");
+        mbody.innerHTML=`<img src="${urlimg}" class="img-fluid"/>`;
+        myModal.show();
+        /************************************************************************************************/        
+    }
+
+    function consultarDatos(){ getPromotor();
+      let containerTabla = document.getElementById('containerTabla'); removeALLChilds( containerTabla );
+      let namePromotor = document.getElementById("namePromotor").value;
+      let mes = parseInt( document.getElementById("listames").value );
+      let year = parseInt( document.getElementById("listyear").value );
+
+      if( namePromotor!="" && mes > 0 && year > 0 ){
+        crearLoader();// se empieza a hacer la consulta
+        let codnomina = document.getElementById("codnomina").value;
+        obtenerDatosFiltrados(codnomina,mes,year);        
+      }
+      else{
+        alertSMS("Error: Ingrese un código de promotor valido y elija el año y un mes de la lista desplegable!");
+      }
+    }
+
+    async function obtenerDatosFiltrados(codnomina, mes, year) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body: new URLSearchParams({
+            action: 'filtarFechas2',
+            codnomina: codnomina,
+            mes: mes,
+            year: year
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          success(data.data);
+          //console.log("Datos filtrados:", data.data);
+          // Aquí puedes hacer algo con data.data
+        } else {
+          console.log(data.mensaje || "Error al obtener los datos filtrados");
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+
+    function success( data ){       
+      dataTable = data;  // Almacenar los datos en dataTable
+      currentPage = 1;   // Resetear a la primera página
+      updateTable();     // Mostrar la tabla con paginación
+    }
+
+    function updateTable(){
+      let containerTabla = document.getElementById('containerTabla');
+      removeALLChilds( containerTabla );
+      
+      let tabla = document.getElementById('plantillaTabla'); 
+      containerTabla.appendChild(tabla.content.cloneNode(true)); 
+
+      let mainTable = document.getElementById("mainTable");
+      let html = '';
+
+      let start = (currentPage - 1) * recordsPerPage;
+      let end = start + recordsPerPage;
+      let paginatedData = dataTable.slice(start, end);
+
+      paginatedData.forEach(elemento=>{           
+        let URLimg = `'https://drive.google.com/thumbnail?id=${elemento[7]}'`;
+        html += `<tr class="table table-striped">
+                  <td>${elemento[1]}</td>
+                  <td>${elemento[3]}</td>
+                  <td>${elemento[2]}</td>
+                  <td style="text-align:center;">                
+                    <a href="#" onclick="nsInforme.mostrarFoto(${URLimg})"><i class="bi bi-image"></i></a>            
+                  </td>                 
+                  <td style="text-align:center;">
+                    <a href="#" onclick="nsInforme.geolocalizar('${elemento[6]}')"><i class="bi bi-geo-alt-fill"></i></a>
+                  </td>
+                </tr>`;
+      });
+
+      mainTable.innerHTML = html;
+      eliminarLoader();
+      createPagination();
+    }
+
+    function createPagination() {
+      let pagination = document.getElementById("pagination");
+      removeALLChilds(pagination);
+      let pageCount = Math.ceil(dataTable.length / recordsPerPage);
+
+      for(let i = 1; i <= pageCount; i++) {
+        let pageLink = document.createElement('button');
+        pageLink.classList.add('btn', 'btn-secondary', 'mx-1');
+        pageLink.textContent = i;
+
+        if(i === currentPage) {
+          pageLink.classList.add('active');
+        }
+
+        pageLink.addEventListener('click', function() {
+          currentPage = i;
+          updateTable();
+        });
+
+        pagination.appendChild(pageLink);
+      }
+    }
+
+    function geolocalizar(coordenadas){
+      let iframe = `<iframe width="100%" height="600" frameborder="0" scrolling="no" marginheight="0" 
+      marginwidth="0" src="${coordenadas}&output=embed"></iframe>`;
+      let myModal = new bootstrap.Modal(document.getElementById('myModal'));         
+      let mbody = document.getElementById("myModalbody");
+      let modalcontainer = document.getElementById("modalcontainer");
+      modalcontainer.classList.add("modal-xl");
+      mbody.innerHTML=iframe;
+      myModal.show();
+    }
+
+    function removeALLChilds(parent){
+      while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+      }
+    }
+
+    function inicializar() {
+      const fechaActual = new Date();
+      const mes = fechaActual.getMonth() + 1;
+      const year = fechaActual.getFullYear();
+
+      const listames = document.getElementById('listames');
+      const listayear = document.getElementById('listyear');
+
+      if (listames && listayear) {
+        listames.value = mes;
+        listayear.value = year;
+      } else {
+        console.warn('No se encontraron los elementos listames o listayear');
+      }
+    }
+
+    inicializar();    
+
+    return {
+      consultarDatos: consultarDatos,
+      mostrarFoto: mostrarFoto,
+      geolocalizar: geolocalizar
+    };
+
+  })();
+  </script>

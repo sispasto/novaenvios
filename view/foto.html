@@ -1,0 +1,141 @@
+  <style>
+    .video-container, .canvas-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #000;
+      overflow: hidden;
+    }
+    video, canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Fotografía</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid text-center">
+            <!-- Webcam video -->
+            <div class="video-container mb-3">
+              <video id="video" playsinline autoplay></video>
+            </div>
+
+            <!-- Botón capturar -->
+            <div class="mb-3">
+              <button id="snap" type="button" class="btn btn-primary">Tomar foto</button>
+            </div>
+
+            <!-- Imagen capturada -->
+            <div class="canvas-container">
+              <canvas id="canvas"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  var nsModal = (function () {
+    let objCamera = null;
+    let myModalEl = document.getElementById('staticBackdrop');
+    let numClic = 0;
+
+    const video = document.getElementById('video');
+    const snap = document.getElementById('snap');
+    const canvas = document.getElementById('canvas');
+    
+    // ==========================
+    // TOMAR FOTO
+    // ==========================
+    snap.addEventListener('click', function () {
+      const context = canvas.getContext('2d');
+
+      canvas.width = 320;
+      canvas.height = 240;
+
+      context.drawImage(video, 0, 0, 320, 240);
+
+      numClic = 1; // ✅ foto tomada correctamente
+    });
+
+    // ==========================
+    // CERRAR MODAL
+    // ==========================
+    myModalEl.addEventListener('hidden.bs.modal', function () { 
+      if (objCamera) {
+        objCamera.getTracks().forEach(track => track.stop());
+        objCamera = null;
+      }
+
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) backdrop.remove();
+    });
+
+    const constraints = {
+      audio: false,
+      video: { facingMode: "user" }
+    };
+
+    async function init() {
+      if (objCamera) return;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        handleSuccess(stream);
+      } catch (e) {
+        alertSMS("Error al acceder a la cámara");
+        console.error(e);
+      }
+    }
+
+    function handleSuccess(stream) {
+      video.srcObject = stream;
+      objCamera = stream;
+
+      video.addEventListener('loadedmetadata', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      });
+    }
+
+    myModalEl.addEventListener('shown.bs.modal', init);
+
+    // ==========================
+    // ✅ RESET TOTAL
+    // ==========================
+    function reset() {
+      numClic = 0;
+
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // ==========================
+    // API PÚBLICA DEL MÓDULO
+    // ==========================
+    function getNumClic() {
+      return numClic;
+    }
+
+    function getCanvas() {
+      return canvas;
+    }
+
+    return {      
+      reset,
+      getNumClic,
+      getCanvas
+    };
+  })();
+</script>
+
+

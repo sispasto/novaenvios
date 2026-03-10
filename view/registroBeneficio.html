@@ -1,0 +1,174 @@
+<style>   
+  .icono { width: 32px; height: 32px; max-width: 60%; }
+  .texto-icono { font-size: 10px; font-family: 'Poppins', sans-serif; }
+</style>
+
+<div>
+  <div class="container-fluid">
+    <h3></h3>
+    <form id="formBeneficio" onsubmit="nsRegistroBeneficio.procesarFormulario(event,this)">
+      <div class="container-fluid p-0 m-0">
+        <div class="row justify-content-center">
+          <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-5">
+            <div class="card shadow border-0">
+              <div class="card-header bg-dark text-white d-flex align-items-center" style="height:3rem">
+                <h5 class="card-title mb-0 fw-bold">Asignar Beneficio a Cliente</h5>
+              </div>
+
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Celular del Cliente</label>
+                  <input type="tel" id="celular_cliente" placeholder="Ej: 3001234567" 
+                         pattern="^3[0-9]{9}$" maxlength="10" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Red de Redención</label>
+                  <select id="id_red" class="form-select" disabled>
+                    <option value="null">Cargando redes...</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="card-footer d-flex gap-2">
+                <button type="submit" class="btn btn-dark flex-fill" id="btnGuardarBeneficio" disabled>
+                  ASIGNAR BENEFICIO
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+var nsRegistroBeneficio = (function () {
+  const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+  const SUPABASE_ANON_KEY = "TU_ANON_KEY";
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  /**
+   * Carga las redes de redención disponibles para la empresa.
+   * Se llama al cargar la página para llenar el select correspondiente.
+   */
+  async function cargarRedes() {
+    const selectRed = document.getElementById("id_red");
+    const btn = document.getElementById("btnGuardarBeneficio");
+    
+    // Obtenemos el ID del sessionStorage
+    const empresaId = sessionStorage.getItem('empresaId');
+
+    if (!empresaId) {
+      selectRed.innerHTML = '<option value="null">Sesión expirada</option>';
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      
+      // Única llamada a la Edge Function
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/mse_getRedes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ empresa_id: empresaId }) 
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+
+      let opciones = '<option value="null">--- Todas las Redes (Global) ---</option>';
+      
+      if (result.redes && result.redes.length > 0) {
+        result.redes.forEach(red => {
+          opciones += `<option value="${red.id}">${red.nombre}</option>`;
+        });
+      }
+
+      selectRed.innerHTML = opciones;
+      selectRed.disabled = false;
+      btn.disabled = false;
+
+    } catch (err) {
+      console.error("Error al obtener redes:", err);
+      selectRed.innerHTML = '<option value="null">Error al cargar redes</option>';
+    }
+  }
+  /**
+   * Procesa el formulario de asignación de beneficio.
+   * Envía los datos a la Edge Function correspondiente para registrar el beneficio.
+   */
+
+  /**
+   * Procesa el formulario de asignación de beneficio.
+   * Envía celular, id_red, empresa_id y rol a la Edge Function.
+   */
+  async function procesarFormulario(event, form) {
+    event.preventDefault();
+    const btn = document.getElementById("btnGuardarBeneficio");
+    
+    // 1. Obtener datos de sesión locales
+    const empresaId = sessionStorage.getItem('empresaId');
+    const rol = sessionStorage.getItem('userRol');
+    const celular = document.getElementById("celular_cliente").value.trim();
+    
+    // 2. Validar que la sesión esté activa antes de intentar el fetch
+    if (!empresaId || !rol) {
+      alertSMS("Error: Sesión no válida. Por favor, reingrese al sistema.");
+      return;
+    }
+
+    btn.disabled = true;
+
+    try {
+      // 3. Preparar el ID de la red (convertir "null" de select a null de JSON)
+      let id_red = document.getElementById("id_red").value;
+      id_red = (id_red === "null") ? null : id_red;
+
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) throw new Error("Sesión de Supabase expirada");
+
+      // 4. Llamada a la Edge Function con los 4 parámetros requeridos
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/mse_registrar_beneficio`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ 
+          celular: celular,    // Para buscar el persona_id en el servidor
+          id_red: id_red,      // Red seleccionada o null
+          empresa_id: empresaId, // Proveniente de sessionStorage
+          rol: rol             // Proveniente de sessionStorage
+        }) 
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Manejo específico para cuando el celular no existe
+        throw new Error(result.error || "Error desconocido al registrar");
+      }
+
+      // 5. Éxito: Notificar y limpiar formulario
+      alertSMS(`✅ Beneficio registrado correctamente.`);
+      form.reset();
+      
+      // Opcional: Recargar redes por si se desea registrar otro inmediatamente
+      await cargarRedes();
+
+    } catch (err) {
+      console.error("Error en procesarFormulario:", err.message);
+      alertSMS(`⚠️ ${err.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  return { procesarFormulario, cargarRedes };
+})();
+</script>
