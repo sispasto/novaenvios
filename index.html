@@ -251,7 +251,7 @@ async function authenticateUser() {
   try {
     // 1. Autenticación básica
     const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
-      email: `${usuario}@mse.com`,
+      email: `${usuario}@novaenvios.com`,
       password: clave,
     });
 
