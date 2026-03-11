@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es-CO">
   <head>
-  <title>MSE</title>
+  <title>NovaEnvios</title>
   <meta charset="utf-8">  
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -15,7 +15,7 @@
   <!-- Estilos personalizados -->
   <link rel="stylesheet" href="css/home.css">
   <link rel="stylesheet" href="css/loader.css">
-  <link rel="icon" href="/mse/assets/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/novaenvios/assets/favicon.ico" type="image/x-icon">
 
   <!-- Bootstrap JS bundle (incluye Popper) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -331,7 +331,7 @@ async function updatePassword() {
     }
 
     // 3. Llamada a la Edge Function
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/mse_authUser`, {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/novaenvios_authUser`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
