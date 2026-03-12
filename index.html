@@ -48,43 +48,12 @@
                     <!-- Inicio -->
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="#" onclick="getHome();"><i class="bi bi-house"> Inicio</i></a>
-                    </li>
-                    <!-- Registrar -->
-                    <!--<li class="nav-item">
-                        <a class="nav-link" href="#" onclick="getRegistro();"><i class="bi bi-pencil-square"> Registrar Asistencia</i></a>
-                    </li>   -->
-                    <!-- Consultar -->
-                    <!--<li class="nav-item">
-                        <a class="nav-link" href="#" onclick="getConsulta();"><i class="bi bi-pencil-square"> Consultar marcaciones</i></a>
-                    </li>     -->                               
+                    </li>                                             
                     <!-- Login Button -->
                     <li class="nav-item" id="loginNavItem">
                         <a class="nav-link" href="#" onclick="showLoginModal();"><i class="bi bi-door-open">Login</i></a>
                     </li>              
-                </ul>
-                 <!-- Rol Cliente -->
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="navbarItemsCliente" style="display:none">
-                    <!-- Inicio -->
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#" onclick="getHome();"><i class="bi bi-house"> Inicio</i></a>
-                    </li>
-                    <!-- Registrar -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="redimirBeneficio();"><i class="bi bi-pencil-square"> Redimir beneficio</i></a>
-                    </li> 
-                    <!-- Informe -->
-                    <!--<li class="nav-item">
-                        <a class="nav-link" href="#" onclick="getInforme();"><i class="bi bi-door-open"> Histórico por mes</i></a>
-                    </li>       -->                                
-                    <!-- Cambiar Clave -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showChangePasswordModal();"><i class="bi bi-key"> Cambiar clave</i></a>
-                    </li>
-                    <!-- Salir Button -->
-                    <li class="nav-item" id="logoutNavItem">
-                        <a class="nav-link" href="#" onclick="logout();"><i class="bi bi-box-arrow-right"> Salir</i></a>
-                    </li>
-                </ul>
+                </ul>                
                 <!-- Rol Empresa -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="navbarItemsUser" style="display:none">
                     <!-- Inicio -->
@@ -340,9 +309,8 @@ async function authenticateUser() {
       const { nombre, rol, persona_id, empresa_id } = data;
 
       // Habilitar menús según rol
-      document.getElementById('navbarItemsAdmin').style.display   = rol === 3 ? 'block' : 'none';
-      document.getElementById('navbarItemsUser').style.display    = rol === 2 ? 'block' : 'none';
-      document.getElementById('navbarItemsCliente').style.display = rol === 1 ? 'block' : 'none';
+      document.getElementById('navbarItemsAdmin').style.display   = rol === 2 ? 'block' : 'none';
+      document.getElementById('navbarItemsUser').style.display    = rol === 1 ? 'block' : 'none';      
       document.getElementById('navbarItemsDefault').style.display = 'none';
 
       // GUARDAR DATOS CLAVE PARA EL RESTO DE LA APP
