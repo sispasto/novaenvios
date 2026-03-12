@@ -1,10 +1,26 @@
 <style>
-.icono{width:32px;height:32px;max-width:60%}
-.texto-icono{font-size:10px;font-family:'Poppins',sans-serif}
-@media screen and (min-width:768px){
-  .icono{width:48px;height:48px}
-  .texto-icono{font-size:14px}
+
+.section-title{
+font-weight:600;
+font-size:14px;
+color:#444;
+margin-bottom:10px;
 }
+
+.scan-input{
+font-size:18px;
+font-weight:500;
+text-align:center;
+}
+
+.table-sm td{
+font-size:14px;
+}
+
+.badge-counter{
+font-size:14px;
+}
+
 </style>
 
 <div class="container-fluid">
@@ -12,66 +28,114 @@
 <form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event,this)">
 
 <div class="row justify-content-center">
-<div class="col-lg-7">
+<div class="col-lg-8">
 
 <div class="card shadow border-0">
 
 <!-- HEADER -->
-<div class="card-header bg-dark text-white d-flex align-items-center">
-<h5 class="mb-0 fw-bold">Registro de Planilla</h5>
+<div class="card-header bg-dark text-white">
+<h5 class="mb-0 fw-bold">Planilla de Reparto</h5>
 </div>
 
-<!-- BODY -->
 <div class="card-body">
 
-<!-- FECHA -->
-<div class="mb-3">
+<!-- ===================== -->
+<!-- ENCABEZADO PLANILLA -->
+<!-- ===================== -->
+
+<div class="section-title">Datos de Planilla</div>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
 <label class="form-label">Fecha creación</label>
 <input type="text" class="form-control" id="fecha_creacion" readonly>
 </div>
 
-<!-- RESPONSABLE -->
-<div class="mb-3">
+<div class="col-md-6 mb-3">
 <label class="form-label">Responsable</label>
-<select class="form-control" id="responsable" required></select>
+
+<select class="form-select" id="responsable" required>
+<option value="">Cargando responsables...</option>
+</select>
+
 </div>
 
-<div class="mb-3">
-<label class="form-label">ID Responsable</label>
-<input type="text" class="form-control" id="id_responsable" readonly>
 </div>
 
 <hr>
 
+<!-- ===================== -->
 <!-- LECTOR GUIAS -->
-<div class="mb-3">
-<label class="form-label">Escanear Guía</label>
-<input type="text" class="form-control" id="inputGuia" placeholder="Escanee guía con lector">
-</div>
+<!-- ===================== -->
+
+<div class="section-title">Lectura de Guías</div>
+
+<div class="row">
+
+<div class="col-md-12 mb-3">
+
+<input 
+type="text"
+class="form-control scan-input"
+id="inputGuia"
+placeholder="Escanee guía con lector de código de barras"
+autocomplete="off"
+>
 
 </div>
 
-<!-- TABLA GUIAS -->
+</div>
+
+<!-- CONTADOR -->
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+
+<span class="fw-semibold">Guías registradas</span>
+
+<span class="badge bg-dark badge-counter" id="contadorGuias">
+0
+</span>
+
+</div>
+
+<!-- TABLA -->
+
 <div class="table-responsive">
-<table class="table table-sm table-striped" id="tablaGuias">
+
+<table class="table table-sm table-striped">
 
 <thead class="table-dark">
+
 <tr>
-<th>#</th>
+<th width="60">#</th>
 <th>Guía</th>
 </tr>
+
 </thead>
 
-<tbody></tbody>
+<tbody id="tablaGuias"></tbody>
 
 </table>
+
+</div>
+
 </div>
 
 <!-- FOOTER -->
+
 <div class="card-footer d-flex gap-2">
-<button type="submit" class="btn btn-dark flex-fill" id="btnGuardar">
+
+<button 
+type="submit"
+class="btn btn-dark flex-fill"
+id="btnGuardar"
+>
+
 GRABAR PLANILLA
+
 </button>
+
 </div>
 
 </div>
@@ -81,6 +145,7 @@ GRABAR PLANILLA
 </form>
 
 </div>
+
 <script>
 
 var nsPlanilla=(function(){
@@ -95,6 +160,7 @@ let listaGuias=[];
 /* =========================
 FECHA ACTUAL
 ========================= */
+
 function cargarFecha(){
 
 const hoy=new Date();
@@ -109,47 +175,54 @@ document.getElementById("fecha_creacion").value=fecha;
 }
 
 /* =========================
-CARGAR PERSONAS
+CARGAR RESPONSABLES
 ========================= */
+
 async function cargarResponsables(){
 
-const {data,error}=await supabaseClient
-.from("log_personas")
-.select("id_persona,nombres,apellidos")
-.order("nombres");
+try{
 
-if(error) return;
+const {data:{session}}=await supabaseClient.auth.getSession();
+
+const response=await fetch(
+`${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":`Bearer ${session.access_token}`
+}
+}
+);
+
+const result=await response.json();
 
 const select=document.getElementById("responsable");
 
-select.innerHTML=`<option value="">Seleccione...</option>`;
+select.innerHTML='<option value="">Seleccione responsable</option>';
 
-data.forEach(p=>{
+result.data.forEach(r=>{
 
 select.innerHTML+=`
-<option value="${p.id_persona}">
-${p.nombres} ${p.apellidos}
+<option value="${r.id_persona}">
+${r.nombres} ${r.apellidos}
 </option>
 `;
 
 });
 
+}catch(err){
+
+console.error(err);
+
+}
+
 }
 
 /* =========================
-SELECCION RESPONSABLE
+LECTOR GUIAS
 ========================= */
-document.addEventListener("change",function(e){
 
-if(e.target.id==="responsable"){
-document.getElementById("id_responsable").value=e.target.value;
-}
-
-});
-
-/* =========================
-LECTOR DE GUIAS
-========================= */
 document.addEventListener("keypress",function(e){
 
 if(e.target.id==="inputGuia" && e.key==="Enter"){
@@ -161,21 +234,16 @@ const guia=e.target.value.trim();
 if(!guia) return;
 
 if(listaGuias.includes(guia)){
+
 alertSMS("Guía repetida");
 e.target.value="";
 return;
+
 }
 
 listaGuias.push(guia);
 
-const tbody=document.querySelector("#tablaGuias tbody");
-
-tbody.innerHTML+=`
-<tr>
-<td>${listaGuias.length}</td>
-<td>${guia}</td>
-</tr>
-`;
+renderGuias();
 
 e.target.value="";
 
@@ -183,10 +251,35 @@ e.target.value="";
 
 });
 
+/* =========================
+RENDER TABLA
+========================= */
+
+function renderGuias(){
+
+const tbody=document.getElementById("tablaGuias");
+
+tbody.innerHTML="";
+
+listaGuias.forEach((g,i)=>{
+
+tbody.innerHTML+=`
+<tr>
+<td>${i+1}</td>
+<td>${g}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("contadorGuias").innerText=listaGuias.length;
+
+}
 
 /* =========================
 GUARDAR PLANILLA
 ========================= */
+
 async function guardarPlanilla(event,form){
 
 event.preventDefault();
@@ -197,16 +290,13 @@ if(listaGuias.length===0){
 throw new Error("Debe escanear al menos una guía");
 }
 
-const responsable=document.getElementById("id_responsable").value;
+const responsable=document.getElementById("responsable").value;
 
 if(!responsable){
 throw new Error("Seleccione responsable");
 }
 
 const {data:{session}}=await supabaseClient.auth.getSession();
-
-if(!session) throw new Error("Sesión no válida");
-
 
 const response=await fetch(
 `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla`,
@@ -232,8 +322,9 @@ throw new Error(result.error);
 alertSMS("Planilla registrada correctamente");
 
 form.reset();
+
 listaGuias=[];
-document.querySelector("#tablaGuias tbody").innerHTML="";
+renderGuias();
 
 cargarFecha();
 
