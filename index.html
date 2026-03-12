@@ -221,6 +221,70 @@
 const SUPABASE_URL = "https://ucmpldcbsccfozuxodig.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbXBsZGNic2NjZm96dXhvZGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODY3NTEsImV4cCI6MjA4ODU2Mjc1MX0.iOXoihyzqEJQgbUV0Ms_f1Inj7H_HmT7Uoh4TErl0b0";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/*******************************************************************************/
+
+async function verificarSesion() {
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    mostrarMenuInvitado();
+    return;
+  }
+
+  try {
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/novaenvios_authUser`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ action: "login" })
+    });
+
+    const data = await response.json();
+
+    if (data.status === "success") {
+
+      const { nombre, rol, persona_id } = data;
+
+      sessionStorage.setItem('nombreUsuario', nombre);
+      sessionStorage.setItem('userRol', rol);
+      sessionStorage.setItem('personaId', persona_id || '');
+
+      document.getElementById('textUser').textContent = nombre;
+
+      mostrarMenuPorRol(rol);
+
+    }
+
+  } catch (error) {
+    console.error("Error verificando sesión:", error);
+  }
+}
+
+//################################################################################
+
+function mostrarMenuPorRol(rol) {
+
+  document.getElementById('navbarItemsDefault').style.display = 'none';  
+  document.getElementById('navbarItemsUser').style.display = rol === 1 ? 'block' : 'none';
+  document.getElementById('navbarItemsAdmin').style.display = rol === 2 ? 'block' : 'none';
+}
+
+/*******************************************************************************/
+function mostrarMenuInvitado(){
+
+  document.getElementById('textUser').textContent = 'Invitado';
+  document.getElementById('navbarItemsDefault').style.display = 'block';
+  document.getElementById('navbarItemsUser').style.display = 'none';
+  document.getElementById('navbarItemsAdmin').style.display = 'none';
+
+}
+
+/******************************************************************************/
 // Inicializar sesión
 sessionStorage.setItem('nombreUsuario', 'Invitado');
 document.getElementById('textUser').textContent = sessionStorage.getItem('nombreUsuario');
@@ -285,7 +349,6 @@ async function authenticateUser() {
       sessionStorage.setItem('nombreUsuario', nombre);
       sessionStorage.setItem('userRol', rol);
       sessionStorage.setItem('personaId', persona_id || ''); // Para registros de beneficios
-      sessionStorage.setItem('empresaId', empresa_id || ''); // Para filtrar redes
 
       document.getElementById('textUser').textContent = nombre;
 
@@ -385,7 +448,6 @@ async function logout() {
     sessionStorage.setItem('nombreUsuario', 'Invitado');
     // Es importante dejar los IDs vacíos para que los componentes no intenten cargar datos previos
     sessionStorage.setItem('personaId', '');
-    sessionStorage.setItem('empresaId', '');
     sessionStorage.setItem('userRol', '0'); 
 
     // 4. Actualizar visualmente la interfaz
@@ -425,13 +487,21 @@ async function logout() {
 
 
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
+      window.addEventListener('load', async () => {
+
+        // 🔹 Verificar sesión al cargar la página
+        if (typeof verificarSesion === "function") {
+          await verificarSesion();
+        }
+
+        // 🔹 Registrar Service Worker
+        if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('./service-worker.js')
             .then(reg => console.log('Service Worker registrado', reg.scope))
             .catch(err => console.error('Error registrando Service Worker', err));
-        });
-      }
+        }
+
+      });
     </script>
   </body>
 </html>
