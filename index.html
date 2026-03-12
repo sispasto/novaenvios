@@ -424,8 +424,7 @@ async function logout() {
     // Ocultar menús privados y mostrar el de invitado
     document.getElementById('navbarItemsDefault').style.display = 'block';
     document.getElementById('navbarItemsUser').style.display    = 'none';
-    document.getElementById('navbarItemsAdmin').style.display   = 'none';
-    document.getElementById('navbarItemsCliente').style.display = 'none';
+    document.getElementById('navbarItemsAdmin').style.display   = 'none';   
 
     // 5. Limpiar campos físicos de los formularios de login/password
     const fields = ['username', 'password', 'newPassword', 'confirmNewPassword'];
