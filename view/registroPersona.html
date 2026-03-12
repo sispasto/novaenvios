@@ -151,7 +151,7 @@ GRABAR PLANILLA
 
 var nsPlanilla=(function(){
 
-const SUPABASE_URL="https://ucmpldcbsccfozuxodig.supabase.co";
+const SUPABASE_URL = "https://ucmpldcbsccfozuxodig.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbXBsZGNic2NjZm96dXhvZGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODY3NTEsImV4cCI6MjA4ODU2Mjc1MX0.iOXoihyzqEJQgbUV0Ms_f1Inj7H_HmT7Uoh4TErl0b0";
 
 const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
@@ -226,7 +226,7 @@ LECTOR GUIAS
 
 document.addEventListener("keypress",function(e){
 
-if(e.target.id==="inputGuia" && e.key==="Enter"){
+if (e.target.id === "inputGuia" && (e.key === "Enter" || e.key === "Tab")) {
 
 e.preventDefault();
 
