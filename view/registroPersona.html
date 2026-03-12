@@ -224,13 +224,13 @@ async function cargarResponsables(){
 LECTOR GUIAS
 ========================= */
 
-document.addEventListener("keypress",function(e){
+document.addEventListener("keydown",function(e){
 
 if (e.target.id === "inputGuia" && (e.key === "Enter" || e.key === "Tab")) {
 
 e.preventDefault();
 
-const guia=e.target.value.trim();
+const guia = e.target.value.trim();
 
 if(!guia) return;
 
