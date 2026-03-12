@@ -1,80 +1,76 @@
-<style>   
-.icono{
-  width:32px;
-  height:32px;
-  max-width:60%;
-}
-
-.texto-icono{
-  font-size:10px;
-  font-family:'Poppins',sans-serif;
-}
-
+<style>
+.icono{width:32px;height:32px;max-width:60%}
+.texto-icono{font-size:10px;font-family:'Poppins',sans-serif}
 @media screen and (min-width:768px){
-  .icono{
-    width:48px;
-    height:48px;
-  }
-
-  .texto-icono{
-    font-size:14px;
-  }
+  .icono{width:48px;height:48px}
+  .texto-icono{font-size:14px}
 }
 </style>
 
 <div class="container-fluid">
 
-<form id="formPlanilla" onsubmit="nsRegistroPlanilla.procesarFormulario(event,this)">
+<form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event,this)">
 
 <div class="row justify-content-center">
-<div class="col-12 col-lg-6">
+<div class="col-lg-7">
 
 <div class="card shadow border-0">
 
 <!-- HEADER -->
-<div class="card-header bg-dark text-white d-flex align-items-center" style="height:3rem">
-<h5 class="card-title mb-0 fw-bold">Registro de Planilla</h5>
+<div class="card-header bg-dark text-white d-flex align-items-center">
+<h5 class="mb-0 fw-bold">Registro de Planilla</h5>
 </div>
 
 <!-- BODY -->
 <div class="card-body">
 
+<!-- FECHA -->
 <div class="mb-3">
-<label class="form-label">Número Planilla</label>
-<input type="number" class="form-control" id="num_planilla" required>
+<label class="form-label">Fecha creación</label>
+<input type="text" class="form-control" id="fecha_creacion" readonly>
+</div>
+
+<!-- RESPONSABLE -->
+<div class="mb-3">
+<label class="form-label">Responsable</label>
+<select class="form-control" id="responsable" required></select>
 </div>
 
 <div class="mb-3">
-<label class="form-label">Guía</label>
-<input type="text" class="form-control" id="guia" required>
+<label class="form-label">ID Responsable</label>
+<input type="text" class="form-control" id="id_responsable" readonly>
 </div>
 
+<hr>
+
+<!-- LECTOR GUIAS -->
 <div class="mb-3">
-<label class="form-label">Valor Flete</label>
-<input type="number" step="0.01" class="form-control" id="valor_flete">
+<label class="form-label">Escanear Guía</label>
+<input type="text" class="form-control" id="inputGuia" placeholder="Escanee guía con lector">
 </div>
 
-<div class="mb-3">
-<label class="form-label">Flete Variable</label>
-<input type="number" step="0.01" class="form-control" id="flete_variable">
 </div>
 
-<div class="mb-3">
-<label class="form-label">Otros Valores</label>
-<input type="number" step="0.01" class="form-control" id="valor_otros">
-</div>
+<!-- TABLA GUIAS -->
+<div class="table-responsive">
+<table class="table table-sm table-striped" id="tablaGuias">
 
-<div class="mb-3">
-<label class="form-label">Valor Producto</label>
-<input type="number" step="0.01" class="form-control" id="valor_product">
-</div>
+<thead class="table-dark">
+<tr>
+<th>#</th>
+<th>Guía</th>
+</tr>
+</thead>
 
+<tbody></tbody>
+
+</table>
 </div>
 
 <!-- FOOTER -->
 <div class="card-footer d-flex gap-2">
 <button type="submit" class="btn btn-dark flex-fill" id="btnGuardar">
-GUARDAR REGISTRO
+GRABAR PLANILLA
 </button>
 </div>
 
@@ -87,39 +83,133 @@ GUARDAR REGISTRO
 </div>
 <script>
 
-var nsRegistroPlanilla = (function(){
+var nsPlanilla=(function(){
 
 const SUPABASE_URL="https://ucmpldcbsccfozuxodig.supabase.co";
 const SUPABASE_ANON_KEY="TU_ANON_KEY";
 
 const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-async function procesarFormulario(event,form){
+let listaGuias=[];
+
+/* =========================
+FECHA ACTUAL
+========================= */
+function cargarFecha(){
+
+const hoy=new Date();
+
+const fecha=
+("0"+hoy.getDate()).slice(-2)+"/"+
+("0"+(hoy.getMonth()+1)).slice(-2)+"/"+
+hoy.getFullYear();
+
+document.getElementById("fecha_creacion").value=fecha;
+
+}
+
+/* =========================
+CARGAR PERSONAS
+========================= */
+async function cargarResponsables(){
+
+const {data,error}=await supabaseClient
+.from("log_personas")
+.select("id_persona,nombres,apellidos")
+.order("nombres");
+
+if(error) return;
+
+const select=document.getElementById("responsable");
+
+select.innerHTML=`<option value="">Seleccione...</option>`;
+
+data.forEach(p=>{
+
+select.innerHTML+=`
+<option value="${p.id_persona}">
+${p.nombres} ${p.apellidos}
+</option>
+`;
+
+});
+
+}
+
+/* =========================
+SELECCION RESPONSABLE
+========================= */
+document.addEventListener("change",function(e){
+
+if(e.target.id==="responsable"){
+document.getElementById("id_responsable").value=e.target.value;
+}
+
+});
+
+/* =========================
+LECTOR DE GUIAS
+========================= */
+document.addEventListener("keypress",function(e){
+
+if(e.target.id==="inputGuia" && e.key==="Enter"){
+
+e.preventDefault();
+
+const guia=e.target.value.trim();
+
+if(!guia) return;
+
+if(listaGuias.includes(guia)){
+alertSMS("Guía repetida");
+e.target.value="";
+return;
+}
+
+listaGuias.push(guia);
+
+const tbody=document.querySelector("#tablaGuias tbody");
+
+tbody.innerHTML+=`
+<tr>
+<td>${listaGuias.length}</td>
+<td>${guia}</td>
+</tr>
+`;
+
+e.target.value="";
+
+}
+
+});
+
+
+/* =========================
+GUARDAR PLANILLA
+========================= */
+async function guardarPlanilla(event,form){
 
 event.preventDefault();
 
-const btn=document.getElementById("btnGuardar");
-btn.disabled=true;
-
 try{
 
-const num_planilla=document.getElementById("num_planilla").value.trim();
-const guia=document.getElementById("guia").value.trim();
-const valor_flete=document.getElementById("valor_flete").value || null;
-const flete_variable=document.getElementById("flete_variable").value || null;
-const valor_otros=document.getElementById("valor_otros").value || null;
-const valor_product=document.getElementById("valor_product").value || null;
+if(listaGuias.length===0){
+throw new Error("Debe escanear al menos una guía");
+}
 
-if(!num_planilla || !guia){
-throw new Error("Planilla y Guía son obligatorios");
+const responsable=document.getElementById("id_responsable").value;
+
+if(!responsable){
+throw new Error("Seleccione responsable");
 }
 
 const {data:{session}}=await supabaseClient.auth.getSession();
 
-if(!session) throw new Error("Debes iniciar sesión");
+if(!session) throw new Error("Sesión no válida");
+
 
 const response=await fetch(
-`${SUPABASE_URL}/functions/v1/novaenvios_registrar_guia`,
+`${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla`,
 {
 method:"POST",
 headers:{
@@ -127,12 +217,8 @@ headers:{
 "Authorization":`Bearer ${session.access_token}`
 },
 body:JSON.stringify({
-num_planilla,
-guia,
-valor_flete,
-flete_variable,
-valor_otros,
-valor_product
+id_responsable:responsable,
+guias:listaGuias
 })
 }
 );
@@ -140,29 +226,36 @@ valor_product
 const result=await response.json();
 
 if(!response.ok){
-throw new Error(result.error || "Error al registrar");
+throw new Error(result.error);
 }
 
-alertSMS("Guía registrada en la planilla correctamente ✅");
+alertSMS("Planilla registrada correctamente");
 
 form.reset();
+listaGuias=[];
+document.querySelector("#tablaGuias tbody").innerHTML="";
+
+cargarFecha();
 
 }catch(err){
 
-console.error(err);
 alertSMS(err.message);
 
-}finally{
-
-btn.disabled=false;
-
 }
 
 }
+
+/* =========================
+INIT
+========================= */
+
+cargarFecha();
+cargarResponsables();
 
 return{
-procesarFormulario
+guardarPlanilla
 }
 
 })();
+
 </script>
