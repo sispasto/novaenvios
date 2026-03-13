@@ -41,13 +41,13 @@ class ConsultarBeneficioComponent extends HTMLElement {
 
       // 7. Disparar la carga de datos con un pequeño delay
       // Esto asegura que nsConsultarBeneficios esté definido en el DOM
-      setTimeout(() => {
+      /*setTimeout(() => {
         if (typeof nsConsultarBeneficios !== 'undefined') {
           nsConsultarBeneficios.cargar();
         } else {
           console.error("El namespace nsConsultarBeneficios no se cargó correctamente");
         }
-      }, 100);
+      }, 100);*/
 
     } catch (e) {
       console.error("Error cargando ConsultarBeneficioComponent:", e);
