@@ -298,68 +298,67 @@ GUARDAR
 
 async function guardarPlanilla(event,form){
 
-event.preventDefault();
+    event.preventDefault();
 
-try{
+    try{
 
-if(listaGuias.length===0){
-throw new Error("Debe escanear al menos una guía");
-}
+    if(listaGuias.length===0){
+    throw new Error("Debe escanear al menos una guía");
+    }
 
-const responsable=document.getElementById("responsable").value;
+    const responsable=document.getElementById("responsable").value;
 
-if(!responsable){
-throw new Error("Seleccione responsable");
-}
+    if(!responsable){
+    throw new Error("Seleccione responsable");
+    }
 
-const {data:{session}}=await supabaseClient.auth.getSession();
+    const {data:{session}}=await supabaseClient.auth.getSession();
 
-const response=await fetch(
-`${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla`,
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${session.access_token}`
-},
-body:JSON.stringify({
-id_responsable:responsable,
-guias:listaGuias
-})
-}
-);
+    const response=await fetch(
+    `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla`,
+    {
+    method:"POST",
+    headers:{
+    "Content-Type":"application/json",
+    "Authorization":`Bearer ${session.access_token}`
+    },
+    body:JSON.stringify({
+    id_responsable:responsable,
+    guias:listaGuias
+    })
+    }
+    );
 
-const result=await response.json();
+    const result=await response.json();
 
-if(!response.ok){
-throw new Error(result.error);
-}
+    if(!response.ok){
+    throw new Error(result.error);
+    }
 
-/* MOSTRAR NUMERO PLANILLA */
+    /* MOSTRAR NUMERO PLANILLA */
 
-if(result.num_planilla){
-document.getElementById("num_planilla").value=result.num_planilla;
-}
+    if(result.num_planilla){
+    document.getElementById("num_planilla").value=result.num_planilla;
+    }
 
-alertSMS("Planilla registrada correctamente");
+    alertSMS("Planilla registrada correctamente");
 
-form.reset();
+    form.reset();
 
-listaGuias=[];
+    listaGuias=[];
 
-renderGuias();
+    renderGuias();
 
-cargarFecha();
+    cargarFecha();
 
-document.getElementById("inputGuia").focus();
+    document.getElementById("inputGuia").focus();
 
-}catch(err){
+    }catch(err){
 
-alertSMS(err.message);
+    alertSMS(err.message);
 
-}
-
-}
+    }
+}//Fin de guardarPlanilla
 
 cargarFecha();
 cargarResponsables();
