@@ -24,7 +24,7 @@ font-size:14px;
 </style>
 
 <div class="container-fluid">
-  <h1></h1>
+<h1></h1>
 
 <form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event,this)">
 
@@ -33,27 +33,29 @@ font-size:14px;
 
 <div class="card shadow border-0">
 
-<!-- HEADER -->
 <div class="card-header bg-dark text-white">
 <h5 class="mb-0 fw-bold">Planilla de Reparto</h5>
 </div>
 
 <div class="card-body">
 
-<!-- ===================== -->
-<!-- ENCABEZADO PLANILLA -->
-<!-- ===================== -->
-
 <div class="section-title">Datos de Planilla</div>
 
 <div class="row">
 
-<div class="col-md-6 mb-3">
+<!-- NUEVO CAMPO PLANILLA -->
+
+<div class="col-md-4 mb-3">
+<label class="form-label">N° Planilla</label>
+<input type="text" class="form-control" id="num_planilla" readonly>
+</div>
+
+<div class="col-md-4 mb-3">
 <label class="form-label">Fecha creación</label>
 <input type="text" class="form-control" id="fecha_creacion" readonly>
 </div>
 
-<div class="col-md-6 mb-3">
+<div class="col-md-4 mb-3">
 <label class="form-label">Responsable</label>
 
 <select class="form-select" id="responsable" required>
@@ -65,10 +67,6 @@ font-size:14px;
 </div>
 
 <hr>
-
-<!-- ===================== -->
-<!-- LECTOR GUIAS -->
-<!-- ===================== -->
 
 <div class="section-title">Lectura de Guías</div>
 
@@ -88,11 +86,23 @@ autocomplete="off"
 
 </div>
 
-<!-- CONTADOR -->
+<!-- CONTADOR + BOTON LIMPIAR -->
 
 <div class="d-flex justify-content-between align-items-center mb-2">
 
+<div class="d-flex align-items-center gap-2">
+
+<button
+type="button"
+class="btn btn-sm btn-outline-danger"
+onclick="nsPlanilla.limpiarGuias()"
+>
+Limpiar
+</button>
+
 <span class="fw-semibold">Guías registradas</span>
+
+</div>
 
 <span class="badge bg-dark badge-counter" id="contadorGuias">
 0
@@ -100,19 +110,15 @@ autocomplete="off"
 
 </div>
 
-<!-- TABLA -->
-
 <div class="table-responsive">
 
 <table class="table table-sm table-striped">
 
 <thead class="table-dark">
-
 <tr>
 <th width="60">#</th>
 <th>Guía</th>
 </tr>
-
 </thead>
 
 <tbody id="tablaGuias"></tbody>
@@ -123,8 +129,6 @@ autocomplete="off"
 
 </div>
 
-<!-- FOOTER -->
-
 <div class="card-footer d-flex gap-2">
 
 <button 
@@ -132,9 +136,7 @@ type="submit"
 class="btn btn-dark flex-fill"
 id="btnGuardar"
 >
-
 GRABAR PLANILLA
-
 </button>
 
 </div>
@@ -151,7 +153,8 @@ GRABAR PLANILLA
 
 var nsPlanilla=(function(){
 
-const SUPABASE_URL = "https://ucmpldcbsccfozuxodig.supabase.co";
+const SUPABASE_URL="https://ucmpldcbsccfozuxodig.supabase.co";
+
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbXBsZGNic2NjZm96dXhvZGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODY3NTEsImV4cCI6MjA4ODU2Mjc1MX0.iOXoihyzqEJQgbUV0Ms_f1Inj7H_HmT7Uoh4TErl0b0";
 
 const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
@@ -159,7 +162,7 @@ const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 let listaGuias=[];
 
 /* =========================
-FECHA ACTUAL
+FECHA
 ========================= */
 
 function cargarFecha(){
@@ -176,70 +179,66 @@ document.getElementById("fecha_creacion").value=fecha;
 }
 
 /* =========================
-CARGAR RESPONSABLES
+RESPONSABLES
 ========================= */
 
 async function cargarResponsables(){
 
-  try{
+try{
 
-  const {data:{session}}=await supabaseClient.auth.getSession();
+const {data:{session}}=await supabaseClient.auth.getSession();
 
-  const response=await fetch(
-  `${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
-  {
-  method:"POST",
-  headers:{
-  "Content-Type":"application/json",
-  "Authorization":`Bearer ${session.access_token}`
-  }
-  }
-  );
+const response=await fetch(
+`${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":`Bearer ${session.access_token}`
+}
+}
+);
 
-  const result=await response.json();
+const result=await response.json();
 
-  const select = document.getElementById("responsable");
+const select=document.getElementById("responsable");
 
-  select.innerHTML='<option value="">Seleccione responsable</option>';
+select.innerHTML='<option value="">Seleccione responsable</option>';
 
-  result.data.forEach(r=>{
+result.data.forEach(r=>{
 
-  select.innerHTML+=`
-  <option value="${r.id_persona}">
-  ${r.nombres} ${r.apellidos}
-  </option>
-  `;
+select.innerHTML+=`
+<option value="${r.id_persona}">
+${r.nombres} ${r.apellidos}
+</option>
+`;
 
-  });
+});
 
-  }catch(err){
-
-  console.error(err);
-
-  }
+}catch(err){
+console.error(err);
+}
 
 }
 
 /* =========================
-LECTOR GUIAS
+LECTOR
 ========================= */
 
 document.addEventListener("keydown",function(e){
 
-if (e.target.id === "inputGuia" && (e.key === "Enter" || e.key === "Tab")) {
+if(e.target.id==="inputGuia" && (e.key==="Enter" || e.key==="Tab")){
 
 e.preventDefault();
 
-const guia = e.target.value.trim();
+const guia=e.target.value.trim();
 
 if(!guia) return;
 
 if(listaGuias.includes(guia)){
-
 alertSMS("Guía repetida");
 e.target.value="";
 return;
-
 }
 
 listaGuias.push(guia);
@@ -247,6 +246,8 @@ listaGuias.push(guia);
 renderGuias();
 
 e.target.value="";
+
+e.target.focus();
 
 }
 
@@ -278,7 +279,21 @@ document.getElementById("contadorGuias").innerText=listaGuias.length;
 }
 
 /* =========================
-GUARDAR PLANILLA
+LIMPIAR GUIAS
+========================= */
+
+function limpiarGuias(){
+
+listaGuias=[];
+
+renderGuias();
+
+document.getElementById("inputGuia").focus();
+
+}
+
+/* =========================
+GUARDAR
 ========================= */
 
 async function guardarPlanilla(event,form){
@@ -320,14 +335,23 @@ if(!response.ok){
 throw new Error(result.error);
 }
 
+/* MOSTRAR NUMERO PLANILLA */
+
+if(result.num_planilla){
+document.getElementById("num_planilla").value=result.num_planilla;
+}
+
 alertSMS("Planilla registrada correctamente");
 
 form.reset();
 
 listaGuias=[];
+
 renderGuias();
 
 cargarFecha();
+
+document.getElementById("inputGuia").focus();
 
 }catch(err){
 
@@ -337,15 +361,12 @@ alertSMS(err.message);
 
 }
 
-/* =========================
-INIT
-========================= */
-
 cargarFecha();
 cargarResponsables();
 
 return{
-guardarPlanilla
+guardarPlanilla,
+limpiarGuias
 }
 
 })();
