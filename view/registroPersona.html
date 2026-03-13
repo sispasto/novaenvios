@@ -130,15 +130,23 @@ Limpiar
 </div>
 
 <div class="card-footer d-flex gap-2">
+  <button 
+  type="submit"
+  class="btn btn-dark flex-fill"
+  id="btnGuardar"
+  >
+  GRABAR PLANILLA
+  </button>
 
-<button 
-type="submit"
-class="btn btn-dark flex-fill"
-id="btnGuardar"
->
-GRABAR PLANILLA
-</button>
-
+  <button 
+  type="button"
+  class="btn btn-secondary"
+  id="btnNuevaPlanilla"
+  onclick="nsPlanilla.nuevaPlanilla()"
+  disabled
+  >
+  NUEVA PLANILLA
+  </button>
 </div>
 
 </div>
@@ -338,20 +346,20 @@ async function guardarPlanilla(event,form){
     /* MOSTRAR NUMERO PLANILLA */
 
     if(result.num_planilla){
-    document.getElementById("num_planilla").value=result.num_planilla;
+      document.getElementById("num_planilla").value=result.num_planilla;
     }
 
-    alertSMS("Planilla registrada correctamente");
+    
 
-    form.reset();
+    /* DESHABILITAR GUARDAR */
 
-    listaGuias=[];
+    document.getElementById("btnGuardar").disabled=true;
 
-    renderGuias();
+    /* HABILITAR NUEVA PLANILLA */
 
-    cargarFecha();
+    document.getElementById("btnNuevaPlanilla").disabled=false;
 
-    document.getElementById("inputGuia").focus();
+    alertSMS("Planilla registrada correctamente");    
 
     }catch(err){
 
@@ -359,6 +367,32 @@ async function guardarPlanilla(event,form){
 
     }
 }//Fin de guardarPlanilla
+
+/************************************************************/
+function nuevaPlanilla(){
+  
+  
+  //cargarFecha();
+    
+  listaGuias=[];
+
+  renderGuias();
+
+  document.getElementById("num_planilla").value="";
+
+  document.getElementById("responsable").value="";
+
+  document.getElementById("inputGuia").value="";
+
+  document.getElementById("btnGuardar").disabled=false;
+
+  document.getElementById("btnNuevaPlanilla").disabled=true;
+
+  document.getElementById("inputGuia").focus();
+
+}
+
+/************************************************************/
 
 cargarFecha();
 cargarResponsables();
