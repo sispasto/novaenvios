@@ -64,6 +64,24 @@ font-size:14px;
 <hr>
 
 <!-- CONTADOR + BOTON LIMPIAR -->
+<div class="row g-2 mb-3">
+    <div class="col-6">
+        <div class="card bg-light border-0">
+            <div class="card-body p-2 text-center">
+                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 10px;">Total Contraentrega (P3/P7)</small>
+                <h5 class="mb-0 fw-bold text-dark" id="totalContraentrega">$ 0</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card bg-light border-0">
+            <div class="card-body p-2 text-center">
+                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 10px;">Total Recaudo (P4 + Prod)</small>
+                <h5 class="mb-0 fw-bold text-primary" id="totalRecaudo">$ 0</h5>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="d-flex justify-content-between align-items-center mb-2">
 
@@ -245,30 +263,66 @@ function limpiarFormularioBusqueda() {
     /* =========================
     VALIDAR GUIAS (Consume tu API Local)
     ========================= */
-    async function validarGuias(){
-        try{
-            if(listaGuias.length===0) throw new Error("No hay guías para validar");
+    async function validarGuias() {
+      try {
+          if (listaGuias.length === 0) throw new Error("No hay guías para validar");
 
-            for(let i=0; i<listaGuias.length; i++){
-                let g = listaGuias[i];
-                const response = await fetch(`http://localhost:8080/guia/${g.guia}`);
-                const data = await response.json();
+          let sumaContraentrega = 0;
+          let sumaRecaudo = 0;
 
-                if(data.ok){
-                    listaGuias[i].estado = data.estado;
-                    listaGuias[i].destinatario = data.destinatario;
-                    listaGuias[i].direccion = data.direccion;
-                    listaGuias[i].celular = data.celular;
-                    listaGuias[i].valor_flete = data.valor_flete;
-                    listaGuias[i].valor_producto = data.valor_producto;
-                }
-            }
-            renderGuias();
-            alertSMS("Validación completada");
-        } catch(err){
-            alertSMS(err.message);
-        }
-    }
+          for (let i = 0; i < listaGuias.length; i++) {
+              let g = listaGuias[i];
+              const response = await fetch(`http://localhost:8080/guia/${g.guia}`);
+              const data = await response.json();
+
+              if (data.ok) {
+                  // Mapeo de datos recibidos
+                  const vFlete = parseFloat(data.valor_flete) || 0;
+                  const vProd = parseFloat(data.valor_producto) || 0;
+                  const fPago = parseInt(data.formaPago);
+
+                  listaGuias[i].estado = data.estado;
+                  listaGuias[i].destinatario = data.destinatario;
+                  listaGuias[i].direccion = data.direccion;
+                  listaGuias[i].celular = data.celular;
+                  listaGuias[i].valor_flete = vFlete;
+                  listaGuias[i].valor_producto = vProd;
+                  listaGuias[i].formaPago = fPago;
+
+                  /* ===================================================
+                    LÓGICA DE TOTALIZACIÓN ACTUALIZADA
+                  =================================================== */
+                  
+                  // 1. RECAUDO: Si es forma de pago 4, sumamos solo el producto
+                  if (fPago === 4) {
+                      sumaRecaudo += vProd;
+                  } 
+                  // 2. CONTRAENTREGA: Si es 3 o 7, sumamos el flete
+                  else if (fPago === 3 || fPago === 7) {
+                      sumaContraentrega += vFlete;
+                  }
+              }
+          }
+
+          // Formateador para moneda (sin decimales para COP)
+          const formatoCop = new Intl.NumberFormat('es-CO', {
+              style: 'currency',
+              currency: 'COP',
+              minimumFractionDigits: 0
+          });
+
+          // Actualización de etiquetas en el HTML
+          document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
+          document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
+
+          renderGuias();
+          alertSMS("Validación completada. Totales calculados.");
+
+      } catch (err) {
+          console.error(err);
+          alertSMS(err.message);
+      }
+  }
 
     /* =========================
     GUARDAR (Sin cambios)
