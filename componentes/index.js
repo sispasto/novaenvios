@@ -11,4 +11,5 @@ import'./consultarPersona.js';
 import'./registroBeneficio.js';
 import'./consultarBeneficios.js';
 import'./redimirBeneficioComponent.js';
+import'./cerrarPlanilla.js';
 

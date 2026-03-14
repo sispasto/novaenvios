@@ -1,0 +1,470 @@
+<style>
+
+.section-title{
+font-weight:600;
+font-size:14px;
+color:#444;
+margin-bottom:10px;
+}
+
+.scan-input{
+font-size:18px;
+font-weight:500;
+text-align:center;
+}
+
+.table-sm td{
+font-size:14px;
+}
+
+.badge-counter{
+font-size:14px;
+}
+
+</style>
+
+<div class="container-fluid">
+<h1></h1>
+
+<form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event,this)">
+
+<div class="row justify-content-center">
+<div class="col-lg-8">
+
+<div class="card shadow border-0">
+
+<div class="card-header bg-dark text-white">
+<h5 class="mb-0 fw-bold">Planilla de Reparto</h5>
+</div>
+
+<div class="card-body">
+
+<div class="section-title"><strong>Datos de Planilla</strong></div>
+
+<div class="row">
+
+<!-- NUEVO CAMPO PLANILLA -->
+
+<div class="col-md-4 mb-3">
+<label class="form-label">N° Planilla</label>
+<input type="text" class="form-control" id="num_planilla" readonly>
+</div>
+
+<div class="col-md-4 mb-3">
+<label class="form-label">Fecha creación</label>
+<input type="text" class="form-control" id="fecha_creacion" readonly>
+</div>
+
+<div class="col-md-4 mb-3">
+<label class="form-label">Responsable</label>
+
+<select class="form-select" id="responsable" required>
+<option value="">Cargando responsables...</option>
+</select>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="section-title"><strong>Lectura de Guías</strong></div>
+
+<div class="row">
+
+<div class="col-md-12 mb-3">
+
+<input 
+type="text"
+class="form-control scan-input"
+id="inputGuia"
+placeholder="Escanee guía con lector de código de barras"
+autocomplete="off"
+>
+
+</div>
+
+</div>
+
+<!-- CONTADOR + BOTON LIMPIAR -->
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+
+<div class="d-flex align-items-center gap-2">
+
+<button
+type="button"
+class="btn btn-sm btn-outline-danger"
+onclick="nsPlanilla.limpiarGuias()"
+>
+Limpiar
+</button>
+
+<span class="fw-semibold">Guías registradas</span>
+
+</div>
+
+<span class="badge bg-dark badge-counter" id="contadorGuias">
+0
+</span>
+
+</div>
+
+<div class="table-responsive">
+
+<table class="table table-sm table-striped">
+
+<thead class="table-dark">
+  <tr>
+    <th width="60">#</th>
+    <th>Guía</th>
+    <th>Estado</th>
+    <th>Destinatario</th>
+    <th>Dirección</th>
+    <th>Celular</th>
+    <th>Flete</th>
+    <th>Producto</th>
+  </tr>
+</thead>
+
+<tbody id="tablaGuias"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<div class="card-footer d-flex gap-2">
+  <button
+    type="button"
+    class="btn btn-sm btn-dark"
+    onclick="nsPlanilla.validarGuias()"
+    >
+    VALIDAR
+  </button>
+  <button 
+  type="submit"
+  class="btn btn-dark flex-fill"
+  id="btnGuardar"
+  >
+  GRABAR PLANILLA
+  </button>
+
+  <button 
+  type="button"
+  class="btn btn-secondary"
+  id="btnNuevaPlanilla"
+  onclick="nsPlanilla.nuevaPlanilla()"
+  disabled
+  >
+  NUEVA PLANILLA
+  </button>
+</div>
+
+</div>
+</div>
+</div>
+
+</form>
+
+</div>
+
+<script>
+
+var nsPlanilla=(function(){
+
+const SUPABASE_URL="https://ucmpldcbsccfozuxodig.supabase.co";
+
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbXBsZGNic2NjZm96dXhvZGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODY3NTEsImV4cCI6MjA4ODU2Mjc1MX0.iOXoihyzqEJQgbUV0Ms_f1Inj7H_HmT7Uoh4TErl0b0";
+
+const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+let listaGuias=[];
+
+/* =========================
+FECHA
+========================= */
+
+function cargarFecha(){
+
+const hoy=new Date();
+
+const fecha=
+("0"+hoy.getDate()).slice(-2)+"/"+
+("0"+(hoy.getMonth()+1)).slice(-2)+"/"+
+hoy.getFullYear();
+
+document.getElementById("fecha_creacion").value=fecha;
+
+}
+
+/* =========================
+RESPONSABLES
+========================= */
+
+async function cargarResponsables(){
+
+try{
+
+const {data:{session}}=await supabaseClient.auth.getSession();
+
+const response=await fetch(
+`${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":`Bearer ${session.access_token}`
+}
+}
+);
+
+const result=await response.json();
+
+const select=document.getElementById("responsable");
+
+select.innerHTML='<option value="">Seleccione responsable</option>';
+
+result.data.forEach(r=>{
+
+select.innerHTML+=`
+<option value="${r.id_persona}">
+${r.nombres} ${r.apellidos}
+</option>
+`;
+
+});
+
+}catch(err){
+console.error(err);
+}
+
+}
+
+/* =========================
+LECTOR
+========================= */
+
+document.addEventListener("keydown",function(e){
+
+if(e.target.id==="inputGuia" && (e.key==="Enter" || e.key==="Tab")){
+
+e.preventDefault();
+
+const guia=e.target.value.trim();
+
+if(!guia) return;
+
+if(listaGuias.includes(guia)){
+alertSMS("Guía repetida");
+e.target.value="";
+return;
+}
+
+listaGuias.push({
+guia:guia
+});
+
+renderGuias();
+
+e.target.value="";
+
+e.target.focus();
+
+}
+
+});
+
+/* =========================
+RENDER TABLA
+========================= */
+
+function renderGuias(){
+
+const tbody=document.getElementById("tablaGuias");
+
+tbody.innerHTML="";
+
+listaGuias.forEach((g,i)=>{
+
+tbody.innerHTML+=`
+<tr>
+<td>${i+1}</td>
+<td>${g.guia}</td>
+<td>${g.estado || ""}</td>
+<td>${g.destinatario || ""}</td>
+<td>${g.direccion || ""}</td>
+<td>${g.celular || ""}</td>
+<td>${g.valor_flete || ""}</td>
+<td>${g.valor_producto || ""}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("contadorGuias").innerText=listaGuias.length;
+
+}
+
+/* =========================
+LIMPIAR GUIAS
+========================= */
+
+function limpiarGuias(){
+
+listaGuias=[];
+
+renderGuias();
+
+document.getElementById("inputGuia").focus();
+
+}
+
+async function validarGuias(){
+
+  try{
+
+  if(listaGuias.length===0){
+  throw new Error("No hay guías para validar");
+  }
+
+  for(let i=0;i<listaGuias.length;i++){
+
+  let g=listaGuias[i];
+
+  const response=await fetch(`http://localhost:8080/guia/${g.guia}`);
+
+  const data=await response.json();
+
+  if(data.ok){
+
+  listaGuias[i].estado=data.estado;
+  listaGuias[i].destinatario=data.destinatario;
+  listaGuias[i].direccion=data.direccion;
+  listaGuias[i].celular=data.celular;
+  listaGuias[i].valor_flete=data.valor_flete;
+  listaGuias[i].valor_producto=data.valor_producto;
+
+  }
+
+  }
+
+  renderGuias();
+
+  alertSMS("Validación completada");
+
+  }catch(err){
+
+  alertSMS(err.message);
+
+  }
+}
+
+/* =========================
+GUARDAR
+========================= */
+
+async function guardarPlanilla(event,form){
+
+    event.preventDefault();
+
+    try{
+
+    if(listaGuias.length===0){
+    throw new Error("Debe escanear al menos una guía");
+    }
+
+    const responsable=document.getElementById("responsable").value;
+
+    if(!responsable){
+    throw new Error("Seleccione responsable");
+    }
+
+    const {data:{session}}=await supabaseClient.auth.getSession();
+
+    const response=await fetch(
+    `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla`,
+    {
+    method:"POST",
+    headers:{
+    "Content-Type":"application/json",
+    "Authorization":`Bearer ${session.access_token}`
+    },
+    body:JSON.stringify({
+    id_responsable:responsable,
+    guias:listaGuias
+    })
+    }
+    );
+
+    const result=await response.json();
+
+    if(!response.ok){
+    throw new Error(result.error);
+    }
+
+    /* MOSTRAR NUMERO PLANILLA */
+
+    if(result.num_planilla){
+      document.getElementById("num_planilla").value=result.num_planilla;
+    }
+
+    
+
+    /* DESHABILITAR GUARDAR */
+
+    document.getElementById("btnGuardar").disabled=true;
+
+    /* HABILITAR NUEVA PLANILLA */
+
+    document.getElementById("btnNuevaPlanilla").disabled=false;
+
+    alertSMS("Planilla registrada correctamente");    
+
+    }catch(err){
+
+    alertSMS(err.message);
+
+    }
+}//Fin de guardarPlanilla
+
+/************************************************************/
+function nuevaPlanilla(){
+  
+  
+  //cargarFecha();
+    
+  listaGuias=[];
+
+  renderGuias();
+
+  document.getElementById("num_planilla").value="";
+
+  document.getElementById("responsable").value="";
+
+  document.getElementById("inputGuia").value="";
+
+  document.getElementById("btnGuardar").disabled=false;
+
+  document.getElementById("btnNuevaPlanilla").disabled=true;
+
+  document.getElementById("inputGuia").focus();
+
+}
+
+/************************************************************/
+
+cargarFecha();
+cargarResponsables();
+
+return{
+guardarPlanilla,
+limpiarGuias,
+nuevaPlanilla,
+validarGuias
+}
+
+})();
+
+</script>

@@ -22,6 +22,14 @@ function registrarPersona() {
   main.appendChild(registroPersona); 
 }
 
+function cerrarPlanilla() {
+  let main = document.getElementById('App');
+  removeALLChilds(main);
+  const cerrarplanilla = document.createElement('cerrar-planilla-component');
+  cerrarplanilla.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(cerrarplanilla); 
+}
+
 function consultarPersona() {
   let main = document.getElementById('App');
   removeALLChilds(main);
