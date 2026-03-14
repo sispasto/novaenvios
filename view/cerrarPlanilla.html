@@ -135,7 +135,7 @@ font-size:14px;
   class="btn btn-dark flex-fill"
   id="btnGuardar"
   >
-  GRABAR PLANILLA
+  CERRAR PLANILLA
   </button>  
 </div>
 
@@ -327,10 +327,60 @@ function limpiarFormularioBusqueda() {
     /* =========================
     GUARDAR (Sin cambios)
     ========================= */
-    async function guardarPlanilla(event,form){
-        event.preventDefault();
-        // ... (Tu lógica existente de guardar)
-    }
+    async function guardarPlanilla(event, form) {
+      event.preventDefault();
+
+      try {
+          const numInput = document.getElementById("num_planilla");
+          const num_planilla = numInput.value;
+          
+          if (!num_planilla) throw new Error("No hay un número de planilla válido");
+
+          // 1. Extraemos los totales de los elementos HTML que ya calculamos
+          // Usamos regex para quitar "$", "." y espacios, dejando solo el número
+          const totalCE = parseFloat(document.getElementById("totalContraentrega").innerText.replace(/[^0-9]/g,"")) || 0;
+          const totalRE = parseFloat(document.getElementById("totalRecaudo").innerText.replace(/[^0-9]/g,"")) || 0;
+
+          // 2. Obtenemos sesión
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          if (!session) throw new Error("Sesión no activa");
+
+          // 3. Petición a la Edge Function
+          const response = await fetch(
+              `${SUPABASE_URL}/functions/v1/novaenvios_cerrar_planilla`,
+              {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": `Bearer ${session.access_token}`
+                  },
+                  body: JSON.stringify({
+                      num_planilla: parseInt(num_planilla),
+                      total_ce: totalCE,
+                      total_re: totalRE
+                  })
+              }
+          );
+
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Error al procesar el cierre");
+
+          /* ===================================================
+            ACCIONES POST-CIERRE (Interfaz)
+          =================================================== */
+          alertSMS(`Planilla ${num_planilla} cerrada y guardada con éxito.`);
+          
+          // Deshabilitar el botón para evitar que le den click dos veces
+          document.getElementById("btnGuardar").disabled = true;
+          
+          // Opcional: Bloquear el input del número para que no lo cambien
+          numInput.readOnly = true;
+
+      } catch (err) {
+          console.error("Error en el cierre:", err);
+          alertSMS("Error: " + err.message);
+      }
+  }
 
     function limpiarCampos(borrarTodo = true) {
         listaGuias = [];
