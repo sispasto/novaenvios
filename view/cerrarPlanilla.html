@@ -167,7 +167,7 @@ var nsPlanilla=(function(){
             const num = e.target.value.trim();
             
             if (num) {
-                // Limpiamos todo lo anterior antes de buscar la nueva
+                // Esto habilitará los botones y limpiará la tabla/totales
                 limpiarCampos(false); 
                 buscarPlanilla(num);
             }
@@ -393,31 +393,31 @@ function limpiarFormularioBusqueda() {
     
     /*********************************************************************/
   function limpiarCampos(borrarTodo = true) {
-      // 1. Limpiar datos lógicos
-      listaGuias = [];
-      
-      // 2. Limpiar UI de la tabla
-      renderGuias();
-      
-      // 3. Limpiar encabezados
-      document.getElementById("fecha_creacion").value = "";
-      document.getElementById("responsable").value = "";
-      
-      // 4. LIMPIAR TOTALES (Esto soluciona tu problema)
-      document.getElementById("totalContraentrega").innerText = "$ 0";
-      document.getElementById("totalRecaudo").innerText = "$ 0";
-      
-      if (borrarTodo) {
-          document.getElementById("num_planilla").value = "";
-          document.getElementById("num_planilla").readOnly = false; // Por si estaba bloqueado
-      }
-      
-      // 5. Reset de estados de botones
-      document.getElementById("btnGuardar").disabled = false;
-      
-      const btnNueva = document.getElementById("btnNuevaPlanilla");
-      if (btnNueva) btnNueva.disabled = true;
-  }
+    listaGuias = [];
+    renderGuias();
+    
+    document.getElementById("fecha_creacion").value = "";
+    document.getElementById("responsable").value = "";
+    
+    // Limpiar totales visuales
+    document.getElementById("totalContraentrega").innerText = "$ 0";
+    document.getElementById("totalRecaudo").innerText = "$ 0";
+    
+    // --- REHABILITAR BOTONES ---
+    document.getElementById("btnGuardar").disabled = false;
+    
+    const btnValidar = document.querySelector('button[onclick="nsPlanilla.validarGuias()"]');
+    if (btnValidar) btnValidar.disabled = false;
+
+    if (borrarTodo) {
+        document.getElementById("num_planilla").value = "";
+        document.getElementById("num_planilla").readOnly = false;
+    } else {
+        // Si solo estamos limpiando para una nueva búsqueda, 
+        // nos aseguramos que el input sea escribible
+        document.getElementById("num_planilla").readOnly = false;
+    }
+}
   
   return {
     guardarPlanilla,
