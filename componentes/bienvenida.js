@@ -36,9 +36,9 @@ class BienvenidaComponent extends HTMLElement {
       if (img) {
         const actualizarImagen = () => {
           if (window.innerWidth <= 768) {
-            img.src = "/mse/assets/bienvenida_android.png";
+            img.src = "/novaenvios/assets/bienvenida_android.jpeg";
           } else {
-            img.src = "/mse/assets/bienvenida.png";
+            img.src = "/novaenvios/assets/bienvenida.jpeg";
           }
         };
 
