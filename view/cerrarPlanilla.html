@@ -213,7 +213,7 @@ async function buscarPlanilla(num_planilla) {
         }
 
         // Llenar campos y renderizar
-        document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleString('es-CO');
+        document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleDateString('es-CO');
         document.getElementById("responsable").value = data.nombre_responsable;
         listaGuias = data.guias.map(g => ({ guia: g })); // Simplificado para el ejemplo
         renderGuias();
