@@ -118,17 +118,7 @@ font-size:14px;
   id="btnGuardar"
   >
   GRABAR PLANILLA
-  </button>
-
-  <button 
-  type="button"
-  class="btn btn-secondary"
-  id="btnNuevaPlanilla"
-  onclick="nsPlanilla.nuevaPlanilla()"
-  disabled
-  >
-  NUEVA PLANILLA
-  </button>
+  </button>  
 </div>
 
 </div>
@@ -153,93 +143,96 @@ var nsPlanilla=(function(){
     EVENTO: BUSCAR PLANILLA POR NÚMERO
     ========================= */
     document.getElementById("num_planilla").addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const num = e.target.value.trim();
-            if (num) {
-                buscarPlanilla(num);
-            }
+    if (e.key === "Enter") {
+        e.preventDefault();
+        const num = e.target.value.trim();
+        
+        if (num) {
+            // Limpiamos todo lo anterior antes de buscar la nueva
+            limpiarCampos(false); 
+            buscarPlanilla(num);
         }
-    });
+    }
+});
 
-    async function buscarPlanilla(num_planilla) {
-      try {
-          // 1. Verificación de sesión
-          const { data: { session } } = await supabaseClient.auth.getSession();
-          if (!session) throw new Error("Debe iniciar sesión para realizar consultas");
+/**********************************************************************/
+async function buscarPlanilla(num_planilla) {
+    try {
+        // 1. Limpieza preventiva: antes de buscar, reseteamos la tabla y campos
+        // Pasamos false para que NO borre el número que el usuario acaba de escribir
+        limpiarCampos(false); 
 
-          // 2. Llamada a la Edge Function
-          const response = await fetch(
-              `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
-              {
-                  method: "POST",
-                  headers: {
-                      "Content-Type": "application/json",
-                      "Authorization": `Bearer ${session.access_token}`
-                  },
-                  body: JSON.stringify({ num_planilla: parseInt(num_planilla) })
-              }
-          );
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) throw new Error("Debe iniciar sesión para realizar consultas");
 
-          const result = await response.json();
-          if (!result.ok) throw new Error(result.error);
+        const response = await fetch(
+            `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({ num_planilla: parseInt(num_planilla) })
+            }
+        );
 
-          const data = result.data;
+        const result = await response.json();
+        
+        // Si el RPC no encuentra la planilla o hay error
+        if (!result.ok) {
+            throw new Error(result.error || "Planilla no encontrada");
+        }
 
-          /* ===================================================
-            VALIDACIÓN DE ESTADOS (ANULADA / CERRADA)
-          =================================================== */
-          if (data.estado === 'AN') {
-              alertSMS(`La planilla N° ${num_planilla} se encuentra ANULADA.`);
-              limpiarFormularioBusqueda(); // Función auxiliar para resetear campos
-              return; 
-          }
+        const data = result.data;
 
-          if (data.estado === 'CE') {
-              alertSMS(`La planilla N° ${num_planilla} ya está CERRADA.`);
-              limpiarFormularioBusqueda();
-              return;
-          }
+        /* ===================================================
+           VALIDACIÓN DE ESTADOS
+        =================================================== */
+        if (data.estado === 'AN' || data.estado === 'CE') {
+            const msj = data.estado === 'AN' ? "ANULADA" : "CERRADA";
+            alertSMS(`La planilla N° ${num_planilla} se encuentra ${msj}.`);
+            limpiarCampos(true); // Aquí sí borramos todo el input
+            return; 
+        }
 
-          // Validación de seguridad por si llega un estado distinto a 'AB'
-          if (data.estado !== 'AB') {
-              alertSMS(`La planilla se encuentra en estado: ${data.estado}. Solo se permiten planillas abiertas.`);
-              return;
-          }
+        if (data.estado !== 'AB') {
+            alertSMS(`Estado inválido: ${data.estado}`);
+            limpiarCampos(true);
+            return;
+        }
 
-          /* ===================================================
-            CARGA DE DATOS (Solo si el estado es 'AB')
-          =================================================== */
-          
-          // Llenar encabezados
-          document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleString('es-CO');
-          document.getElementById("responsable").value = data.nombre_responsable;
+        /* ===================================================
+           CARGA DE DATOS
+        =================================================== */
+        document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleString('es-CO');
+        document.getElementById("responsable").value = data.nombre_responsable;
 
-          // Mapear guías (coalesce garantiza que sea un array vacío si no hay guías)
-          listaGuias = data.guias.map(g => ({
-              guia: g,
-              estado: "",
-              destinatario: "",
-              direccion: "",
-              celular: "",
-              valor_flete: "",
-              valor_producto: ""
-          }));
+        // Mapear guías
+        listaGuias = data.guias.map(g => ({
+            guia: g,
+            estado: "",
+            destinatario: "",
+            direccion: "",
+            celular: "",
+            valor_flete: "",
+            valor_producto: ""
+        }));
 
-          // Renderizar tabla y actualizar contador
-          renderGuias();
-          
-          // Deshabilitar botón de guardar si ya existe (opcional, según tu lógica de edición)
-          // document.getElementById("btnGuardar").disabled = true;
-          
-          alertSMS("Planilla cargada correctamente");
+        renderGuias();
+        
+        // Como es una planilla existente y abierta, habilitamos el botón de grabar por si editan
+        document.getElementById("btnGuardar").disabled = false;
+        
+        alertSMS("Planilla cargada correctamente");
 
-      } catch (err) {
-          console.error("Error en buscarPlanilla:", err);
-          alertSMS("No se encontró la planilla o error de conexión.");
-          limpiarFormularioBusqueda();
-      }
-  }
+    } catch (err) {
+        console.error("Error:", err);
+        alertSMS(err.message);
+        limpiarCampos(true);
+    }
+}
+/*********************************************************************/
 
 /**
  * Función auxiliar para limpiar los campos si la búsqueda falla o es inválida
@@ -312,19 +305,26 @@ function limpiarFormularioBusqueda() {
         // ... (Tu lógica existente de guardar)
     }
 
-    function nuevaPlanilla(){
-        listaGuias=[];
+    function limpiarCampos(borrarTodo = true) {
+        listaGuias = [];
         renderGuias();
-        document.getElementById("num_planilla").value="";
-        document.getElementById("fecha_creacion").value="";
-        document.getElementById("responsable").value="";
-        document.getElementById("btnGuardar").disabled=false;
-        document.getElementById("btnNuevaPlanilla").disabled=true;
+        
+        document.getElementById("fecha_creacion").value = "";
+        document.getElementById("responsable").value = "";
+        
+        if (borrarTodo) {
+            document.getElementById("num_planilla").value = "";
+        }
+        
+        // Reset de botones
+        document.getElementById("btnGuardar").disabled = false;
+        // El botón Nueva Planilla ya no es necesario, pero si lo dejas, lo reseteamos
+        const btnNueva = document.getElementById("btnNuevaPlanilla");
+        if (btnNueva) btnNueva.disabled = true;
     }
-
+    
     return {
         guardarPlanilla,
-        nuevaPlanilla,
         validarGuias
     }
 
