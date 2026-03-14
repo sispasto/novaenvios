@@ -163,55 +163,93 @@ var nsPlanilla=(function(){
     });
 
     async function buscarPlanilla(num_planilla) {
-        try {
-            // Obtenemos la sesión para el token
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) throw new Error("Debe iniciar sesión primero");
+      try {
+          // 1. Verificación de sesión
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          if (!session) throw new Error("Debe iniciar sesión para realizar consultas");
 
-            // Llamamos a la Edge Function novaenvios_validar_planilla
-            const response = await fetch(
-                `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${session.access_token}`
-                    },
-                    body: JSON.stringify({ num_planilla: parseInt(num_planilla) })
-                }
-            );
+          // 2. Llamada a la Edge Function
+          const response = await fetch(
+              `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+              {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": `Bearer ${session.access_token}`
+                  },
+                  body: JSON.stringify({ num_planilla: parseInt(num_planilla) })
+              }
+          );
 
-            const result = await response.json();
+          const result = await response.json();
+          if (!result.ok) throw new Error(result.error);
 
-            if (!result.ok) throw new Error(result.error);
+          const data = result.data;
 
-            const data = result.data;
+          /* ===================================================
+            VALIDACIÓN DE ESTADOS (ANULADA / CERRADA)
+          =================================================== */
+          if (data.estado === 'AN') {
+              alertSMS(`La planilla N° ${num_planilla} se encuentra ANULADA.`);
+              limpiarFormularioBusqueda(); // Función auxiliar para resetear campos
+              return; 
+          }
 
-            // 1. Llenamos encabezados (Usando la fecha convertida que viene de la RPC)
-            document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleString('es-CO');
-            document.getElementById("responsable").value = data.nombre_responsable;
+          if (data.estado === 'CE') {
+              alertSMS(`La planilla N° ${num_planilla} ya está CERRADA.`);
+              limpiarFormularioBusqueda();
+              return;
+          }
 
-            // 2. Mapeamos las guías al formato de la tabla
-            // Como la RPC solo trae el string de la guía, inicializamos los campos vacíos
-            // para luego poder ejecutar "Validar" si es necesario.
-            listaGuias = data.guias.map(g => ({
-                guia: g,
-                estado: "",
-                destinatario: "",
-                direccion: "",
-                celular: "",
-                valor_flete: "",
-                valor_producto: ""
-            }));
+          // Validación de seguridad por si llega un estado distinto a 'AB'
+          if (data.estado !== 'AB') {
+              alertSMS(`La planilla se encuentra en estado: ${data.estado}. Solo se permiten planillas abiertas.`);
+              return;
+          }
 
-            renderGuias();
-            alertSMS("Planilla cargada correctamente");
+          /* ===================================================
+            CARGA DE DATOS (Solo si el estado es 'AB')
+          =================================================== */
+          
+          // Llenar encabezados
+          document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleString('es-CO');
+          document.getElementById("responsable").value = data.nombre_responsable;
 
-        } catch (err) {
-            console.error(err);
-            alertSMS(err.message);
-        }
-    }
+          // Mapear guías (coalesce garantiza que sea un array vacío si no hay guías)
+          listaGuias = data.guias.map(g => ({
+              guia: g,
+              estado: "",
+              destinatario: "",
+              direccion: "",
+              celular: "",
+              valor_flete: "",
+              valor_producto: ""
+          }));
+
+          // Renderizar tabla y actualizar contador
+          renderGuias();
+          
+          // Deshabilitar botón de guardar si ya existe (opcional, según tu lógica de edición)
+          // document.getElementById("btnGuardar").disabled = true;
+          
+          alertSMS("Planilla cargada correctamente");
+
+      } catch (err) {
+          console.error("Error en buscarPlanilla:", err);
+          alertSMS("No se encontró la planilla o error de conexión.");
+          limpiarFormularioBusqueda();
+      }
+  }
+
+/**
+ * Función auxiliar para limpiar los campos si la búsqueda falla o es inválida
+ */
+function limpiarFormularioBusqueda() {
+    document.getElementById("fecha_creacion").value = "";
+    document.getElementById("responsable").value = "";
+    listaGuias = [];
+    renderGuias();
+}
 
     /* =========================
     RENDER TABLA (Sin cambios)
