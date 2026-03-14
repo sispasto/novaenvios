@@ -126,6 +126,7 @@ font-size:14px;
   <button
     type="button"
     class="btn btn-sm btn-dark"
+    id="btnValidar"
     onclick="nsPlanilla.validarGuias()"
     >
     VALIDAR
@@ -265,18 +266,35 @@ function limpiarFormularioBusqueda() {
     ========================= */
     async function validarGuias() {
       try {
-          if (listaGuias.length === 0) throw new Error("No hay guías para validar");
+          // Formateador para moneda (reutilizable)
+          const formatoCop = new Intl.NumberFormat('es-CO', {
+              style: 'currency',
+              currency: 'COP',
+              minimumFractionDigits: 0
+          });
+
+          // 1. Si no hay guías, reseteamos totales a $ 0 y salimos sin lanzar error
+          if (!listaGuias || listaGuias.length === 0) {
+              document.getElementById("totalContraentrega").innerText = formatoCop.format(0);
+              document.getElementById("totalRecaudo").innerText = formatoCop.format(0);
+              renderGuias();
+              console.warn("No hay guías para procesar.");
+              return; // Detiene la ejecución elegantemente
+          }
 
           let sumaContraentrega = 0;
           let sumaRecaudo = 0;
 
           for (let i = 0; i < listaGuias.length; i++) {
               let g = listaGuias[i];
+              
+              // Opcional: solo consultar si la guía tiene valor (evita errores de fetch vacíos)
+              if(!g.guia) continue;
+
               const response = await fetch(`http://localhost:8080/guia/${g.guia}`);
               const data = await response.json();
 
               if (data.ok) {
-                  // Mapeo de datos recibidos
                   const vFlete = parseFloat(data.valor_flete) || 0;
                   const vProd = parseFloat(data.valor_producto) || 0;
                   const fPago = parseInt(data.formaPago);
@@ -289,29 +307,16 @@ function limpiarFormularioBusqueda() {
                   listaGuias[i].valor_producto = vProd;
                   listaGuias[i].formaPago = fPago;
 
-                  /* ===================================================
-                    LÓGICA DE TOTALIZACIÓN ACTUALIZADA
-                  =================================================== */
-                  
-                  // 1. RECAUDO: Si es forma de pago 4, sumamos solo el producto
+                  // Lógica de totales
                   if (fPago === 4) {
                       sumaRecaudo += vProd;
-                  } 
-                  // 2. CONTRAENTREGA: Si es 3 o 7, sumamos el flete
-                  else if (fPago === 3 || fPago === 7) {
+                  } else if (fPago === 3 || fPago === 7) {
                       sumaContraentrega += vFlete;
                   }
               }
           }
 
-          // Formateador para moneda (sin decimales para COP)
-          const formatoCop = new Intl.NumberFormat('es-CO', {
-              style: 'currency',
-              currency: 'COP',
-              minimumFractionDigits: 0
-          });
-
-          // Actualización de etiquetas en el HTML
+          // 2. Actualización de etiquetas en el HTML tras el bucle
           document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
           document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
 
@@ -319,14 +324,15 @@ function limpiarFormularioBusqueda() {
           alertSMS("Validación completada. Totales calculados.");
 
       } catch (err) {
-          console.error(err);
-          alertSMS(err.message);
+          console.error("Error en validación:", err);
+          alertSMS("Hubo un problema al validar las guías.");
       }
   }
 
     /* =========================
     GUARDAR (Sin cambios)
     ========================= */
+    
     async function guardarPlanilla(event, form) {
       event.preventDefault();
 
@@ -337,7 +343,6 @@ function limpiarFormularioBusqueda() {
           if (!num_planilla) throw new Error("No hay un número de planilla válido");
 
           // 1. Extraemos los totales de los elementos HTML que ya calculamos
-          // Usamos regex para quitar "$", "." y espacios, dejando solo el número
           const totalCE = parseFloat(document.getElementById("totalContraentrega").innerText.replace(/[^0-9]/g,"")) || 0;
           const totalRE = parseFloat(document.getElementById("totalRecaudo").innerText.replace(/[^0-9]/g,"")) || 0;
 
@@ -370,10 +375,14 @@ function limpiarFormularioBusqueda() {
           =================================================== */
           alertSMS(`Planilla ${num_planilla} cerrada y guardada con éxito.`);
           
-          // Deshabilitar el botón para evitar que le den click dos veces
+          // Deshabilitar botones para evitar clics dobles o validaciones extra
           document.getElementById("btnGuardar").disabled = true;
           
-          // Opcional: Bloquear el input del número para que no lo cambien
+          // --- AQUÍ SE DESHABILITA EL BOTÓN VALIDAR ---
+          const btnValidar = document.querySelector('button[onclick="nsPlanilla.validarGuias()"]');
+          if (btnValidar) btnValidar.disabled = true;
+          
+          // Bloquear el input del número para que no lo cambien
           numInput.readOnly = true;
 
       } catch (err) {
@@ -381,7 +390,8 @@ function limpiarFormularioBusqueda() {
           alertSMS("Error: " + err.message);
       }
   }
-
+    
+    /*********************************************************************/
   function limpiarCampos(borrarTodo = true) {
       // 1. Limpiar datos lógicos
       listaGuias = [];
