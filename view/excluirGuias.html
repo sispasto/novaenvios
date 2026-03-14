@@ -161,7 +161,7 @@ var nsSacarGuias = (function() {
             const { data: { session } } = await supabaseClient.auth.getSession();
 
             // Llamamos a una nueva Edge Function que crearemos abajo
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/novaenvios_sacar_guias`, {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/novaenvios_excluir_guias`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
