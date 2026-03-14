@@ -22,6 +22,14 @@ function registrarPersona() {
   main.appendChild(registroPersona); 
 }
 
+function excluirGuias() {
+  let main = document.getElementById('App');
+  removeALLChilds(main);
+  const excluirGuias = document.createElement('excluir-guias-component');
+  excluirGuias.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(excluirGuias); 
+}
+
 function cerrarPlanilla() {
   let main = document.getElementById('App');
   removeALLChilds(main);
