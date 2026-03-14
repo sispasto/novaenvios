@@ -57,34 +57,11 @@ font-size:14px;
 
 <div class="col-md-4 mb-3">
 <label class="form-label">Responsable</label>
-
-<select class="form-select" id="responsable" required>
-<option value="">Cargando responsables...</option>
-</select>
-
+<input type="text" class="form-control" id="responsable" readonly>
 </div>
 
 </div>
-
 <hr>
-
-<div class="section-title"><strong>Lectura de Guías</strong></div>
-
-<div class="row">
-
-<div class="col-md-12 mb-3">
-
-<input 
-type="text"
-class="form-control scan-input"
-id="inputGuia"
-placeholder="Escanee guía con lector de código de barras"
-autocomplete="off"
->
-
-</div>
-
-</div>
 
 <!-- CONTADOR + BOTON LIMPIAR -->
 
@@ -182,65 +159,7 @@ const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
 let listaGuias=[];
 
-/* =========================
-FECHA
-========================= */
 
-function cargarFecha(){
-
-const hoy=new Date();
-
-const fecha=
-("0"+hoy.getDate()).slice(-2)+"/"+
-("0"+(hoy.getMonth()+1)).slice(-2)+"/"+
-hoy.getFullYear();
-
-document.getElementById("fecha_creacion").value=fecha;
-
-}
-
-/* =========================
-RESPONSABLES
-========================= */
-
-async function cargarResponsables(){
-
-try{
-
-const {data:{session}}=await supabaseClient.auth.getSession();
-
-const response=await fetch(
-`${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${session.access_token}`
-}
-}
-);
-
-const result=await response.json();
-
-const select=document.getElementById("responsable");
-
-select.innerHTML='<option value="">Seleccione responsable</option>';
-
-result.data.forEach(r=>{
-
-select.innerHTML+=`
-<option value="${r.id_persona}">
-${r.nombres} ${r.apellidos}
-</option>
-`;
-
-});
-
-}catch(err){
-console.error(err);
-}
-
-}
 
 /* =========================
 LECTOR
