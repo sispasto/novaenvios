@@ -158,12 +158,10 @@ var nsPlanilla=(function(){
 /**********************************************************************/
 async function buscarPlanilla(num_planilla) {
     try {
-        // 1. Limpieza preventiva: antes de buscar, reseteamos la tabla y campos
-        // Pasamos false para que NO borre el número que el usuario acaba de escribir
         limpiarCampos(false); 
 
         const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) throw new Error("Debe iniciar sesión para realizar consultas");
+        if (!session) throw new Error("Debe iniciar sesión");
 
         const response = await fetch(
             `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
@@ -178,57 +176,32 @@ async function buscarPlanilla(num_planilla) {
         );
 
         const result = await response.json();
-        
-        // Si el RPC no encuentra la planilla o hay error
+
+        // Si la Edge Function nos dijo que ok: false (planilla no existe)
         if (!result.ok) {
-            throw new Error(result.error || "Planilla no encontrada");
-        }
-
-        const data = result.data;
-
-        /* ===================================================
-           VALIDACIÓN DE ESTADOS
-        =================================================== */
-        if (data.estado === 'AN' || data.estado === 'CE') {
-            const msj = data.estado === 'AN' ? "ANULADA" : "CERRADA";
-            alertSMS(`La planilla N° ${num_planilla} se encuentra ${msj}.`);
-            limpiarCampos(true); // Aquí sí borramos todo el input
-            return; 
-        }
-
-        if (data.estado !== 'AB') {
-            alertSMS(`Estado inválido: ${data.estado}`);
+            alertSMS(result.error); // Mostrará "La planilla no existe o no está disponible"
             limpiarCampos(true);
             return;
         }
 
-        /* ===================================================
-           CARGA DE DATOS
-        =================================================== */
+        const data = result.data;
+        
+        // ... resto de tu lógica de validación de estado (AN, CE, AB) ...
+        if (data.estado === 'AN' || data.estado === 'CE') {
+             alertSMS(`La planilla N° ${num_planilla} está ${data.estado === 'AN' ? 'ANULADA' : 'CERRADA'}.`);
+             limpiarCampos(true);
+             return;
+        }
+
+        // Llenar campos y renderizar
         document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleString('es-CO');
         document.getElementById("responsable").value = data.nombre_responsable;
-
-        // Mapear guías
-        listaGuias = data.guias.map(g => ({
-            guia: g,
-            estado: "",
-            destinatario: "",
-            direccion: "",
-            celular: "",
-            valor_flete: "",
-            valor_producto: ""
-        }));
-
+        listaGuias = data.guias.map(g => ({ guia: g })); // Simplificado para el ejemplo
         renderGuias();
-        
-        // Como es una planilla existente y abierta, habilitamos el botón de grabar por si editan
-        document.getElementById("btnGuardar").disabled = false;
-        
-        alertSMS("Planilla cargada correctamente");
 
     } catch (err) {
-        console.error("Error:", err);
-        alertSMS(err.message);
+        console.error(err);
+        alertSMS("Error de conexión con el servidor");
         limpiarCampos(true);
     }
 }
