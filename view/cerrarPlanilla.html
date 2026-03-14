@@ -161,17 +161,17 @@ var nsPlanilla=(function(){
     EVENTO: BUSCAR PLANILLA POR NÚMERO
     ========================= */
     document.getElementById("num_planilla").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        const num = e.target.value.trim();
-        
-        if (num) {
-            // Limpiamos todo lo anterior antes de buscar la nueva
-            limpiarCampos(false); 
-            buscarPlanilla(num);
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const num = e.target.value.trim();
+            
+            if (num) {
+                // Limpiamos todo lo anterior antes de buscar la nueva
+                limpiarCampos(false); 
+                buscarPlanilla(num);
+            }
         }
-    }
-});
+    });
 
 /**********************************************************************/
 async function buscarPlanilla(num_planilla) {
@@ -382,27 +382,36 @@ function limpiarFormularioBusqueda() {
       }
   }
 
-    function limpiarCampos(borrarTodo = true) {
-        listaGuias = [];
-        renderGuias();
-        
-        document.getElementById("fecha_creacion").value = "";
-        document.getElementById("responsable").value = "";
-        
-        if (borrarTodo) {
-            document.getElementById("num_planilla").value = "";
-        }
-        
-        // Reset de botones
-        document.getElementById("btnGuardar").disabled = false;
-        // El botón Nueva Planilla ya no es necesario, pero si lo dejas, lo reseteamos
-        const btnNueva = document.getElementById("btnNuevaPlanilla");
-        if (btnNueva) btnNueva.disabled = true;
-    }
-    
-    return {
-        guardarPlanilla,
-        validarGuias
-    }
+  function limpiarCampos(borrarTodo = true) {
+      // 1. Limpiar datos lógicos
+      listaGuias = [];
+      
+      // 2. Limpiar UI de la tabla
+      renderGuias();
+      
+      // 3. Limpiar encabezados
+      document.getElementById("fecha_creacion").value = "";
+      document.getElementById("responsable").value = "";
+      
+      // 4. LIMPIAR TOTALES (Esto soluciona tu problema)
+      document.getElementById("totalContraentrega").innerText = "$ 0";
+      document.getElementById("totalRecaudo").innerText = "$ 0";
+      
+      if (borrarTodo) {
+          document.getElementById("num_planilla").value = "";
+          document.getElementById("num_planilla").readOnly = false; // Por si estaba bloqueado
+      }
+      
+      // 5. Reset de estados de botones
+      document.getElementById("btnGuardar").disabled = false;
+      
+      const btnNueva = document.getElementById("btnNuevaPlanilla");
+      if (btnNueva) btnNueva.disabled = true;
+  }
+  
+  return {
+    guardarPlanilla,
+    validarGuias
+  }
 
 })();
