@@ -372,16 +372,16 @@ async function updatePassword() {
     }
 
     // 3. Llamada a la Edge Function
+    // Dentro de tu función updatePassword() en el HTML:
     const response = await fetch(`${SUPABASE_URL}/functions/v1/novaenvios_authUser`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // USAMOS EL ACCESS_TOKEN DEL USUARIO, NO LA ANON_KEY
         "Authorization": `Bearer ${session.access_token}`
       },      
       body: JSON.stringify({
-        action: "updatePassword",
-        claveNueva: claveNueva
+        action: "updatePassword", // Coincide con el if en la Edge Function
+        claveNueva: claveNueva    // Coincide con la variable en la Edge Function
       })
     });
 
