@@ -92,46 +92,50 @@ const SUPABASE_ANON_KEY="TU_ANON_KEY";
 
 const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-async function consultar(){
+async function consultar() {
+  try {
+    const fecha = document.getElementById("fecha_planilla").value;
 
-try{
+    if (!fecha) {
+      throw new Error("Seleccione una fecha para consultar");
+    }
 
-const fecha=document.getElementById("fecha_planilla").value;
+    const { data: { session } } = await supabaseClient.auth.getSession();
 
-if(!fecha){
-throw new Error("Seleccione fecha");
-}
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/novaenvios_consultar_planillas`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ fecha: fecha })
+      }
+    );
 
-const {data:{session}}=await supabaseClient.auth.getSession();
+    const result = await response.json();
 
-const response=await fetch(
-`${SUPABASE_URL}/functions/v1/novaenvios_consultar_planillas`,
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${session.access_token}`
-},
-body:JSON.stringify({
-fecha:fecha
-})
-}
-);
+    if (!response.ok) {
+      throw new Error(result.error || "Error en la consulta");
+    }
 
-const result=await response.json();
+    // VALIDACIÓN CLAVE: Si data está vacío o no hay resultados
+    if (!result.data || result.data.length === 0) {
+      // Limpiamos la tabla para que no se vea información vieja
+      renderTabla([]); 
+      // Notificamos al usuario
+      alertSMS("No se encontraron planillas para la fecha seleccionada.");
+      return; // Detenemos la ejecución
+    }
 
-if(!response.ok){
-throw new Error(result.error);
-}
+    // Si llegamos aquí, sí hay datos
+    renderTabla(result.data);
 
-renderTabla(result.data);
-
-}catch(err){
-
-alertSMS(err.message);
-
-}
-
+  } catch (err) {
+    console.error("Error en consulta:", err);
+    alertSMS(err.message);
+  }
 }
 
 /* =========================
