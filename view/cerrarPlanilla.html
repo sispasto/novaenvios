@@ -291,7 +291,7 @@ function limpiarFormularioBusqueda() {
               // Opcional: solo consultar si la guía tiene valor (evita errores de fetch vacíos)
               if(!g.guia) continue;
 
-              const response = await fetch(`http://localhost:8080/guia/${g.guia}`);
+              const response = await fetch(`http://10.70.255.80:8080/guia/${g.guia}`);
               const data = await response.json();
 
               if (data.ok) {
