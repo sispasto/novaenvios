@@ -64,6 +64,8 @@ Consultar
     <th>Estado</th> 
     <th>Responsable</th>
     <th># Guías</th>
+    <th>Flete Contraentrega</th> 
+    <th>Flete Recaudo</th>      
   </tr>
 </thead>
 
@@ -149,27 +151,32 @@ function renderTabla(data) {
     tbody.innerHTML = "";
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No hay datos disponibles</td></tr>`;
+        // Cambiamos colspan="4" por colspan="6"
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No hay datos disponibles</td></tr>`;
         return;
     }
 
     data.forEach(p => {
-        // Lógica de colores: Verde para ABIERTA, Rojo/Gris para CERRADA
-        const badgeColor = p.estado === 'ABIERTA' ? 'bg-success' : 'bg-secondary';
-        
-        tbody.innerHTML += `
-        <tr>
-            <td><strong>${p.num_planilla}</strong></td>
-            <td>
-                <span class="badge ${badgeColor}">${p.estado || 'N/A'}</span>
-            </td>
-            <td>${p.responsable}</td>
-            <td>
-                <span class="badge bg-light text-dark border">${p.total_guias}</span>
-            </td>
-        </tr>
-        `;
-    });
+      const badgeColor = p.estado === 'ABIERTA' ? 'bg-success' : 'bg-secondary';
+      
+      // Formateo de moneda para que se vea profesional 💰
+      const fleteCE = (p.flete_contraentrega || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+      const fleteRE = (p.flete_recaudo || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+
+      tbody.innerHTML += `
+      <tr>
+          <td><strong>${p.num_planilla}</strong></td>
+          <td>
+              <span class="badge ${badgeColor}">${p.estado || 'N/A'}</span>
+          </td>
+          <td>${p.responsable}</td>
+          <td>
+              <span class="badge bg-light text-dark border">${p.total_guias}</span>
+          </td>
+          <td class="text-end text-primary fw-bold">${fleteCE}</td> <td class="text-end text-success fw-bold">${fleteRE}</td> </tr>
+      `;
+  });
+    
 }
 
 return{
