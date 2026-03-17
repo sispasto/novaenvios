@@ -115,10 +115,11 @@ Limpiar
 <table class="table table-sm table-striped">
 
 <thead class="table-dark">
-<tr>
-<th width="60">#</th>
-<th>Guía</th>
-</tr>
+  <tr>
+    <th width="60">#</th>
+    <th>Guía</th>
+    <th width="50">Acción</th> 
+  </tr>
 </thead>
 
 <tbody id="tablaGuias"></tbody>
@@ -266,24 +267,39 @@ RENDER TABLA
 ========================= */
 
 function renderGuias(){
+    const tbody = document.getElementById("tablaGuias");
+    tbody.innerHTML = "";
 
-const tbody=document.getElementById("tablaGuias");
+    listaGuias.forEach((g, i) => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${i + 1}</td>
+            <td>${g}</td>
+            <td class="text-center">
+                <button 
+                    type="button" 
+                    class="btn btn-sm btn-danger px-2 py-0" 
+                    onclick="nsPlanilla.quitarGuia(${i})"
+                >
+                    &times;
+                </button>
+            </td>
+        </tr>
+        `;
+    });
 
-tbody.innerHTML="";
+    document.getElementById("contadorGuias").innerText = listaGuias.length;
+}
 
-listaGuias.forEach((g,i)=>{
-
-tbody.innerHTML+=`
-<tr>
-<td>${i+1}</td>
-<td>${g}</td>
-</tr>
-`;
-
-});
-
-document.getElementById("contadorGuias").innerText=listaGuias.length;
-
+function quitarGuia(index) {
+    // Eliminamos 1 elemento en la posición 'index'
+    listaGuias.splice(index, 1);
+    
+    // Volvemos a dibujar la tabla para que se refleje el cambio
+    renderGuias();
+    
+    // Devolvemos el foco al input para seguir escaneando
+    document.getElementById("inputGuia").focus();
 }
 
 /* =========================
@@ -397,10 +413,11 @@ function nuevaPlanilla(){
 cargarFecha();
 cargarResponsables();
 
-return{
-guardarPlanilla,
-limpiarGuias,
-nuevaPlanilla
+return {
+    guardarPlanilla,
+    limpiarGuias,
+    nuevaPlanilla,
+    quitarGuia // <-- Agrégala aquí
 }
 
 })();
