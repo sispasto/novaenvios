@@ -241,7 +241,8 @@ inputGuia.addEventListener("keydown", function(e) {
     if (e.key === "Enter" || e.key === "Tab") {
         e.preventDefault(); // Evitamos que el Tab salte al siguiente campo
 
-        const guia = this.value.trim(); // Limpiamos espacios
+        // Reemplazamos todo lo que NO sea número por un vacío ""
+        const guia = this.value.replace(/[^0-9]/g, "");
 
         if (!guia) return;
 

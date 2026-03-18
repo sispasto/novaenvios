@@ -290,9 +290,12 @@ function limpiarFormularioBusqueda() {
               
               // Opcional: solo consultar si la guía tiene valor (evita errores de fetch vacíos)
               if(!g.guia) continue;
-
-              const response = await fetch(`http://localhost:8081/guia/${g.guia}`);
+              
+              // Esto quita cualquier carácter que no sea una letra o un número
+              let guiaLimpia = g.guia.replace(/[^a-zA-Z0-9]/g, ''); 
+              const response = await fetch(`http://localhost:8081/guia/${guiaLimpia}`);             
               const data = await response.json();
+              
 
               if (data.ok) {
                   const vFlete = parseFloat(data.valor_flete) || 0;
