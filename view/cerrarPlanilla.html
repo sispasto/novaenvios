@@ -106,12 +106,13 @@ font-size:14px;
     <th width="60">#</th>
     <th>Guía</th>
     <th>Estado</th>
+    <th>Ciudad Destino</th>
     <th>Destinatario</th>
     <th>Dirección</th>
     <th>Celular</th>
     <th>Flete</th>
     <th>Producto</th>
-  </tr>
+    <th>Pago Elec.</th> </tr>
 </thead>
 
 <tbody id="tablaGuias"></tbody>
@@ -240,97 +241,104 @@ function limpiarFormularioBusqueda() {
     RENDER TABLA (Sin cambios)
     ========================= */
     function renderGuias(){
-        const tbody=document.getElementById("tablaGuias");
-        tbody.innerHTML="";
+        const tbody = document.getElementById("tablaGuias");
+        tbody.innerHTML = "";
 
-        listaGuias.forEach((g,i)=>{
-            tbody.innerHTML+=`
+        listaGuias.forEach((g, i) => {
+            tbody.innerHTML += `
             <tr>
-                <td>${i+1}</td>
+                <td>${i + 1}</td>
                 <td>${g.guia}</td>
                 <td>${g.estado || ""}</td>
-                <td>${g.destinatario || ""}</td>
+                <td><small>${g.ciudad || ""}</small></td> <td>${g.destinatario || ""}</td>
                 <td>${g.direccion || ""}</td>
                 <td>${g.celular || ""}</td>
                 <td>${g.valor_flete || ""}</td>
                 <td>${g.valor_producto || ""}</td>
-            </tr>
+                <td>${g.pago_electronico || ""}</td> </tr>
             `;
         });
 
-        document.getElementById("contadorGuias").innerText=listaGuias.length;
+        document.getElementById("contadorGuias").innerText = listaGuias.length;
     }
 
     /* =========================
     VALIDAR GUIAS (Consume tu API Local)
     ========================= */
     async function validarGuias() {
-      try {
-          // Formateador para moneda (reutilizable)
-          const formatoCop = new Intl.NumberFormat('es-CO', {
-              style: 'currency',
-              currency: 'COP',
-              minimumFractionDigits: 0
-          });
+        try {
+            // Formateador para moneda
+            const formatoCop = new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            });
 
-          // 1. Si no hay guías, reseteamos totales a $ 0 y salimos sin lanzar error
-          if (!listaGuias || listaGuias.length === 0) {
-              document.getElementById("totalContraentrega").innerText = formatoCop.format(0);
-              document.getElementById("totalRecaudo").innerText = formatoCop.format(0);
-              renderGuias();
-              console.warn("No hay guías para procesar.");
-              return; // Detiene la ejecución elegantemente
-          }
+            if (!listaGuias || listaGuias.length === 0) {
+                document.getElementById("totalContraentrega").innerText = formatoCop.format(0);
+                document.getElementById("totalRecaudo").innerText = formatoCop.format(0);
+                renderGuias();
+                return;
+            }
 
-          let sumaContraentrega = 0;
-          let sumaRecaudo = 0;
+            let sumaContraentrega = 0;
+            let sumaRecaudo = 0;
 
-          for (let i = 0; i < listaGuias.length; i++) {
-              let g = listaGuias[i];
-              
-              // Opcional: solo consultar si la guía tiene valor (evita errores de fetch vacíos)
-              if(!g.guia) continue;
-              
-              // Esto quita cualquier carácter que no sea una letra o un número
-              let guiaLimpia = g.guia.replace(/[^a-zA-Z0-9]/g, ''); 
-              const response = await fetch(`http://localhost:8081/guia/${guiaLimpia}`);             
-              const data = await response.json();
-              
+            for (let i = 0; i < listaGuias.length; i++) {
+                let g = listaGuias[i];
+                if (!g.guia) continue;
 
-              if (data.ok) {
-                  const vFlete = parseFloat(data.valor_flete) || 0;
-                  const vProd = parseFloat(data.valor_producto) || 0;
-                  const fPago = parseInt(data.formaPago);
+                // Limpiar la guía de caracteres especiales
+                let guiaLimpia = g.guia.replace(/[^a-zA-Z0-9]/g, ''); 
+                
+                // Petición a tu Endpoint en C#
+                const response = await fetch(`http://localhost:8081/guia/${guiaLimpia}`);     
+                const data = await response.json();
 
-                  listaGuias[i].estado = data.estado;
-                  listaGuias[i].destinatario = data.destinatario;
-                  listaGuias[i].direccion = data.direccion;
-                  listaGuias[i].celular = data.celular;
-                  listaGuias[i].valor_flete = vFlete;
-                  listaGuias[i].valor_producto = vProd;
-                  listaGuias[i].formaPago = fPago;
+                if (data.ok) {
+                    const vFlete = parseFloat(data.valor_flete) || 0;
+                    const vProd = parseFloat(data.valor_producto) || 0;
+                    const fPago = parseInt(data.formaPago);
 
-                  // Lógica de totales
-                  if (fPago === 4) {
-                      sumaRecaudo += vProd;
-                  } else if (fPago === 3 || fPago === 7) {
-                      sumaContraentrega += vFlete;
-                  }
-              }
-          }
+                    // Asignamos los datos básicos
+                    listaGuias[i].estado = data.estado;
+                    listaGuias[i].destinatario = data.destinatario;
+                    listaGuias[i].direccion = data.direccion;
+                    listaGuias[i].celular = data.celular;
+                    listaGuias[i].valor_flete = vFlete;
+                    listaGuias[i].valor_producto = vProd;
+                    listaGuias[i].formaPago = fPago;
 
-          // 2. Actualización de etiquetas en el HTML tras el bucle
-          document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
-          document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
+                    // --- NUEVOS CAMPOS ---
+                    // Guardamos la ciudad y el estado del pago electrónico
+                    listaGuias[i].ciudad = data.ciudad; 
+                    listaGuias[i].pago_electronico = data.pago_electronico;
+                    // ---------------------
 
-          renderGuias();
-          alertSMS("Validación completada. Totales calculados.");
+                    // Lógica de totales basada en la forma de pago
+                    if (fPago === 4) {
+                        sumaRecaudo += vProd;
+                    } else if (fPago === 3 || fPago === 7) {
+                        sumaContraentrega += vFlete;
+                    }
+                } else {
+                    console.error(`Error en guía ${guiaLimpia}: ${data.mensaje}`);
+                }
+            }
 
-      } catch (err) {
-          console.error("Error en validación:", err);
-          alertSMS("Hubo un problema al validar las guías.");
-      }
-  }
+            // Actualizamos los totales en la interfaz 💰
+            document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
+            document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
+
+            // Volvemos a dibujar la tabla con los nuevos datos
+            renderGuias();
+            alertSMS("Validación completada. Datos de ciudad y pagos actualizados.");
+
+        } catch (err) {
+            console.error("Error en validación:", err);
+            alertSMS("Hubo un problema al conectar con el servidor local.");
+        }
+    }
 
     /* =========================
     GUARDAR (Sin cambios)
