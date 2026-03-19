@@ -245,6 +245,22 @@ async function verificarSesion() {
   }
 }
 
+function safeHideModal(modalId) {
+  const modalElement = document.getElementById(modalId);
+  if (!modalElement) return;
+
+  // 1. Quitamos el foco del elemento actual (como el botón 'X')
+  if (document.activeElement) {
+    document.activeElement.blur();
+  }
+
+  // 2. Obtenemos la instancia y la ocultamos
+  const modal = bootstrap.Modal.getInstance(modalElement);
+  if (modal) {
+    modal.hide();
+  }
+}
+
 //################################################################################
 
 function mostrarMenuPorRol(rol) {
@@ -313,7 +329,7 @@ async function authenticateUser() {
       },
       body: JSON.stringify({ action: "login" })
     });
-
+    
     const data = await response.json();
 
     if (data.status === "success") {
@@ -332,9 +348,7 @@ async function authenticateUser() {
       document.getElementById('textUser').textContent = nombre;
 
       // Cerrar modal y redirigir
-      const modalElement = document.getElementById('loginModal');
-      const modal = bootstrap.Modal.getInstance(modalElement);
-      if (modal) modal.hide();
+      safeHideModal('loginModal');
       
       getHome();
       alertSMS("Bienvenido " + nombre);
@@ -393,9 +407,7 @@ async function updatePassword() {
       document.getElementById('newPassword').value = '';
       document.getElementById('confirmNewPassword').value = '';
       
-      const modalEl = document.getElementById('changePasswordModal');
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
+      safeHideModal('changePasswordModal');
 
       const navEl = document.getElementById('navbarText');
       const bsCollapse = bootstrap.Collapse.getInstance(navEl) || new bootstrap.Collapse(navEl, { toggle: false });
