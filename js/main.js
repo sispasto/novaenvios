@@ -3,47 +3,46 @@ var arrayGlobal = []; //array de promotores
 var folderPathIMG="";//variable que guarda id de carpeta donde se guardan las imagenes
 var versionApp="1.0";//La version se debe cambiar en service-worker.js y main.js
 
-function getRegistro() {
-  let main = document.getElementById('App');
-  removeALLChilds(main);
-  const registro = document.createElement('registro-component');
-  registro.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(registro);
-  const foto = document.createElement('foto-component');
-  foto.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(foto); 
-}
 
-function registrarPersona() {
+
+function crearPlanilla() {
   let main = document.getElementById('App');
   removeALLChilds(main);
-  const registroPersona = document.createElement('registro-persona-component');
-  registroPersona.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(registroPersona); 
+  const frmCrearPlanilla = document.createElement('crear-planilla-component');
+  frmCrearPlanilla.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(frmCrearPlanilla); 
 }
 
 function excluirGuias() {
   let main = document.getElementById('App');
   removeALLChilds(main);
-  const excluirGuias = document.createElement('excluir-guias-component');
-  excluirGuias.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(excluirGuias); 
+  const frmExcluirGuias = document.createElement('excluir-guias-component');
+  frmExcluirGuias.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(frmExcluirGuias); 
 }
 
 function cerrarPlanilla() {
   let main = document.getElementById('App');
   removeALLChilds(main);
-  const cerrarplanilla = document.createElement('cerrar-planilla-component');
-  cerrarplanilla.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(cerrarplanilla); 
+  const frmCerrarplanilla = document.createElement('cerrar-planilla-component');
+  frmCerrarplanilla.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(frmCerrarplanilla); 
 }
 
-function consultarPersona() {
+function consultarPlanillas() {    
   let main = document.getElementById('App');
   removeALLChilds(main);
-  const consultarPersona = document.createElement('consultar-persona');
-  consultarPersona.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(consultarPersona); 
+  const frmConsultarPlanillas = document.createElement('consultar-planillas-component');
+  frmConsultarPlanillas.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(frmConsultarPlanillas);      
+}
+
+function anularPlanilla() {    
+  let main = document.getElementById('App');
+  removeALLChilds(main);
+  const frmAnularPlanilla = document.createElement('anular-planilla-component');
+  frmAnularPlanilla.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(frmAnularPlanilla);      
 }
 
 function getHome() {
@@ -68,80 +67,6 @@ function acercade() {
   /******************************************************** */
 }
 
-
-function errorUpload(data) {
-  alert("Error al generar el archivo");
-}
-
-function removeALLChilds(parentNode) {
-  while (parentNode.firstChild) {
-    parentNode.removeChild(parentNode.firstChild);
-  }
-}
-
-function alertSMS(texto) {
-  let myToast = document.querySelector('.toast');
-  let smsToast = document.querySelector('.toast-body');
-  let toast = new bootstrap.Toast(myToast);
-  smsToast.innerHTML = texto;
-  toast.show();
-}
-
-
-function consultarBeneficios() {    
-  let main = document.getElementById('App');
-  removeALLChilds(main);
-  const frmgetBeneficios = document.createElement('consultar-beneficio');
-  frmgetBeneficios.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(frmgetBeneficios);      
-}
-
-function registrarBeneficio() {    
-  let main = document.getElementById('App');
-  removeALLChilds(main);
-  const frmBeneficio = document.createElement('registro-beneficio-component');
-  frmBeneficio.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(frmBeneficio);      
-}
-  
-function redimirBeneficio() {    
-  let main = document.getElementById('App');
-  removeALLChilds(main);
-  const frmredimirBeneficio = document.createElement('redimir-beneficio');
-  frmredimirBeneficio.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(frmredimirBeneficio);      
-}
-
-function getInforme() {    
-  let main = document.getElementById('App');
-  removeALLChilds(main);
-  const informe = document.createElement('informe-component');
-  informe.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(informe);
-  const vmodal = document.createElement('vmodal-component');
-  vmodal.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(vmodal); 
-}
-
-function getNomina() {  
-  let main = document.getElementById('App');
-  removeALLChilds(main);
-  const nomina = document.createElement('nomina-component');
-  nomina.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(nomina);
-  const vmodal = document.createElement('vmodal-component');
-  vmodal.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(vmodal); 
-}
-
-function getConsulta() {
-  let main = document.getElementById('App');
-  removeALLChilds(main);
-  const componente = document.createElement('consulta-component');
-  componente.setAttribute('container', '#App'); // <-- aquí pasas el parámetro 
-  main.appendChild(componente);
-  /******************************************************** */
-}
 
 function crearLoader() {
   eliminarLoader();

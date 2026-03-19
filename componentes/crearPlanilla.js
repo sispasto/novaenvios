@@ -1,4 +1,4 @@
-class RegistroPersonaComponent extends HTMLElement {
+class CrearplanillaComponent extends HTMLElement {
   constructor() {
     super();
   }
@@ -13,7 +13,7 @@ class RegistroPersonaComponent extends HTMLElement {
     }
 
     try {
-      const response = await fetch('view/registroPersona.html');
+      const response = await fetch('view/crearPlanilla.html');
       const htmlText = await response.text();
 
       // Crear template para manipular el contenido
@@ -53,4 +53,4 @@ class RegistroPersonaComponent extends HTMLElement {
   }
 }
 
-customElements.define('registro-persona-component', RegistroPersonaComponent);
+customElements.define('crear-planilla-component', CrearplanillaComponent);

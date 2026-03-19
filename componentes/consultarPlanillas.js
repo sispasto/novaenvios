@@ -1,11 +1,11 @@
-class ConsultarBeneficioComponent extends HTMLElement {
+class ConsultarPlanillasComponent extends HTMLElement {
   async connectedCallback() {
     // 1. Obtener el selector del contenedor principal desde el atributo
     const containerSelector = this.getAttribute("container");
     const container = document.querySelector(containerSelector);
 
     if (!container) {
-      console.error("Contenedor no encontrado para ConsultarBeneficioComponent");
+      console.error("Contenedor no encontrado para ConsultarPlanillasComponent");
       return;
     }
 
@@ -50,14 +50,11 @@ class ConsultarBeneficioComponent extends HTMLElement {
       }, 100);*/
 
     } catch (e) {
-      console.error("Error cargando ConsultarBeneficioComponent:", e);
-      this.innerHTML = `<div class="alert alert-danger">Error al cargar la vista de beneficios: ${e.message}</div>`;
+      console.error("Error cargando ConsultarPlanillasComponent:", e);
+      this.innerHTML = `<div class="alert alert-danger">Error al cargar la vista de planillas: ${e.message}</div>`;
     }
   }
 }
 
 // Registro del nuevo custom element
-customElements.define(
-  "consultar-beneficio",
-  ConsultarBeneficioComponent
-);
+customElements.define( "consultar-planillas-component", ConsultarPlanillasComponent);

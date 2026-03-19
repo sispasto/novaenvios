@@ -1,4 +1,4 @@
-class RegistroBeneficioComponent extends HTMLElement {
+class AnularPlanillaComponent extends HTMLElement {
   constructor() {
     super();
   }
@@ -52,4 +52,4 @@ class RegistroBeneficioComponent extends HTMLElement {
   }
 }
 
-customElements.define('registro-beneficio-component', RegistroBeneficioComponent);
+customElements.define('anular-planilla-component', AnularPlanillaComponent);
