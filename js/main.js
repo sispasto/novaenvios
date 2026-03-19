@@ -108,6 +108,20 @@ function setNavbarCollapse(){
   });
 }
 
+function removeALLChilds(parentNode) {
+  while (parentNode.firstChild) {
+    parentNode.removeChild(parentNode.firstChild);
+  }
+}
+
+function alertSMS(texto) {
+  let myToast = document.querySelector('.toast');
+  let smsToast = document.querySelector('.toast-body');
+  let toast = new bootstrap.Toast(myToast);
+  smsToast.innerHTML = texto;
+  toast.show();
+}
+
 document.addEventListener("DOMContentLoaded", async function () {   
   /************Para forzar actualizacion de PWA**************/
   if ('serviceWorker' in navigator) {
