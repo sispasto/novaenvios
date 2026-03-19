@@ -50,7 +50,7 @@ class ExcluirGuiasComponent extends HTMLElement {
         container.appendChild(newScript);
       });
 
-      console.log('Componente Excluir Guías cargado correctamente.');
+      //console.log('Componente Excluir Guías cargado correctamente.');
 
     } catch (error) {
       console.error('Error al cargar excluirGuias.html:', error);
