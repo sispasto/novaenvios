@@ -87,12 +87,6 @@ Consultar
 
 var nsConsultaPlanillas=(function(){
 
-const SUPABASE_URL="https://ucmpldcbsccfozuxodig.supabase.co";
-
-const SUPABASE_ANON_KEY="TU_ANON_KEY";
-
-const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-
 async function consultar() {
   try {
     const fecha = document.getElementById("fecha_planilla").value;
