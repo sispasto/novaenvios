@@ -9,7 +9,7 @@ class RegistroBeneficioComponent extends HTMLElement {
     if (!container) return;
 
     try {
-      const response = await fetch('view/registroBeneficio.html');
+      const response = await fetch('view/anularPlanilla.html');
       const htmlText = await response.text();
 
       const template = document.createElement('template');

@@ -11,7 +11,7 @@ class ConsultarBeneficioComponent extends HTMLElement {
 
     try {
       // 2. Cargar el archivo HTML de la vista (asegúrate de que el nombre coincida)
-      const res = await fetch("view/consultarBeneficios.html");
+      const res = await fetch("view/consultarPlanillas.html");
       if (!res.ok) throw new Error("No se pudo cargar el archivo HTML");
       
       const html = await res.text();

@@ -50,7 +50,7 @@ class CerrarPlanillaComponent extends HTMLElement {
 
       });
 
-      // 7. Inicialización opcional
+      //. Inicialización opcional
       /*
       setTimeout(() => {
         if (typeof nsCerrarPlanilla !== "undefined") {
