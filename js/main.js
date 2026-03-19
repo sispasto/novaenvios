@@ -111,7 +111,7 @@ function setNavbarCollapse(){
 document.addEventListener("DOMContentLoaded", async function () {   
   /************Para forzar actualizacion de PWA**************/
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/unp/service-worker.js', { scope: '/unp/' })
+    navigator.serviceWorker.register('/novaenvios/service-worker.js', { scope: '/novaenvios/' })
       .then(reg => {
         reg.onupdatefound = () => {
           const newSW = reg.installing;
