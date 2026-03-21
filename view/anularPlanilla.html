@@ -1,94 +1,79 @@
 <div class="container-fluid">
-<h1></h1>
+  <h1></h1>
 
-<div class="row justify-content-center">
-<div class="col-lg-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-4">
+      <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+          <strong>Anular Planilla</strong>
+        </div>
 
-<div class="card shadow">
+        <div class="card-body">
+          <label>Número de planilla</label>
 
-<div class="card-header bg-dark text-white">
-<strong>Anular Planilla</strong>
-</div>
+          <input
+            type="number"
+            class="form-control mb-3"
+            id="num_planilla"
+            placeholder="Ingrese número de planilla"
+          />
 
-<div class="card-body">
-
-<label>Número de planilla</label>
-
-<input
-type="number"
-class="form-control mb-3"
-id="num_planilla"
-placeholder="Ingrese número de planilla"
->
-
-<button
-class="btn btn-dark w-100"
-onclick="nsAnularPlanilla.anular()"
->
-ANULAR PLANILLA
-</button>
-
-</div>
-
-</div>
-
-</div>
-</div>
-
+          <button
+            class="btn btn-dark w-100"
+            onclick="nsAnularPlanilla.anular()"
+          >
+            ANULAR PLANILLA
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
+  var nsAnularPlanilla = (function () {
+    async function anular() {
+      try {
+        const num = document.getElementById("num_planilla").value;
 
-var nsAnularPlanilla=(function(){
+        if (!num) {
+          throw new Error("Ingrese número de planilla");
+        }
 
-async function anular(){
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
 
-try{
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_anular_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              num_planilla: num,
+            }),
+          },
+        );
 
-const num=document.getElementById("num_planilla").value;
+        const result = await response.json();
 
-if(!num){
-throw new Error("Ingrese número de planilla");
-}
+        if (!response.ok) {
+          throw new Error(result.error);
+        }
 
-const {data:{session}}=await supabaseClient.auth.getSession();
+        alertSMS("Planilla anulada correctamente");
 
-const response=await fetch(
-`${SUPABASE_URL}/functions/v1/novaenvios_anular_planilla`,
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${session.access_token}`
-},
-body:JSON.stringify({
-num_planilla:num
-})
-}
-);
+        document.getElementById("num_planilla").value = "";
+      } catch (err) {
+        alertSMS(err.message);
+      }
+    }
 
-const result=await response.json();
-
-if(!response.ok){
-throw new Error(result.error);
-}
-
-alertSMS("Planilla anulada correctamente");
-
-document.getElementById("num_planilla").value="";
-
-}catch(err){
-
-alertSMS(err.message);
-
-}
-
-}
-
-return{
-anular
-}
-
-})();
-
+    return {
+      anular,
+    };
+  })();
 </script>

@@ -1,238 +1,217 @@
 <style>
+  .section-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 10px;
+  }
 
-.section-title{
-font-weight:600;
-font-size:14px;
-color:#444;
-margin-bottom:10px;
-}
+  .scan-input {
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+  }
 
-.scan-input{
-font-size:18px;
-font-weight:500;
-text-align:center;
-}
+  .table-sm td {
+    font-size: 14px;
+  }
 
-.table-sm td{
-font-size:14px;
-}
-
-.badge-counter{
-font-size:14px;
-}
-
+  .badge-counter {
+    font-size: 14px;
+  }
 </style>
 
 <div class="container-fluid">
-<h1></h1>
+  <h1></h1>
 
-<form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event,this)">
+  <form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event, this)">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow border-0">
+          <div class="card-header bg-dark text-white">
+            <h5 class="mb-0 fw-bold">Planilla de Reparto</h5>
+          </div>
 
-<div class="row justify-content-center">
-<div class="col-lg-8">
+          <div class="card-body">
+            <div class="section-title"><strong>Datos de Planilla</strong></div>
 
-<div class="card shadow border-0">
+            <div class="row">
+              <!-- NUEVO CAMPO PLANILLA -->
 
-<div class="card-header bg-dark text-white">
-<h5 class="mb-0 fw-bold">Planilla de Reparto</h5>
-</div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">N° Planilla</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="num_planilla"
+                  readonly
+                />
+              </div>
 
-<div class="card-body">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Fecha creación</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="fecha_creacion"
+                  readonly
+                />
+              </div>
 
-<div class="section-title"><strong>Datos de Planilla</strong></div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Responsable</label>
 
-<div class="row">
+                <select class="form-select" id="responsable" required>
+                  <option value="">Cargando responsables...</option>
+                </select>
+              </div>
+            </div>
 
-<!-- NUEVO CAMPO PLANILLA -->
+            <hr />
 
-<div class="col-md-4 mb-3">
-<label class="form-label">N° Planilla</label>
-<input type="text" class="form-control" id="num_planilla" readonly>
-</div>
+            <div class="section-title"><strong>Lectura de Guías</strong></div>
 
-<div class="col-md-4 mb-3">
-<label class="form-label">Fecha creación</label>
-<input type="text" class="form-control" id="fecha_creacion" readonly>
-</div>
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <input
+                  type="text"
+                  class="form-control scan-input"
+                  id="inputGuia"
+                  placeholder="Escanee guía con lector de código de barras"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
 
-<div class="col-md-4 mb-3">
-<label class="form-label">Responsable</label>
+            <!-- CONTADOR + BOTON LIMPIAR -->
 
-<select class="form-select" id="responsable" required>
-<option value="">Cargando responsables...</option>
-</select>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  onclick="nsPlanilla.limpiarGuias()"
+                >
+                  Limpiar
+                </button>
 
-</div>
+                <span class="fw-semibold">Guías registradas</span>
+              </div>
 
-</div>
+              <span class="badge bg-dark badge-counter" id="contadorGuias">
+                0
+              </span>
+            </div>
 
-<hr>
+            <div class="table-responsive">
+              <table class="table table-sm table-striped">
+                <thead class="table-dark">
+                  <tr>
+                    <th width="60">#</th>
+                    <th>Guía</th>
+                    <th width="50">Acción</th>
+                  </tr>
+                </thead>
 
-<div class="section-title"><strong>Lectura de Guías</strong></div>
+                <tbody id="tablaGuias"></tbody>
+              </table>
+            </div>
+          </div>
 
-<div class="row">
+          <div class="card-footer d-flex gap-2">
+            <button
+              type="submit"
+              class="btn btn-dark flex-fill"
+              id="btnGuardar"
+            >
+              GRABAR PLANILLA
+            </button>
 
-<div class="col-md-12 mb-3">
-
-<input 
-type="text"
-class="form-control scan-input"
-id="inputGuia"
-placeholder="Escanee guía con lector de código de barras"
-autocomplete="off"
->
-
-</div>
-
-</div>
-
-<!-- CONTADOR + BOTON LIMPIAR -->
-
-<div class="d-flex justify-content-between align-items-center mb-2">
-
-<div class="d-flex align-items-center gap-2">
-
-<button
-type="button"
-class="btn btn-sm btn-outline-danger"
-onclick="nsPlanilla.limpiarGuias()"
->
-Limpiar
-</button>
-
-<span class="fw-semibold">Guías registradas</span>
-
-</div>
-
-<span class="badge bg-dark badge-counter" id="contadorGuias">
-0
-</span>
-
-</div>
-
-<div class="table-responsive">
-
-<table class="table table-sm table-striped">
-
-<thead class="table-dark">
-  <tr>
-    <th width="60">#</th>
-    <th>Guía</th>
-    <th width="50">Acción</th> 
-  </tr>
-</thead>
-
-<tbody id="tablaGuias"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-<div class="card-footer d-flex gap-2">
-  <button 
-  type="submit"
-  class="btn btn-dark flex-fill"
-  id="btnGuardar"
-  >
-  GRABAR PLANILLA
-  </button>
-
-  <button 
-  type="button"
-  class="btn btn-secondary"
-  id="btnNuevaPlanilla"
-  onclick="nsPlanilla.nuevaPlanilla()"
-  disabled
-  >
-  NUEVA PLANILLA
-  </button>
-</div>
-
-</div>
-</div>
-</div>
-
-</form>
-
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="btnNuevaPlanilla"
+              onclick="nsPlanilla.nuevaPlanilla()"
+              disabled
+            >
+              NUEVA PLANILLA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
 
 <script>
+  var nsPlanilla = (function () {
+    let listaGuias = [];
 
-var nsPlanilla=(function(){
-
-let listaGuias=[];
-
-/* =========================
+    /* =========================
 FECHA
 ========================= */
 
-function cargarFecha(){
+    function cargarFecha() {
+      const hoy = new Date();
 
-const hoy=new Date();
+      const fecha =
+        ("0" + hoy.getDate()).slice(-2) +
+        "/" +
+        ("0" + (hoy.getMonth() + 1)).slice(-2) +
+        "/" +
+        hoy.getFullYear();
 
-const fecha=
-("0"+hoy.getDate()).slice(-2)+"/"+
-("0"+(hoy.getMonth()+1)).slice(-2)+"/"+
-hoy.getFullYear();
+      document.getElementById("fecha_creacion").value = fecha;
+    }
 
-document.getElementById("fecha_creacion").value=fecha;
-
-}
-
-/* =========================
+    /* =========================
 RESPONSABLES
 ========================= */
 
-async function cargarResponsables(){
+    async function cargarResponsables() {
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
 
-try{
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          },
+        );
 
-const {data:{session}}=await supabaseClient.auth.getSession();
+        const result = await response.json();
 
-const response=await fetch(
-`${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${session.access_token}`
-}
-}
-);
+        const select = document.getElementById("responsable");
 
-const result=await response.json();
+        select.innerHTML = '<option value="">Seleccione responsable</option>';
 
-const select=document.getElementById("responsable");
-
-select.innerHTML='<option value="">Seleccione responsable</option>';
-
-result.data.forEach(r=>{
-
-select.innerHTML+=`
+        result.data.forEach((r) => {
+          select.innerHTML += `
 <option value="${r.id_persona}">
 ${r.nombres} ${r.apellidos}
 </option>
 `;
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
-});
-
-}catch(err){
-console.error(err);
-}
-
-}
-
-/* =========================
+    /* =========================
 LECTOR CORREGIDO
 ========================= */
-// Es mejor usar el elemento directo que el document global
-const inputGuia = document.getElementById("inputGuia");
+    // Es mejor usar el elemento directo que el document global
+    const inputGuia = document.getElementById("inputGuia");
 
-inputGuia.addEventListener("keydown", function(e) {
-    // Escuchamos Enter o Tab (común en lectores de barras)
-    if (e.key === "Enter" || e.key === "Tab") {
+    inputGuia.addEventListener("keydown", function (e) {
+      // Escuchamos Enter o Tab (común en lectores de barras)
+      if (e.key === "Enter" || e.key === "Tab") {
         e.preventDefault(); // Evitamos que el Tab salte al siguiente campo
 
         // Reemplazamos todo lo que NO sea número por un vacío ""
@@ -242,9 +221,9 @@ inputGuia.addEventListener("keydown", function(e) {
 
         // VALIDACIÓN: Verificamos si ya existe
         if (listaGuias.includes(guia)) {
-            alertSMS(`La guía ${guia} ya fue escaneada`);
-            this.value = "";
-            return;
+          alertSMS(`La guía ${guia} ya fue escaneada`);
+          this.value = "";
+          return;
         }
 
         // AGREGAR
@@ -254,18 +233,18 @@ inputGuia.addEventListener("keydown", function(e) {
         // LIMPIAR Y REENFOCAR
         this.value = "";
         this.focus();
-    }
-});
+      }
+    });
 
-/* =========================
+    /* =========================
 RENDER TABLA
 ========================= */
 
-function renderGuias(){
-    const tbody = document.getElementById("tablaGuias");
-    tbody.innerHTML = "";
+    function renderGuias() {
+      const tbody = document.getElementById("tablaGuias");
+      tbody.innerHTML = "";
 
-    listaGuias.forEach((g, i) => {
+      listaGuias.forEach((g, i) => {
         tbody.innerHTML += `
         <tr>
             <td>${i + 1}</td>
@@ -281,140 +260,128 @@ function renderGuias(){
             </td>
         </tr>
         `;
-    });
+      });
 
-    document.getElementById("contadorGuias").innerText = listaGuias.length;
-}
+      document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }
 
-function quitarGuia(index) {
-    // Eliminamos 1 elemento en la posición 'index'
-    listaGuias.splice(index, 1);
-    
-    // Volvemos a dibujar la tabla para que se refleje el cambio
-    renderGuias();
-    
-    // Devolvemos el foco al input para seguir escaneando
-    document.getElementById("inputGuia").focus();
-}
+    function quitarGuia(index) {
+      // Eliminamos 1 elemento en la posición 'index'
+      listaGuias.splice(index, 1);
 
-/* =========================
+      // Volvemos a dibujar la tabla para que se refleje el cambio
+      renderGuias();
+
+      // Devolvemos el foco al input para seguir escaneando
+      document.getElementById("inputGuia").focus();
+    }
+
+    /* =========================
 LIMPIAR GUIAS
 ========================= */
 
-function limpiarGuias(){
+    function limpiarGuias() {
+      listaGuias = [];
 
-listaGuias=[];
+      renderGuias();
 
-renderGuias();
+      document.getElementById("inputGuia").focus();
+    }
 
-document.getElementById("inputGuia").focus();
-
-}
-
-/* =========================
+    /* =========================
 GUARDAR
 ========================= */
 
-async function guardarPlanilla(event,form){
+    async function guardarPlanilla(event, form) {
+      event.preventDefault();
 
-    event.preventDefault();
+      try {
+        if (listaGuias.length === 0) {
+          throw new Error("Debe escanear al menos una guía");
+        }
 
-    try{
+        const responsable = document.getElementById("responsable").value;
 
-    if(listaGuias.length===0){
-    throw new Error("Debe escanear al menos una guía");
+        if (!responsable) {
+          throw new Error("Seleccione responsable");
+        }
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              id_responsable: responsable,
+              guias: listaGuias,
+            }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error);
+        }
+
+        /* MOSTRAR NUMERO PLANILLA */
+
+        if (result.num_planilla) {
+          document.getElementById("num_planilla").value = result.num_planilla;
+        }
+
+        /* DESHABILITAR GUARDAR */
+
+        document.getElementById("btnGuardar").disabled = true;
+
+        /* HABILITAR NUEVA PLANILLA */
+
+        document.getElementById("btnNuevaPlanilla").disabled = false;
+
+        alertSMS("Planilla registrada correctamente");
+      } catch (err) {
+        alertSMS(err.message);
+      }
+    } //Fin de guardarPlanilla
+
+    /************************************************************/
+    function nuevaPlanilla() {
+      //cargarFecha();
+
+      listaGuias = [];
+
+      renderGuias();
+
+      document.getElementById("num_planilla").value = "";
+
+      document.getElementById("responsable").value = "";
+
+      document.getElementById("inputGuia").value = "";
+
+      document.getElementById("btnGuardar").disabled = false;
+
+      document.getElementById("btnNuevaPlanilla").disabled = true;
+
+      document.getElementById("inputGuia").focus();
     }
 
-    const responsable=document.getElementById("responsable").value;
+    /************************************************************/
 
-    if(!responsable){
-    throw new Error("Seleccione responsable");
-    }
+    cargarFecha();
+    cargarResponsables();
 
-    const {data:{session}}=await supabaseClient.auth.getSession();
-
-    const response=await fetch(
-    `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla`,
-    {
-    method:"POST",
-    headers:{
-    "Content-Type":"application/json",
-    "Authorization":`Bearer ${session.access_token}`
-    },
-    body:JSON.stringify({
-    id_responsable:responsable,
-    guias:listaGuias
-    })
-    }
-    );
-
-    const result=await response.json();
-
-    if(!response.ok){
-    throw new Error(result.error);
-    }
-
-    /* MOSTRAR NUMERO PLANILLA */
-
-    if(result.num_planilla){
-      document.getElementById("num_planilla").value=result.num_planilla;
-    }
-
-    
-
-    /* DESHABILITAR GUARDAR */
-
-    document.getElementById("btnGuardar").disabled=true;
-
-    /* HABILITAR NUEVA PLANILLA */
-
-    document.getElementById("btnNuevaPlanilla").disabled=false;
-
-    alertSMS("Planilla registrada correctamente");    
-
-    }catch(err){
-
-    alertSMS(err.message);
-
-    }
-}//Fin de guardarPlanilla
-
-/************************************************************/
-function nuevaPlanilla(){
-  
-  
-  //cargarFecha();
-    
-  listaGuias=[];
-
-  renderGuias();
-
-  document.getElementById("num_planilla").value="";
-
-  document.getElementById("responsable").value="";
-
-  document.getElementById("inputGuia").value="";
-
-  document.getElementById("btnGuardar").disabled=false;
-
-  document.getElementById("btnNuevaPlanilla").disabled=true;
-
-  document.getElementById("inputGuia").focus();
-
-}
-
-/************************************************************/
-
-cargarFecha();
-cargarResponsables();
-
-return {
-    guardarPlanilla,
-    limpiarGuias,
-    nuevaPlanilla,
-    quitarGuia // <-- Agrégala aquí
-}
-
-})();
-
+    return {
+      guardarPlanilla,
+      limpiarGuias,
+      nuevaPlanilla,
+      quitarGuia, // <-- Agrégala aquí
+    };
+  })();
 </script>

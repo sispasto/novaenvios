@@ -1,167 +1,152 @@
 <style>
-
-.section-title{
-font-weight:600;
-font-size:14px;
-color:#444;
-margin-bottom:10px;
-}
-
+  .section-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 10px;
+  }
 </style>
 
 <div class="container-fluid">
-<h1>Consulta de Planillas</h1>
+  <h1>Consulta de Planillas</h1>
 
-<div class="row justify-content-center">
-<div class="col-lg-8">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+          <strong>Consulta de Planillas</strong>
+        </div>
 
-<div class="card shadow">
+        <div class="card-body">
+          <div class="section-title"><strong>Filtro</strong></div>
 
-<div class="card-header bg-dark text-white">
-<strong>Consulta de Planillas</strong>
-</div>
+          <div class="row">
+            <div class="col-md-4">
+              <label>Fecha</label>
 
-<div class="card-body">
+              <input type="date" class="form-control" id="fecha_planilla" />
+            </div>
 
-<div class="section-title"><strong>Filtro</strong></div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button
+                class="btn btn-dark w-100"
+                onclick="nsConsultaPlanillas.consultar()"
+              >
+                Consultar
+              </button>
+            </div>
+          </div>
 
-<div class="row">
+          <hr />
 
-<div class="col-md-4">
+          <div class="table-responsive">
+            <table class="table table-sm table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>N° Planilla</th>
+                  <th>Estado</th>
+                  <th>Responsable</th>
+                  <th># Guías</th>
+                  <th>Flete Contraentrega</th>
+                  <th>Flete Recaudo</th>
+                </tr>
+              </thead>
 
-<label>Fecha</label>
-
-<input 
-type="date"
-class="form-control"
-id="fecha_planilla"
->
-
-</div>
-
-<div class="col-md-2 d-flex align-items-end">
-
-<button 
-class="btn btn-dark w-100"
-onclick="nsConsultaPlanillas.consultar()"
->
-Consultar
-</button>
-
-</div>
-
-</div>
-
-<hr>
-
-<div class="table-responsive">
-
-<table class="table table-sm table-striped">
-
-<thead class="table-dark">
-  <tr>
-    <th>N° Planilla</th>
-    <th>Estado</th> 
-    <th>Responsable</th>
-    <th># Guías</th>
-    <th>Flete Contraentrega</th> 
-    <th>Flete Recaudo</th>      
-  </tr>
-</thead>
-
-<tbody id="tablaPlanillas"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-</div>
-
+              <tbody id="tablaPlanillas"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
+  var nsConsultaPlanillas = (function () {
+    async function consultar() {
+      try {
+        const fecha = document.getElementById("fecha_planilla").value;
 
-var nsConsultaPlanillas=(function(){
+        if (!fecha) {
+          throw new Error("Seleccione una fecha para consultar");
+        }
 
-async function consultar() {
-  try {
-    const fecha = document.getElementById("fecha_planilla").value;
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
 
-    if (!fecha) {
-      throw new Error("Seleccione una fecha para consultar");
-    }
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultar_planillas`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ fecha: fecha }),
+          },
+        );
 
-    const { data: { session } } = await supabaseClient.auth.getSession();
+        const result = await response.json();
 
-    const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/novaenvios_consultar_planillas`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({ fecha: fecha })
+        if (!response.ok) {
+          throw new Error(result.error || "Error en la consulta");
+        }
+
+        // VALIDACIÓN CLAVE:  Si data está vacío o no hay resultados
+        if (!result.data || result.data.length === 0) {
+          // Limpiamos la tabla para que no se vea información vieja
+          renderTabla([]);
+          // Notificamos al usuario
+          alertSMS("No se encontraron planillas para la fecha seleccionada.");
+          return; // Detenemos la ejecución
+        }
+
+        // Si llegamos aquí, sí hay datos
+        renderTabla(result.data);
+      } catch (err) {
+        console.error("Error en consulta:", err);
+        alertSMS(err.message);
       }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || "Error en la consulta");
     }
 
-    // VALIDACIÓN CLAVE: Si data está vacío o no hay resultados
-    if (!result.data || result.data.length === 0) {
-      // Limpiamos la tabla para que no se vea información vieja
-      renderTabla([]); 
-      // Notificamos al usuario
-      alertSMS("No se encontraron planillas para la fecha seleccionada.");
-      return; // Detenemos la ejecución
-    }
-
-    // Si llegamos aquí, sí hay datos
-    renderTabla(result.data);
-
-  } catch (err) {
-    console.error("Error en consulta:", err);
-    alertSMS(err.message);
-  }
-}
-
-/* =========================
+    /* =========================
 RENDER TABLA
 ========================= */
 
-/* =========================
+    /* =========================
 RENDER TABLA
 ========================= */
-function renderTabla(data) {
-    const tbody = document.getElementById("tablaPlanillas");
-    tbody.innerHTML = "";
+    function renderTabla(data) {
+      const tbody = document.getElementById("tablaPlanillas");
+      tbody.innerHTML = "";
 
-    if (!data || data.length === 0) {
+      if (!data || data.length === 0) {
         // Cambiamos colspan="4" por colspan="6"
         tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No hay datos disponibles</td></tr>`;
         return;
-    }
+      }
 
-    data.forEach(p => {
-      const badgeColor = p.estado === 'ABIERTA' ? 'bg-success' : 'bg-secondary';
-      
-      // Formateo de moneda para que se vea profesional 💰
-      const fleteCE = (p.flete_contraentrega || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
-      const fleteRE = (p.flete_recaudo || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+      data.forEach((p) => {
+        const badgeColor =
+          p.estado === "ABIERTA" ? "bg-success" : "bg-secondary";
 
-      tbody.innerHTML += `
+        // Formateo de moneda para que se vea profesional 💰
+        const fleteCE = (p.flete_contraentrega || 0).toLocaleString("es-CO", {
+          style: "currency",
+          currency: "COP",
+          maximumFractionDigits: 0,
+        });
+        const fleteRE = (p.flete_recaudo || 0).toLocaleString("es-CO", {
+          style: "currency",
+          currency: "COP",
+          maximumFractionDigits: 0,
+        });
+
+        tbody.innerHTML += `
       <tr>
           <td><strong>${p.num_planilla}</strong></td>
           <td>
-              <span class="badge ${badgeColor}">${p.estado || 'N/A'}</span>
+              <span class="badge ${badgeColor}">${p.estado || "N/A"}</span>
           </td>
           <td>${p.responsable}</td>
           <td>
@@ -169,14 +154,11 @@ function renderTabla(data) {
           </td>
           <td class="text-end text-primary fw-bold">${fleteCE}</td> <td class="text-end text-success fw-bold">${fleteRE}</td> </tr>
       `;
-  });
-    
-}
+      });
+    }
 
-return{
-consultar
-}
-
-})();
-
+    return {
+      consultar,
+    };
+  })();
 </script>

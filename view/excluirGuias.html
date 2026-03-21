@@ -1,196 +1,242 @@
 <div class="container-fluid">
-    <h1></h1>
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow border-0">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0 fw-bold">Sacar Guías de Planilla (Devolución)</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">1. Número de Planilla</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="num_planilla_sacar" placeholder="Ingrese planilla">
-                                <button class="btn btn-dark" type="button" onclick="nsSacarGuias.validarPlanilla()">
-                                    Validar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Fecha Creación</label>
-                            <input type="text" class="form-control bg-light" id="fecha_sacar" readonly>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Responsable</label>
-                            <input type="text" class="form-control bg-light" id="resp_sacar" readonly>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <div id="seccionEscaneo" style="display: none;">
-                        <div class="section-title"><strong>2. Escanear guías para eliminar</strong></div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text bg-danger text-white"><i class="fas fa-barcode"></i></span>
-                            <input type="text" class="form-control form-control-lg scan-input" id="input_scan_sacar" placeholder="Pistolee la guía aquí...">
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover">
-                                <thead class="table-danger">
-                                    <tr>
-                                        <th>Guía a Eliminar</th>
-                                        <th width="50"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaSacar"></tbody>
-                            </table>
-                        </div>
-
-                        <button class="btn btn-dark w-100 fw-bold" onclick="nsSacarGuias.procesarEliminacion()">
-                            CONFIRMAR Y ELIMINAR GUIAS
-                        </button>
-                    </div>
-                </div>
-            </div>
+  <h1></h1>
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0 fw-bold">Sacar Guías de Planilla (Devolución)</h5>
         </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold">1. Número de Planilla</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  class="form-control"
+                  id="num_planilla_sacar"
+                  placeholder="Ingrese planilla"
+                />
+                <button
+                  class="btn btn-dark"
+                  type="button"
+                  onclick="nsSacarGuias.validarPlanilla()"
+                >
+                  Validar
+                </button>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Fecha Creación</label>
+              <input
+                type="text"
+                class="form-control bg-light"
+                id="fecha_sacar"
+                readonly
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Responsable</label>
+              <input
+                type="text"
+                class="form-control bg-light"
+                id="resp_sacar"
+                readonly
+              />
+            </div>
+          </div>
+
+          <hr />
+
+          <div id="seccionEscaneo" style="display: none">
+            <div class="section-title">
+              <strong>2. Escanear guías para eliminar</strong>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-danger text-white"
+                ><i class="fas fa-barcode"></i
+              ></span>
+              <input
+                type="text"
+                class="form-control form-control-lg scan-input"
+                id="input_scan_sacar"
+                placeholder="Pistolee la guía aquí..."
+              />
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead class="table-danger">
+                  <tr>
+                    <th>Guía a Eliminar</th>
+                    <th width="50"></th>
+                  </tr>
+                </thead>
+                <tbody id="tablaSacar"></tbody>
+              </table>
+            </div>
+
+            <button
+              class="btn btn-dark w-100 fw-bold"
+              onclick="nsSacarGuias.procesarEliminacion()"
+            >
+              CONFIRMAR Y ELIMINAR GUIAS
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
-var nsSacarGuias = (function() {
-    
+  var nsSacarGuias = (function () {
     let guiasParaEliminar = [];
     let guiasOriginales = [];
 
     // Listener para el input de escaneo
-    document.getElementById("input_scan_sacar").addEventListener("keydown", function(e) {
+    document
+      .getElementById("input_scan_sacar")
+      .addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
-            e.preventDefault();
-            const guia = e.target.value.trim();
-            if (guia) agregarALista(guia);
-            e.target.value = "";
+          e.preventDefault();
+          const guia = e.target.value.trim();
+          if (guia) agregarALista(guia);
+          e.target.value = "";
         }
-    });
+      });
 
     async function validarPlanilla() {
-        try {
-            const num = document.getElementById("num_planilla_sacar").value;
-            if (!num) throw new Error("Ingrese número de planilla");
+      try {
+        const num = document.getElementById("num_planilla_sacar").value;
+        if (!num) throw new Error("Ingrese número de planilla");
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            
-            // Reutilizamos tu lógica de validación
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({ num_planilla: parseInt(num) })
-            });
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
 
-            const result = await response.json();
-            if (!result.ok) throw new Error(result.error);
+        // Reutilizamos tu lógica de validación
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ num_planilla: parseInt(num) }),
+          },
+        );
 
-            const planilla = result.data;
+        const result = await response.json();
+        if (!result.ok) throw new Error(result.error);
 
-            // VALIDAR ESTADO ABIERTO
-            if (planilla.estado !== 'AB') {
-                throw new Error(`La planilla está ${planilla.estado}. Solo se pueden sacar guías de planillas ABIERTAS.`);
-            }
+        const planilla = result.data;
 
-            // Llenar encabezado
-            document.getElementById("fecha_sacar").value = new Date(planilla.fecha_planilla).toLocaleDateString();
-            document.getElementById("resp_sacar").value = planilla.nombre_responsable;
-            
-            // Guardar guías que pertenecen a la planilla para validar que no pistoleen guías de otros
-            guiasOriginales = planilla.guias; 
-
-            // Mostrar sección de escaneo
-            document.getElementById("seccionEscaneo").style.display = "block";
-            document.getElementById("input_scan_sacar").focus();
-
-        } catch (err) {
-            alertSMS(err.message);
+        // VALIDAR ESTADO ABIERTO
+        if (planilla.estado !== "AB") {
+          throw new Error(
+            `La planilla está ${planilla.estado}. Solo se pueden sacar guías de planillas ABIERTAS.`,
+          );
         }
+
+        // Llenar encabezado
+        document.getElementById("fecha_sacar").value = new Date(
+          planilla.fecha_planilla,
+        ).toLocaleDateString();
+        document.getElementById("resp_sacar").value =
+          planilla.nombre_responsable;
+
+        // Guardar guías que pertenecen a la planilla para validar que no pistoleen guías de otros
+        guiasOriginales = planilla.guias;
+
+        // Mostrar sección de escaneo
+        document.getElementById("seccionEscaneo").style.display = "block";
+        document.getElementById("input_scan_sacar").focus();
+      } catch (err) {
+        alertSMS(err.message);
+      }
     }
 
     function agregarALista(guia) {
-        // Validar que la guía pertenezca a la planilla
-        if (!guiasOriginales.includes(guia)) {
-            alertSMS("Error: La guía " + guia + " no pertenece a esta planilla.");
-            return;
-        }
+      // Validar que la guía pertenezca a la planilla
+      if (!guiasOriginales.includes(guia)) {
+        alertSMS("Error: La guía " + guia + " no pertenece a esta planilla.");
+        return;
+      }
 
-        if (guiasParaEliminar.includes(guia)) {
-            alertSMS("La guía ya está en la lista para eliminar");
-            return;
-        }
+      if (guiasParaEliminar.includes(guia)) {
+        alertSMS("La guía ya está en la lista para eliminar");
+        return;
+      }
 
-        guiasParaEliminar.push(guia);
-        renderTabla();
+      guiasParaEliminar.push(guia);
+      renderTabla();
     }
 
     function quitarDeLista(index) {
-        guiasParaEliminar.splice(index, 1);
-        renderTabla();
+      guiasParaEliminar.splice(index, 1);
+      renderTabla();
     }
 
     function renderTabla() {
-        const tbody = document.getElementById("tablaSacar");
-        tbody.innerHTML = "";
-        guiasParaEliminar.forEach((g, i) => {
-            tbody.innerHTML += `
+      const tbody = document.getElementById("tablaSacar");
+      tbody.innerHTML = "";
+      guiasParaEliminar.forEach((g, i) => {
+        tbody.innerHTML += `
                 <tr>
                     <td class="fw-bold">${g}</td>
                     <td><button class="btn btn-sm btn-outline-danger" onclick="nsSacarGuias.quitarDeLista(${i})">×</button></td>
                 </tr>`;
-        });
+      });
     }
 
     async function procesarEliminacion() {
-        try {
-            if (guiasParaEliminar.length === 0) throw new Error("No hay guías para eliminar");
+      try {
+        if (guiasParaEliminar.length === 0)
+          throw new Error("No hay guías para eliminar");
 
-            const num = document.getElementById("num_planilla_sacar").value;
-            const { data: { session } } = await supabaseClient.auth.getSession();
+        const num = document.getElementById("num_planilla_sacar").value;
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
 
-            // Llamamos a una nueva Edge Function que crearemos abajo
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/novaenvios_excluir_guias`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({
-                    num_planilla: parseInt(num),
-                    guias: guiasParaEliminar
-                })
-            });
+        // Llamamos a una nueva Edge Function que crearemos abajo
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_excluir_guias`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              num_planilla: parseInt(num),
+              guias: guiasParaEliminar,
+            }),
+          },
+        );
 
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error);
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
 
-            alertSMS("Guías eliminadas de la planilla correctamente");
-            
-            // Resetear todo
-            guiasParaEliminar = [];
-            document.getElementById("seccionEscaneo").style.display = "none";
-            document.getElementById("num_planilla_sacar").value = "";
-            document.getElementById("fecha_sacar").value = "";
-            document.getElementById("resp_sacar").value = "";
+        alertSMS("Guías eliminadas de la planilla correctamente");
 
-        } catch (err) {
-            alertSMS(err.message);
-        }
+        // Resetear todo
+        guiasParaEliminar = [];
+        document.getElementById("seccionEscaneo").style.display = "none";
+        document.getElementById("num_planilla_sacar").value = "";
+        document.getElementById("fecha_sacar").value = "";
+        document.getElementById("resp_sacar").value = "";
+      } catch (err) {
+        alertSMS(err.message);
+      }
     }
 
     return {
-        validarPlanilla,
-        quitarDeLista,
-        procesarEliminacion
+      validarPlanilla,
+      quitarDeLista,
+      procesarEliminacion,
     };
-})();
+  })();
 </script>

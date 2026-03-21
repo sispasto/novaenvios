@@ -211,7 +211,7 @@ async function buscarPlanilla(num_planilla) {
 
         // Si la Edge Function nos dijo que ok: false (planilla no existe)
         if (!result.ok) {
-            alertSMS(result.error); // Mostrará "La planilla no existe o no está disponible"
+            alertSMS(result.error); // Mostrará "La planilla no existe o no está disponible "
             limpiarCampos(true);
             return;
         }

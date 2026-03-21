@@ -1,10 +1,9 @@
-import './bienvenida.js';
-import'./vmodal.js';
-import'./acercade.js';
-import'./crearPlanilla.js';
-import'./consultarPersona.js';
-import'./anularPlanilla.js';
-import'./consultarPlanillas.js';
-import'./cerrarPlanilla.js';
-import'./excluirGuias.js';
-
+import "./bienvenida.js";
+import "./vmodal.js";
+import "./acercade.js";
+import "./crearPlanilla.js";
+import "./consultarPersona.js";
+import "./anularPlanilla.js";
+import "./consultarPlanillas.js";
+import "./cerrarPlanilla.js";
+import "./excluirGuias.js";
