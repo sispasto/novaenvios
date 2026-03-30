@@ -124,8 +124,8 @@ function alertSMS(texto) {
 function actualizarTextoBoton() {
   const btn = document.getElementById("btn-update-app");
 
-  if (btn && nuevaVersion) {
-    btn.innerText = `Actualizar a versión ${nuevaVersion}`;
+  if (btn && versionApp) {
+    btn.innerText = `Actualizar a versión ${versionApp}`;
   }
 }
 
@@ -161,7 +161,6 @@ function mostrarBotonActualizacion(reg) {
 
 document.addEventListener("DOMContentLoaded", async function () {
   /************Para forzar actualizacion de PWA**************/
-  let nuevaVersion = null;
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
@@ -201,7 +200,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (event.data.type === "VERSION") {
         console.log("Versión recibida:", event.data.version);
 
-        nuevaVersion = event.data.version;
+        versionApp = event.data.version;
 
         actualizarTextoBoton();
       }
