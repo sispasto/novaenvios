@@ -123,7 +123,6 @@ function alertSMS(texto) {
 
 function actualizarTextoBoton() {
   const btn = document.getElementById("btn-update-app");
-
   if (btn && versionApp) {
     btn.innerText = `Actualizar a versión ${versionApp}`;
   }
@@ -161,58 +160,48 @@ function mostrarBotonActualizacion(reg) {
 
 document.addEventListener("DOMContentLoaded", async function () {
   /************Para forzar actualizacion de PWA**************/
-
+  // Registrar SW y manejar versión
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
       .register("/novaenvios/service-worker.js", { scope: "/novaenvios/" })
       .then((reg) => {
-        // 🔥 Detectar nueva versión
+        // Detectar nueva versión
         reg.onupdatefound = () => {
           const newSW = reg.installing;
-
           newSW.onstatechange = () => {
             if (
               newSW.state === "installed" &&
               navigator.serviceWorker.controller
             ) {
               console.log("Nueva versión disponible");
-
-              // 👇 Pedir versión al nuevo SW
               newSW.postMessage("GET_VERSION");
-
-              // 👇 Guardar referencia
               mostrarBotonActualizacion(reg);
             }
           };
         };
 
-        // 🔥 Pedir versión actual al cargar
+        // Pedir versión actual al cargar
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage("GET_VERSION");
         }
       })
-      .catch((error) => {
-        console.error("Error al registrar el Service Worker:", error);
-      });
+      .catch((error) => console.error("Error al registrar el SW:", error));
 
-    // 🔥 Recibir versión desde SW
+    // Recibir versión desde SW
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data.type === "VERSION") {
-        console.log("Versión recibida:", event.data.version);
-
         versionApp = event.data.version;
 
+        // Actualizar solo el botón
         actualizarTextoBoton();
-        /*****************************************/
-        // 🔥 ACTUALIZAR SOLO EL LABEL (SIN RECARGAR COMPONENTE)
+
+        // Actualizar el label dentro del componente
         const label = document.getElementById("version-label");
-        if (label) {
-          label.textContent = `NovaEnvios v${versionApp}`;
-        }
-        /*****************************************/
+        if (label) label.textContent = `NovaEnvios v${versionApp}`;
       }
     });
 
+    // Recargar página cuando SW toma control
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
     });

@@ -1,11 +1,10 @@
-const APP_VERSION = "2.0";
+const APP_VERSION = "1.1";
 const CACHE_NAME = `app-cache-v${APP_VERSION}`;
 
 self.addEventListener("install", (e) => {
   console.log("SW instalado - versión", APP_VERSION);
 
-  self.skipWaiting();
-
+  // NO usar skipWaiting aquí para permitir que quede en estado waiting
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
@@ -37,14 +36,12 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  // ✅ SOLO GET (evita errores)
   if (e.request.method !== "GET") return;
 
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       const fetchPromise = fetch(e.request)
         .then((networkRes) => {
-          // ✅ Validar respuesta antes de cachear
           if (
             !networkRes ||
             networkRes.status !== 200 ||
@@ -52,14 +49,10 @@ self.addEventListener("fetch", (e) => {
           ) {
             return networkRes;
           }
-
-          // 🔥 CLONAR ANTES de usar
           const responseClone = networkRes.clone();
-
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(e.request, responseClone);
           });
-
           return networkRes;
         })
         .catch(() => cachedResponse); // fallback offline
