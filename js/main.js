@@ -51,11 +51,13 @@ function anularPlanilla() {
 function getHome() {
   let main = document.getElementById("App");
   removeALLChilds(main);
+  // 🔥 SIEMPRE leer la versión más reciente
+  versionApp = localStorage.getItem("app_version") || "";
   const componente = document.createElement("bienvenida-component");
-  componente.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
-  componente.versionApp = versionApp; // <-- Aquí se pasa la versión antes de renderizar
+  componente.setAttribute("container", "#App");
+  componente.versionApp = versionApp;
+
   main.appendChild(componente);
-  /******************************************************** */
 }
 
 function acercade() {
@@ -167,6 +169,11 @@ function mostrarBotonActualizacion() {
 
   btn.onclick = () => {
     if (swRegistration && swRegistration.waiting) {
+      // 🔥 AQUÍ recién aceptas la nueva versión
+      if (newVersionAvailable) {
+        localStorage.setItem("app_version", newVersionAvailable);
+      }
+
       swRegistration.waiting.postMessage({ action: "SKIP_WAITING" });
     }
   };
@@ -228,17 +235,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     // 🔥 recibir versión
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data.type === "VERSION") {
-        versionApp = event.data.version;
+        if (swRegistration && swRegistration.waiting) {
+          // 🔥 ESTA ES LA NUEVA (NO aplicar todavía)
+          newVersionAvailable = event.data.version;
 
-        // 🔥 guardar en localStorage
-        localStorage.setItem("app_version", versionApp);
+          console.log("Nueva versión detectada:", newVersionAvailable);
 
-        const label = document.getElementById("version-label");
-        if (label) label.textContent = `NovaEnvios v${versionApp}`;
-
-        const btn = document.getElementById("btn-update-app");
-        if (btn) {
-          btn.innerText = `Actualizar a versión ${versionApp}`;
+          mostrarBotonActualizacion();
+        } else {
+          // 🔥 ESTA ES LA ACTUAL
+          versionApp = event.data.version;
+          localStorage.setItem("app_version", versionApp);
         }
       }
     });

@@ -50,7 +50,7 @@ class BienvenidaComponent extends HTMLElement {
       if (this.versionApp) {
         const versionLabel = this.querySelector("#version-label");
         if (versionLabel) {
-          versionLabel.textContent = ""; //`NovaEnvios v${this.versionApp}`; la version se acftualiza desde el main
+          versionLabel.textContent = `NovaEnvios v${this.versionApp}`; //la version se actualiza desde el main mas preciso desde el swworker
         }
       }
       // Limpiar scripts anteriores en el contenedor
