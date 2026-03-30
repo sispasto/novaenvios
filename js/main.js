@@ -195,7 +195,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         // 🔥 iniciar revisión automática
         iniciarAutoUpdateSW();
 
-        // 🔥 revisar si ya hay uno en waiting
+        // 🔥 SIEMPRE obtener versión (incluye primera carga)
+        navigator.serviceWorker.ready.then((regReady) => {
+          if (regReady.active) {
+            regReady.active.postMessage("GET_VERSION");
+          }
+        });
+
+        // 🔥 si ya hay una versión en espera
         if (reg.waiting && navigator.serviceWorker.controller) {
           console.log("SW ya estaba esperando");
           mostrarBotonActualizacion();
@@ -208,14 +215,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
           newSW.onstatechange = () => {
             if (newSW.state === "installed") {
+              // Solo si ya hay una app corriendo (no primera instalación)
               if (navigator.serviceWorker.controller) {
                 console.log("Nueva versión disponible");
 
-                // 🔥 pedir versión al NUEVO SW
+                // 🔥 pedir versión del NUEVO SW
                 newSW.postMessage("GET_VERSION");
-
-                // guardar referencia temporal
-                reg._newSW = newSW;
 
                 if (reg.waiting) {
                   mostrarBotonActualizacion();
@@ -224,11 +229,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
           };
         };
-
-        // pedir versión actual
-        if (navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage("GET_VERSION");
-        }
       })
       .catch((error) => console.error("Error al registrar el SW:", error));
 
@@ -236,26 +236,32 @@ document.addEventListener("DOMContentLoaded", async function () {
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data.type === "VERSION") {
         if (swRegistration && swRegistration.waiting) {
-          // 🔥 ESTA ES LA NUEVA (NO aplicar todavía)
+          // 🔥 nueva versión (NO aplicar aún)
           newVersionAvailable = event.data.version;
 
           console.log("Nueva versión detectada:", newVersionAvailable);
 
           mostrarBotonActualizacion();
         } else {
-          // 🔥 ESTA ES LA ACTUAL
+          // 🔥 versión actual activa
           versionApp = event.data.version;
           localStorage.setItem("app_version", versionApp);
+
+          // 🔥 actualizar UI si estás en home
+          const label = document.getElementById("version-label");
+          if (label) {
+            label.textContent = `NovaEnvios v${versionApp}`;
+          }
         }
       }
     });
 
-    // 🔥 recargar SOLO cuando usuario acepta
+    // 🔥 recargar SOLO cuando usuario acepta actualización
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
     });
 
-    // 🔥 revisar al volver a la pestaña
+    // 🔥 revisar actualización al volver a la pestaña
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
         if (swRegistration) {
