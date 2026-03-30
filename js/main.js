@@ -203,6 +203,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         versionApp = event.data.version;
 
         actualizarTextoBoton();
+        /*****************************************/
+        // 🔥 ACTUALIZAR SOLO EL LABEL (SIN RECARGAR COMPONENTE)
+        const label = document.getElementById("version-label");
+        if (label) {
+          label.textContent = `NovaEnvios v${versionApp}`;
+        }
+        /*****************************************/
       }
     });
 
