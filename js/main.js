@@ -137,7 +137,7 @@ function iniciarAutoUpdateSW() {
       //console.log("🔄 Buscando actualización del SW...");
       swRegistration.update();
     }
-  }, 1800000); // cada 1 minuto
+  }, 1800000); // detecta versiones cada 30 minutos (1800000 ms)
 }
 
 /* =========================
