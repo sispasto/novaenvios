@@ -134,7 +134,7 @@ function iniciarAutoUpdateSW() {
 
   intervalSW = setInterval(() => {
     if (swRegistration) {
-      console.log("🔄 Buscando actualización del SW...");
+      //console.log("🔄 Buscando actualización del SW...");
       swRegistration.update();
     }
   }, 60000); // cada 1 minuto
@@ -265,7 +265,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
         if (swRegistration) {
-          console.log("👀 Usuario volvió → revisando SW...");
+          //console.log("👀 Usuario volvió → revisando SW...");
           swRegistration.update();
         }
       }

@@ -2,7 +2,7 @@ const APP_VERSION = "1.6";
 const CACHE_NAME = `app-cache-v${APP_VERSION}`;
 
 self.addEventListener("install", (e) => {
-  console.log("SW instalado - versión", APP_VERSION);
+  //console.log("SW instalado - versión", APP_VERSION);
 
   // ⚠️ NO usar skipWaiting (modo controlado)
   e.waitUntil(
@@ -28,7 +28,7 @@ self.addEventListener("activate", (e) => {
         names
           .filter((name) => name !== CACHE_NAME)
           .map((name) => {
-            console.log("Eliminando cache viejo:", name);
+            //console.log("Eliminando cache viejo:", name);
             return caches.delete(name);
           }),
       );
@@ -79,7 +79,7 @@ self.addEventListener("message", (event) => {
 
   // 🔥 activar manualmente cuando el usuario haga clic
   if (event.data?.action === "SKIP_WAITING") {
-    console.log("Activando nueva versión manualmente...");
+    //console.log("Activando nueva versión manualmente...");
     self.skipWaiting();
   }
 });
