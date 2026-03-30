@@ -3,6 +3,7 @@ var arrayGlobal = []; //array de promotores
 var folderPathIMG = ""; //variable que guarda id de carpeta donde se guardan las imagenes
 var versionApp = ""; //La version se debe cambiar en service-worker.js y main.js
 let swRegistration = null; // 🔥 referencia global
+let intervalSW = null;
 
 function crearPlanilla() {
   let main = document.getElementById("App");
@@ -122,6 +123,23 @@ function alertSMS(texto) {
   toast.show();
 }
 
+/* =========================
+   AUTO UPDATE SW
+========================= */
+function iniciarAutoUpdateSW() {
+  if (intervalSW) return;
+
+  intervalSW = setInterval(() => {
+    if (swRegistration) {
+      console.log("🔄 Buscando actualización del SW...");
+      swRegistration.update();
+    }
+  }, 60000); // cada 1 minuto
+}
+
+/* =========================
+   BOTÓN ACTUALIZACIÓN
+========================= */
 function mostrarBotonActualizacion() {
   let btn = document.getElementById("btn-update-app");
 
@@ -153,6 +171,9 @@ function mostrarBotonActualizacion() {
   };
 }
 
+/* =========================
+   INIT
+========================= */
 document.addEventListener("DOMContentLoaded", async function () {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
@@ -161,28 +182,28 @@ document.addEventListener("DOMContentLoaded", async function () {
         updateViaCache: "none",
       })
       .then((reg) => {
-        swRegistration = reg; // 🔥 guardar referencia
+        swRegistration = reg;
 
-        // 🔥 SI YA HAY UNO EN WAITING (caso reload)
-        if (reg.waiting) {
+        // 🔥 iniciar revisión automática
+        iniciarAutoUpdateSW();
+
+        // 🔥 revisar si ya hay uno en waiting
+        if (reg.waiting && navigator.serviceWorker.controller) {
           console.log("SW ya estaba esperando");
           mostrarBotonActualizacion();
         }
 
+        // 🔥 detectar nueva versión
         reg.onupdatefound = () => {
           const newSW = reg.installing;
-
           if (!newSW) return;
 
           newSW.onstatechange = () => {
-            if (
-              newSW.state === "installed" &&
-              navigator.serviceWorker.controller
-            ) {
-              console.log("Nueva versión disponible");
-
-              // 🔥 importante: ahora usamos reg.waiting
-              mostrarBotonActualizacion();
+            if (newSW.state === "installed") {
+              if (reg.waiting && navigator.serviceWorker.controller) {
+                console.log("Nueva versión disponible");
+                mostrarBotonActualizacion();
+              }
             }
           };
         };
@@ -194,16 +215,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       })
       .catch((error) => console.error("Error al registrar el SW:", error));
 
-    // recibir versión
+    // 🔥 recibir versión
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data.type === "VERSION") {
         versionApp = event.data.version;
 
-        // actualizar label
         const label = document.getElementById("version-label");
         if (label) label.textContent = `NovaEnvios v${versionApp}`;
 
-        // 🔥 actualizar texto botón si ya existe
         const btn = document.getElementById("btn-update-app");
         if (btn) {
           btn.innerText = `Actualizar a versión ${versionApp}`;
@@ -211,9 +230,19 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     });
 
-    // 🔥 SOLO recarga cuando usuario acepta
+    // 🔥 recargar SOLO cuando usuario acepta
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
+    });
+
+    // 🔥 revisar al volver a la pestaña
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        if (swRegistration) {
+          console.log("👀 Usuario volvió → revisando SW...");
+          swRegistration.update();
+        }
+      }
     });
   }
 
