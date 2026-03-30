@@ -4,6 +4,7 @@ var folderPathIMG = ""; //variable que guarda id de carpeta donde se guardan las
 var versionApp = ""; //La version se debe cambiar en service-worker.js y main.js
 let swRegistration = null; // 🔥 referencia global
 let intervalSW = null;
+let newVersionAvailable = null;
 
 function crearPlanilla() {
   let main = document.getElementById("App");
@@ -160,8 +161,8 @@ function mostrarBotonActualizacion() {
     document.body.appendChild(btn);
   }
 
-  btn.innerText = versionApp
-    ? `Actualizar a versión ${versionApp}`
+  btn.innerText = newVersionAvailable
+    ? `Actualizar a versión ${newVersionAvailable}`
     : "Nueva versión disponible";
 
   btn.onclick = () => {
@@ -200,9 +201,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 
           newSW.onstatechange = () => {
             if (newSW.state === "installed") {
-              if (reg.waiting && navigator.serviceWorker.controller) {
+              if (navigator.serviceWorker.controller) {
                 console.log("Nueva versión disponible");
-                mostrarBotonActualizacion();
+
+                // 🔥 pedir versión al NUEVO SW
+                newSW.postMessage("GET_VERSION");
+
+                // guardar referencia temporal
+                reg._newSW = newSW;
+
+                if (reg.waiting) {
+                  mostrarBotonActualizacion();
+                }
               }
             }
           };
@@ -219,6 +229,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data.type === "VERSION") {
         versionApp = event.data.version;
+
+        // 🔥 guardar en localStorage
+        localStorage.setItem("app_version", versionApp);
 
         const label = document.getElementById("version-label");
         if (label) label.textContent = `NovaEnvios v${versionApp}`;
