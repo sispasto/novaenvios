@@ -2,6 +2,7 @@ const templateCache = {};
 var arrayGlobal = []; //array de promotores
 var folderPathIMG = ""; //variable que guarda id de carpeta donde se guardan las imagenes
 var versionApp = ""; //La version se debe cambiar en service-worker.js y main.js
+let swRegistration = null; // 🔥 referencia global
 
 function crearPlanilla() {
   let main = document.getElementById("App");
@@ -121,14 +122,7 @@ function alertSMS(texto) {
   toast.show();
 }
 
-function actualizarTextoBoton() {
-  const btn = document.getElementById("btn-update-app");
-  if (btn && versionApp) {
-    btn.innerText = `Actualizar a versión ${versionApp}`;
-  }
-}
-
-function mostrarBotonActualizacion(reg) {
+function mostrarBotonActualizacion() {
   let btn = document.getElementById("btn-update-app");
 
   if (!btn) {
@@ -148,65 +142,81 @@ function mostrarBotonActualizacion(reg) {
     document.body.appendChild(btn);
   }
 
-  // texto inicial
-  btn.innerText = "Nueva versión disponible";
+  btn.innerText = versionApp
+    ? `Actualizar a versión ${versionApp}`
+    : "Nueva versión disponible";
 
   btn.onclick = () => {
-    if (reg.waiting) {
-      reg.waiting.postMessage({ action: "SKIP_WAITING" });
+    if (swRegistration && swRegistration.waiting) {
+      swRegistration.waiting.postMessage({ action: "SKIP_WAITING" });
     }
   };
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
-  /************Para forzar actualizacion de PWA**************/
-  // Registrar SW y manejar versión
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-      .register("/novaenvios/service-worker.js", { scope: "/novaenvios/" })
+      .register("/novaenvios/service-worker.js", {
+        scope: "/novaenvios/",
+        updateViaCache: "none",
+      })
       .then((reg) => {
-        // Detectar nueva versión
+        swRegistration = reg; // 🔥 guardar referencia
+
+        // 🔥 SI YA HAY UNO EN WAITING (caso reload)
+        if (reg.waiting) {
+          console.log("SW ya estaba esperando");
+          mostrarBotonActualizacion();
+        }
+
         reg.onupdatefound = () => {
           const newSW = reg.installing;
+
+          if (!newSW) return;
+
           newSW.onstatechange = () => {
             if (
               newSW.state === "installed" &&
               navigator.serviceWorker.controller
             ) {
               console.log("Nueva versión disponible");
-              newSW.postMessage("GET_VERSION");
-              mostrarBotonActualizacion(reg);
+
+              // 🔥 importante: ahora usamos reg.waiting
+              mostrarBotonActualizacion();
             }
           };
         };
 
-        // Pedir versión actual al cargar
+        // pedir versión actual
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage("GET_VERSION");
         }
       })
       .catch((error) => console.error("Error al registrar el SW:", error));
 
-    // Recibir versión desde SW
+    // recibir versión
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data.type === "VERSION") {
         versionApp = event.data.version;
 
-        // Actualizar solo el botón
-        actualizarTextoBoton();
-
-        // Actualizar el label dentro del componente
+        // actualizar label
         const label = document.getElementById("version-label");
         if (label) label.textContent = `NovaEnvios v${versionApp}`;
+
+        // 🔥 actualizar texto botón si ya existe
+        const btn = document.getElementById("btn-update-app");
+        if (btn) {
+          btn.innerText = `Actualizar a versión ${versionApp}`;
+        }
       }
     });
 
-    // Recargar página cuando SW toma control
+    // 🔥 SOLO recarga cuando usuario acepta
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
     });
   }
-  /************Para forzar actualizacion de PWA**************/
+
   setNavbarCollapse();
   getHome();
 });

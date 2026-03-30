@@ -4,7 +4,7 @@ const CACHE_NAME = `app-cache-v${APP_VERSION}`;
 self.addEventListener("install", (e) => {
   console.log("SW instalado - versión", APP_VERSION);
 
-  // NO usar skipWaiting aquí para permitir que quede en estado waiting
+  // ⚠️ NO usar skipWaiting (modo controlado)
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
@@ -27,7 +27,10 @@ self.addEventListener("activate", (e) => {
       return Promise.all(
         names
           .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name)),
+          .map((name) => {
+            console.log("Eliminando cache viejo:", name);
+            return caches.delete(name);
+          }),
       );
     }),
   );
@@ -49,13 +52,16 @@ self.addEventListener("fetch", (e) => {
           ) {
             return networkRes;
           }
+
           const responseClone = networkRes.clone();
+
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(e.request, responseClone);
           });
+
           return networkRes;
         })
-        .catch(() => cachedResponse); // fallback offline
+        .catch(() => cachedResponse);
 
       return cachedResponse || fetchPromise;
     }),
@@ -63,6 +69,7 @@ self.addEventListener("fetch", (e) => {
 });
 
 self.addEventListener("message", (event) => {
+  // 🔥 devolver versión
   if (event.data === "GET_VERSION") {
     event.source.postMessage({
       type: "VERSION",
@@ -70,7 +77,9 @@ self.addEventListener("message", (event) => {
     });
   }
 
+  // 🔥 activar manualmente cuando el usuario haga clic
   if (event.data?.action === "SKIP_WAITING") {
+    console.log("Activando nueva versión manualmente...");
     self.skipWaiting();
   }
 });
