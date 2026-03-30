@@ -37,21 +37,46 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  e.respondWith(
-    caches.match(e.request).then((response) => {
-      const fetchPromise = fetch(e.request).then((networkRes) => {
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(e.request, networkRes.clone());
-        });
-        return networkRes;
-      });
+  // ✅ SOLO GET (evita errores)
+  if (e.request.method !== "GET") return;
 
-      return response || fetchPromise;
+  e.respondWith(
+    caches.match(e.request).then((cachedResponse) => {
+      const fetchPromise = fetch(e.request)
+        .then((networkRes) => {
+          // ✅ Validar respuesta antes de cachear
+          if (
+            !networkRes ||
+            networkRes.status !== 200 ||
+            networkRes.type === "opaque"
+          ) {
+            return networkRes;
+          }
+
+          // 🔥 CLONAR ANTES de usar
+          const responseClone = networkRes.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseClone);
+          });
+
+          return networkRes;
+        })
+        .catch(() => cachedResponse); // fallback offline
+
+      return cachedResponse || fetchPromise;
     }),
   );
 });
 
 self.addEventListener("message", (event) => {
+  if (event.data === "GET_VERSION") {
+    event.source.postMessage({
+      type: "VERSION",
+      version: APP_VERSION,
+    });
+  }
+
   if (event.data?.action === "SKIP_WAITING") {
     self.skipWaiting();
   }

@@ -121,13 +121,20 @@ function alertSMS(texto) {
   toast.show();
 }
 
+function actualizarTextoBoton() {
+  const btn = document.getElementById("btn-update-app");
+
+  if (btn && nuevaVersion) {
+    btn.innerText = `Actualizar a versión ${nuevaVersion}`;
+  }
+}
+
 function mostrarBotonActualizacion(reg) {
   let btn = document.getElementById("btn-update-app");
 
   if (!btn) {
     btn = document.createElement("button");
     btn.id = "btn-update-app";
-    btn.innerText = "Actualizar aplicación";
 
     btn.style.position = "fixed";
     btn.style.bottom = "20px";
@@ -142,6 +149,9 @@ function mostrarBotonActualizacion(reg) {
     document.body.appendChild(btn);
   }
 
+  // texto inicial
+  btn.innerText = "Nueva versión disponible";
+
   btn.onclick = () => {
     if (reg.waiting) {
       reg.waiting.postMessage({ action: "SKIP_WAITING" });
@@ -151,10 +161,13 @@ function mostrarBotonActualizacion(reg) {
 
 document.addEventListener("DOMContentLoaded", async function () {
   /************Para forzar actualizacion de PWA**************/
+  let nuevaVersion = null;
+
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
       .register("/novaenvios/service-worker.js", { scope: "/novaenvios/" })
       .then((reg) => {
+        // 🔥 Detectar nueva versión
         reg.onupdatefound = () => {
           const newSW = reg.installing;
 
@@ -165,15 +178,34 @@ document.addEventListener("DOMContentLoaded", async function () {
             ) {
               console.log("Nueva versión disponible");
 
-              // 👇 Mostrar botón en UI
+              // 👇 Pedir versión al nuevo SW
+              newSW.postMessage("GET_VERSION");
+
+              // 👇 Guardar referencia
               mostrarBotonActualizacion(reg);
             }
           };
         };
+
+        // 🔥 Pedir versión actual al cargar
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage("GET_VERSION");
+        }
       })
       .catch((error) => {
         console.error("Error al registrar el Service Worker:", error);
       });
+
+    // 🔥 Recibir versión desde SW
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data.type === "VERSION") {
+        console.log("Versión recibida:", event.data.version);
+
+        nuevaVersion = event.data.version;
+
+        actualizarTextoBoton();
+      }
+    });
 
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
