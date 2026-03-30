@@ -1,7 +1,7 @@
 const templateCache = {};
 var arrayGlobal = []; //array de promotores
 var folderPathIMG = ""; //variable que guarda id de carpeta donde se guardan las imagenes
-var versionApp = "1.0"; //La version se debe cambiar en service-worker.js y main.js
+var versionApp = ""; //La version se debe cambiar en service-worker.js y main.js
 
 function crearPlanilla() {
   let main = document.getElementById("App");
