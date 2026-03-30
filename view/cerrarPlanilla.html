@@ -211,7 +211,7 @@ async function buscarPlanilla(num_planilla) {
 
         // Si la Edge Function nos dijo que ok: false (planilla no existe)
         if (!result.ok) {
-            alertSMS(result.error); // Mostrará "La planilla no existe o no está disponible "
+            alertSMS(result.error); // Mostrará "La planilla no existe o no está disponible"
             limpiarCampos(true);
             return;
         }
@@ -430,6 +430,8 @@ if (data.ok) {
     // Limpiar totales visuales
     document.getElementById("totalContraentrega").innerText = "$ 0";
     document.getElementById("totalRecaudo").innerText = "$ 0";
+    document.getElementById("totalElectronico").innerText = "$ 0";
+    document.getElementById("totalGeneral").innerText = "$ 0";
     
     // --- REHABILITAR BOTONES ---
     document.getElementById("btnGuardar").disabled = false;
