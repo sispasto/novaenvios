@@ -180,8 +180,7 @@ var nsPlanilla=(function(){
             const num = e.target.value.trim();
             
             if (num) {
-                // Esto habilitará los botones y limpiará la tabla/totales
-                limpiarCampos(false); 
+                // Esto habilitará los botones y limpiará la tabla/totales               
                 buscarPlanilla(num);
             }
         }
@@ -228,7 +227,18 @@ async function buscarPlanilla(num_planilla) {
         // Llenar campos y renderizar
         document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleDateString('es-CO');
         document.getElementById("responsable").value = data.nombre_responsable;
-        listaGuias = data.guias.map(g => ({ guia: g })); // Simplificado para el ejemplo
+        listaGuias = data.guias.map(g => ({
+            guia: g,
+            estado: "",
+            ciudad: "",
+            destinatario: "",
+            direccion: "",
+            celular: "",
+            valor_flete: "",
+            valor_producto: "",
+            pago_electronico: ""
+        }));
+        
         renderGuias();
 
     } catch (err) {
