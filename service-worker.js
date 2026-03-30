@@ -1,49 +1,58 @@
-const CACHE_NAME = 'app-cache-v1.0';
+const APP_VERSION = "1.1.0";
+const CACHE_NAME = `app-cache-v${APP_VERSION}`;
 
-self.addEventListener('install', function(e) {
-  console.log('Service Worker: Installed');
+self.addEventListener("install", (e) => {
+  console.log("SW instalado - versión", APP_VERSION);
+
   self.skipWaiting();
 
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
+    caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
-        './',
-        './index.html',
-        './css/home.css',
-        './css/loader.css',
-        './js/main.js',
-        './componentes/index.js',
-        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
-        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
-        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'
+        "./",
+        "./index.html",
+        "./css/home.css",
+        "./css/loader.css",
+        "./js/main.js",
+        "./componentes/index.js",
       ]);
-    })
+    }),
   );
 });
 
-self.addEventListener('activate', function(e) {
-  console.log('Service Worker: Activated');
+self.addEventListener("activate", (e) => {
+  console.log("SW activado - versión", APP_VERSION);
 
   e.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then((names) => {
       return Promise.all(
-        cacheNames
-          .filter(name => name.startsWith('app-cache-v') && name !== CACHE_NAME)
-          .map(name => {
-            console.log('Service Worker: Deleting old cache', name);
-            return caches.delete(name);
-          })
+        names
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name)),
       );
-    })
+    }),
   );
 
-  return self.clients.claim();
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', function(e) {
+self.addEventListener("fetch", (e) => {
   e.respondWith(
-    caches.match(e.request).then(response => {
-      return response || fetch(e.request);
-    })
+    caches.match(e.request).then((response) => {
+      const fetchPromise = fetch(e.request).then((networkRes) => {
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, networkRes.clone());
+        });
+        return networkRes;
+      });
+
+      return response || fetchPromise;
+    }),
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.action === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
