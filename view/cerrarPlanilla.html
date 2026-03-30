@@ -313,40 +313,40 @@ function limpiarFormularioBusqueda() {
                 const response = await fetch(`http://localhost:8081/guia/${guiaLimpia}`);     
                 const data = await response.json();
 		// ... dentro de la función validarGuias ...
-if (data.ok) {
-    const vFlete = parseFloat(data.valor_flete) || 0;
-    const vProd = parseFloat(data.valor_producto) || 0;
-    const fPago = parseInt(data.formaPago);
-    
-    const tienePagoElec = data.pago_electronico && data.pago_electronico.toString().trim() !== "";
+                if (data.ok) {
+                    const vFlete = parseFloat(data.valor_flete) || 0;
+                    const vProd = parseFloat(data.valor_producto) || 0;
+                    const fPago = parseInt(data.formaPago);
+                    
+                    const tienePagoElec = data.pago_electronico && data.pago_electronico.toString().trim() !== "";
 
-    // --- CORRECCIÓN AQUÍ: Guardar todos los datos necesarios para la tabla ---
-    listaGuias[i].estado = data.estado;       // <--- Faltaba este
-    listaGuias[i].direccion = data.direccion; // <--- Faltaba este
-    listaGuias[i].celular = data.celular;     // <--- Faltaba este
-    
-    listaGuias[i].valor_flete = vFlete;
-    listaGuias[i].valor_producto = vProd;
-    listaGuias[i].pago_electronico = data.pago_electronico; 
-    listaGuias[i].formaPago = fPago;
-    listaGuias[i].ciudad = data.ciudad;
-    listaGuias[i].destinatario = data.destinatario;
+                    // --- CORRECCIÓN AQUÍ: Guardar todos los datos necesarios para la tabla ---
+                    listaGuias[i].estado = data.estado;       // <--- Faltaba este
+                    listaGuias[i].direccion = data.direccion; // <--- Faltaba este
+                    listaGuias[i].celular = data.celular;     // <--- Faltaba este
+                    
+                    listaGuias[i].valor_flete = vFlete;
+                    listaGuias[i].valor_producto = vProd;
+                    listaGuias[i].pago_electronico = data.pago_electronico; 
+                    listaGuias[i].formaPago = fPago;
+                    listaGuias[i].ciudad = data.ciudad;
+                    listaGuias[i].destinatario = data.destinatario;
 
-    // --- LÓGICA DE SUMATORIAS (Igual que antes) ---
-    if (tienePagoElec) {
-        if (fPago === 3 || fPago === 7) {
-            sumaElectronicos += vFlete;
-        } else if (fPago === 4) {
-            sumaElectronicos += vProd;
-        }
-    } else {
-        if (fPago === 3 || fPago === 7) {
-            sumaContraentrega += vFlete;
-        } else if (fPago === 4) {
-            sumaRecaudo += vProd;
-        }
-    }
-}//cierre data
+                    // --- LÓGICA DE SUMATORIAS (Igual que antes) ---
+                    if (tienePagoElec) {
+                        if (fPago === 3 || fPago === 7) {
+                            sumaElectronicos += vFlete;
+                        } else if (fPago === 4) {
+                            sumaElectronicos += vProd;
+                        }
+                    } else {
+                        if (fPago === 3 || fPago === 7) {
+                            sumaContraentrega += vFlete;
+                        } else if (fPago === 4) {
+                            sumaRecaudo += vProd;
+                        }
+                    }
+                }//cierre data
                 
             }
 
