@@ -137,7 +137,7 @@ function iniciarAutoUpdateSW() {
       //console.log("🔄 Buscando actualización del SW...");
       swRegistration.update();
     }
-  }, 60000); // cada 1 minuto
+  }, 1800000); // cada 1 minuto
 }
 
 /* =========================
@@ -204,7 +204,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         // 🔥 si ya hay una versión en espera
         if (reg.waiting && navigator.serviceWorker.controller) {
-          console.log("SW ya estaba esperando");
+          //console.log("SW ya estaba esperando");
           mostrarBotonActualizacion();
         }
 
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (newSW.state === "installed") {
               // Solo si ya hay una app corriendo (no primera instalación)
               if (navigator.serviceWorker.controller) {
-                console.log("Nueva versión disponible");
+                //console.log("Nueva versión disponible");
 
                 // 🔥 pedir versión del NUEVO SW
                 newSW.postMessage("GET_VERSION");
@@ -238,9 +238,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (swRegistration && swRegistration.waiting) {
           // 🔥 nueva versión (NO aplicar aún)
           newVersionAvailable = event.data.version;
-
-          console.log("Nueva versión detectada:", newVersionAvailable);
-
+          //console.log("Nueva versión detectada:", newVersionAvailable);
           mostrarBotonActualizacion();
         } else {
           // 🔥 versión actual activa
