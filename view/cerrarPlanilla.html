@@ -29,7 +29,7 @@ font-size:14px;
 <form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event,this)">
 
 <div class="row justify-content-center">
-<div class="col-lg-8">
+<div class="col-lg-12"> <!-- ancho de la tabla-->
 
 <div class="card shadow border-0">
 
@@ -279,15 +279,15 @@ function limpiarFormularioBusqueda() {
             tbody.innerHTML += `
             <tr>
                 <td>${i + 1}</td>
-                <td><strong>${g.guia}</strong></td>
+                <td>${g.guia}</td>
                 <td><small>${g.estado || ""}</small></td>
                 <td>${obtenerTextoPago(g.formaPago)}</td> <td><small>${g.ciudad || ""}</small></td>
                 <td>${g.destinatario || ""}</td>
                 <td><small>${g.direccion || ""}</small></td>
                 <td>${g.celular || ""}</td>
-                <td>${g.valor_flete ? '$ ' + g.valor_flete.toLocaleString() : ""}</td>
-                <td>${g.valor_producto ? '$ ' + g.valor_producto.toLocaleString() : ""}</td>
-                <td>${g.pago_electronico || ""}</td>
+                <td class="text-nowrap">${g.valor_flete ? '$ ' + g.valor_flete.toLocaleString() : ""}</td>
+                <td class="text-nowrap">${g.valor_producto ? '$ ' + g.valor_producto.toLocaleString() : ""}</td>
+                <td class="text-nowrap">${g.pago_electronico || ""}</td>
             </tr>
             `;
         });
