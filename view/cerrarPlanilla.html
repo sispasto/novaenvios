@@ -308,7 +308,7 @@ function limpiarFormularioBusqueda() {
     /* =========================
     VALIDAR GUIAS (Consume tu API Local)
     ========================= */
-    async function validarGuias() {
+    /*async function validarGuias() {
         try {
             const formatoCop = new Intl.NumberFormat('es-CO', {
                 style: 'currency', currency: 'COP', minimumFractionDigits: 0
@@ -369,8 +369,7 @@ function limpiarFormularioBusqueda() {
                         sumaRecaudo += vProd;
                     }
                     
-                }//cierre data
-                
+                }//cierre data                
             }
 
             // Gran Total = Efectivo + Electrónicos
@@ -389,7 +388,86 @@ function limpiarFormularioBusqueda() {
             console.error("Error en validación:", err);
             alertSMS("Error al procesar los totales.");
         }
+    }*/
+    
+    async function validarGuias() {
+    try {
+        const formatoCop = new Intl.NumberFormat('es-CO', {
+            style: 'currency', currency: 'COP', minimumFractionDigits: 0
+        });
+
+        if (!listaGuias || listaGuias.length === 0) {
+            ["totalContraentrega", "totalRecaudo", "totalElectronico", "totalGeneral"].forEach(id => {
+                document.getElementById(id).innerText = formatoCop.format(0);
+            });
+            renderGuias();
+            return;
+        }
+
+        // 1. Petición única al servidor enviando el arreglo completo
+        const response = await fetch(`http://localhost:8081/arrayguias/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(listaGuias) // Enviamos el arreglo tal cual
+        });
+
+        const resServidor = await response.json();
+
+        if (resServidor.ok) {
+            // Reemplazamos nuestra lista con la procesada por el servidor
+            // Se asume que el servidor devuelve { ok: true, data: [...] }
+            listaGuias = resServidor.data;
+
+            let sumaContraentrega = 0; 
+            let sumaRecaudo = 0;       
+            let sumaElectronicos = 0;  
+
+            // 2. Ahora recorremos el arreglo ya actualizado para calcular sumatorias
+            listaGuias.forEach(g => {
+                const vFlete = parseFloat(g.valor_flete) || 0;
+                const vProd = parseFloat(g.valor_producto) || 0;
+                const fPago = parseInt(g.formaPago);
+                
+                const tienePagoElec = g.pago_electronico && g.pago_electronico.toString().trim() !== "";
+
+                // Lógica de Sumatorias
+                if (tienePagoElec) {
+                    if (fPago === 3 || fPago === 7) {
+                        sumaElectronicos += vFlete;
+                    } else if (fPago === 4) {
+                        sumaElectronicos += vProd;
+                    }
+                } 
+
+                if (fPago === 3 || fPago === 7) {
+                    sumaContraentrega += vFlete;
+                } else if (fPago === 4) {
+                    sumaRecaudo += vProd;
+                }
+            });
+
+            // Gran Total = Efectivo (Contraentrega + Recaudo)
+            const granTotal = sumaContraentrega + sumaRecaudo;
+
+            // 3. Actualizar Interfaz
+            document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
+            document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
+            document.getElementById("totalElectronico").innerText = formatoCop.format(sumaElectronicos);
+            document.getElementById("totalGeneral").innerText = formatoCop.format(granTotal);
+
+            renderGuias();
+            alertSMS("Validación masiva completada con éxito.");
+
+        } else {
+            alertSMS("El servidor no pudo procesar las guías.");
+        }
+
+    } catch (err) {
+        console.error("Error en validación:", err);
+        alertSMS("Error al conectar con el servidor.");
     }
+}
+
     /* =========================
     GUARDAR (Sin cambios)
     ========================= */
