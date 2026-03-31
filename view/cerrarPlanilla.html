@@ -335,7 +335,7 @@ async function buscarPlanilla(num_planilla) {
 
             const response = await fetch(`http://localhost:8081/arrayguias/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' },
                 body: JSON.stringify(listaGuias)
             });
 
@@ -343,7 +343,7 @@ async function buscarPlanilla(num_planilla) {
 
             if (resServidor.ok) {
                 listaGuias = resServidor.data;
-                
+                console.log("guias enviadas:", listaGuias);
                 // Reutilizamos la nueva función
                 calcularTotales(listaGuias);
                 
