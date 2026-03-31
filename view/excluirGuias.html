@@ -215,9 +215,8 @@
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.access_token}`,
             },
-            body: JSON.stringify({
-              guiasParaEliminar,
-            }),
+            // CAMBIO AQUÍ: Enviamos el array directamente, no envuelto en un objeto {}
+            body: JSON.stringify(guiasParaEliminar),
           },
         );
 
