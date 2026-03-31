@@ -122,6 +122,7 @@ font-size:14px;
     <th width="60">#</th>
     <th>Guía</th>
     <th>Estado</th>
+    <th>Forma Pago</th>
     <th>Ciudad Destino</th>
     <th>Destinatario</th>
     <th>Dirección</th>
@@ -260,22 +261,34 @@ function limpiarFormularioBusqueda() {
     /* =========================
     RENDER TABLA (Sin cambios)
     ========================= */
-    function renderGuias(){
+    function renderGuias() {
         const tbody = document.getElementById("tablaGuias");
         tbody.innerHTML = "";
+
+        // Mapeo de códigos a texto
+        const obtenerTextoPago = (codigo) => {
+            const c = parseInt(codigo);
+            if (c === 1 || c === 6) return '<span class="badge bg-success">CONTADO</span>';
+            if (c === 3 || c === 7) return '<span class="badge bg-primary">CONTRAENTREGA</span>';
+            if (c === 4 || c === 8) return '<span class="badge bg-warning text-dark">CRÉDITO</span>';
+            if (c === 5) return '<span class="badge bg-info text-dark">CORTESÍA</span>';
+            return "";
+        };
 
         listaGuias.forEach((g, i) => {
             tbody.innerHTML += `
             <tr>
                 <td>${i + 1}</td>
-                <td>${g.guia}</td>
-                <td>${g.estado || ""}</td>
-                <td><small>${g.ciudad || ""}</small></td> <td>${g.destinatario || ""}</td>
-                <td>${g.direccion || ""}</td>
+                <td><strong>${g.guia}</strong></td>
+                <td><small>${g.estado || ""}</small></td>
+                <td>${obtenerTextoPago(g.formaPago)}</td> <td><small>${g.ciudad || ""}</small></td>
+                <td>${g.destinatario || ""}</td>
+                <td><small>${g.direccion || ""}</small></td>
                 <td>${g.celular || ""}</td>
-                <td>${g.valor_flete || ""}</td>
-                <td>${g.valor_producto || ""}</td>
-                <td>${g.pago_electronico || ""}</td> </tr>
+                <td>${g.valor_flete ? '$ ' + g.valor_flete.toLocaleString() : ""}</td>
+                <td>${g.valor_producto ? '$ ' + g.valor_producto.toLocaleString() : ""}</td>
+                <td>${g.pago_electronico || ""}</td>
+            </tr>
             `;
         });
 
