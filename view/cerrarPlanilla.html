@@ -207,38 +207,57 @@ async function buscarPlanilla(num_planilla) {
 
         const result = await response.json();
 
-        // Si la Edge Function nos dijo que ok: false (planilla no existe)
         if (!result.ok) {
-            alertSMS(result.error); // Mostrará "La planilla no existe o no está disponible"
+            alertSMS(result.error); 
             limpiarCampos(true);
             return;
         }
 
         const data = result.data;
         
-        // ... resto de tu lógica de validación de estado (AN, CE, AB) ...
         if (data.estado === 'AN' || data.estado === 'CE') {
              alertSMS(`La planilla N° ${num_planilla} está ${data.estado === 'AN' ? 'ANULADA' : 'CERRADA'}.`);
              limpiarCampos(true);
              return;
         }
 
-        // Llenar campos y renderizar
+        // Llenar campos de cabecera
         document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleDateString('es-CO');
         document.getElementById("responsable").value = data.nombre_responsable;
+
+        /* ============================================================
+           CAMBIO CLAVE: Mapeo de guías con datos de sincronización
+           ============================================================ */
         listaGuias = data.guias.map(g => ({
-            guia: g,
-            estado: "",
-            ciudad: "",
-            destinatario: "",
-            direccion: "",
-            celular: "",
-            valor_flete: "",
-            valor_producto: "",
-            pago_electronico: ""
-        }));
+            guia: g.guia,             
+            sincronizado: g.sincronizado, 
+            estado: g.estado || "",   
+            ciudad: g.ciudad || "",
+            destinatario: g.destinatario || "",
+            direccion: g.direccion || "",
+            celular: g.celular || "",
+            formaPago: g.formaPago || "",            
+            valor_flete: g.valor_flete || "",
+            valor_producto: g.valor_producto || "",
+            pago_electronico: g.pago_electronico || ""
+        }));        
         
+        calcularTotales(listaGuias);
         renderGuias();
+
+        /* ============================================================
+           LÓGICA ADICIONAL: ¿Qué hacemos tras cargar?
+           ============================================================ */
+        // Filtrar las guías que aún NO están sincronizadas
+        const pendientes = listaGuias.filter(g => !g.sincronizado).map(g => g.guia);
+
+        /*if (pendientes.length > 0) {
+            console.log("Hay guías pendientes de sincronizar:", pendientes);
+            // Aquí llamarías a tu función de C# enviando solo los números de 'pendientes'
+            // sincronizarConServidorLocal(pendientes);
+        } else {
+            console.log("Planilla totalmente sincronizada. No se requiere consultar al backend local.");
+        }*/
 
     } catch (err) {
         console.error(err);
@@ -248,15 +267,15 @@ async function buscarPlanilla(num_planilla) {
 }
 /*********************************************************************/
 
-/**
- * Función auxiliar para limpiar los campos si la búsqueda falla o es inválida
- */
-function limpiarFormularioBusqueda() {
-    document.getElementById("fecha_creacion").value = "";
-    document.getElementById("responsable").value = "";
-    listaGuias = [];
-    renderGuias();
-}
+    /**
+     * Función auxiliar para limpiar los campos si la búsqueda falla o es inválida
+     */
+    function limpiarFormularioBusqueda() {
+        document.getElementById("fecha_creacion").value = "";
+        document.getElementById("responsable").value = "";
+        listaGuias = [];
+        renderGuias();
+    }
 
     /* =========================
     RENDER TABLA (Sin cambios)
@@ -305,132 +324,62 @@ function limpiarFormularioBusqueda() {
         document.getElementById("contadorGuias").innerText = listaGuias.length;
     }
 
-    /* =========================
-    VALIDAR GUIAS (Consume tu API Local)
-    ========================= */
-    /*async function validarGuias() {
+       
+    async function validarGuias() {
         try {
-            const formatoCop = new Intl.NumberFormat('es-CO', {
-                style: 'currency', currency: 'COP', minimumFractionDigits: 0
-            });
-
             if (!listaGuias || listaGuias.length === 0) {
-                ["totalContraentrega", "totalRecaudo", "totalElectronico", "totalGeneral"].forEach(id => {
-                    document.getElementById(id).innerText = formatoCop.format(0);
-                });
+                calcularTotales([]);
                 renderGuias();
                 return;
             }
 
-            let sumaContraentrega = 0; // Fletes P3/P7 en EFECTIVO
-            let sumaRecaudo = 0;       // Productos P4 en EFECTIVO
-            let sumaElectronicos = 0;  // Todo lo que tenga el campo pago_electronico lleno
+            const response = await fetch(`http://localhost:8081/arrayguias/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(listaGuias)
+            });
 
-            for (let i = 0; i < listaGuias.length; i++) {
-                let g = listaGuias[i];
-                if (!g.guia) continue;
+            const resServidor = await response.json();
 
-                let guiaLimpia = g.guia.replace(/[^a-zA-Z0-9]/g, ''); 
-                const response = await fetch(`http://localhost:8081/guia/${guiaLimpia}`);     
-                const data = await response.json();
-		// ... dentro de la función validarGuias ...
-                if (data.ok) {
-                    const vFlete = parseFloat(data.valor_flete) || 0;
-                    const vProd = parseFloat(data.valor_producto) || 0;
-                    const fPago = parseInt(data.formaPago);
-                    
-                    const tienePagoElec = data.pago_electronico && data.pago_electronico.toString().trim() !== "";
-
-                    // --- CORRECCIÓN AQUÍ: Guardar todos los datos necesarios para la tabla ---
-                    listaGuias[i].estado = data.estado;       // <--- Faltaba este
-                    listaGuias[i].direccion = data.direccion; // <--- Faltaba este
-                    listaGuias[i].celular = data.celular;     // <--- Faltaba este
-                    
-                    listaGuias[i].valor_flete = vFlete;
-                    listaGuias[i].valor_producto = vProd;
-                    listaGuias[i].pago_electronico = data.pago_electronico; 
-                    listaGuias[i].formaPago = fPago;
-                    listaGuias[i].ciudad = data.ciudad;
-                    listaGuias[i].destinatario = data.destinatario;
-
-                    // --- LÓGICA DE SUMATORIAS (Igual que antes) ---
-                    if (tienePagoElec) {
-                        if (fPago === 3 || fPago === 7) {
-                            sumaElectronicos += vFlete;
-                        } else if (fPago === 4) {
-                            sumaElectronicos += vProd;
-                        }
-                    } 
-
-                    if (fPago === 3 || fPago === 7) {
-                        sumaContraentrega += vFlete;
-                    } 
-                    else if (fPago === 4) {
-                        sumaRecaudo += vProd;
-                    }
-                    
-                }//cierre data                
+            if (resServidor.ok) {
+                listaGuias = resServidor.data;
+                
+                // Reutilizamos la nueva función
+                calcularTotales(listaGuias);
+                
+                renderGuias();
+                alertSMS("Validación masiva completada con éxito.");
+            } else {
+                alertSMS("El servidor no pudo procesar las guías.");
             }
-
-            // Gran Total = Efectivo + Electrónicos
-            const granTotal = sumaContraentrega + sumaRecaudo ;
-
-            // Actualizar Interfaz
-            document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
-            document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
-            document.getElementById("totalElectronico").innerText = formatoCop.format(sumaElectronicos);
-            document.getElementById("totalGeneral").innerText = formatoCop.format(granTotal);
-
-            renderGuias();
-            alertSMS("Validación completada. Se discriminaron los pagos electrónicos.");
-
         } catch (err) {
             console.error("Error en validación:", err);
-            alertSMS("Error al procesar los totales.");
+            alertSMS("Error al conectar con el servidor.");
         }
-    }*/
-    
-    async function validarGuias() {
-    try {
+    }
+
+/*************************************************************************************/
+    async function calcularTotales(lista) { console.log("LLego a totales:", lista);
         const formatoCop = new Intl.NumberFormat('es-CO', {
             style: 'currency', currency: 'COP', minimumFractionDigits: 0
         });
 
-        if (!listaGuias || listaGuias.length === 0) {
-            ["totalContraentrega", "totalRecaudo", "totalElectronico", "totalGeneral"].forEach(id => {
-                document.getElementById(id).innerText = formatoCop.format(0);
-            });
-            renderGuias();
-            return;
-        }
+        let sumaContraentrega = 0; 
+        let sumaRecaudo = 0;       
+        let sumaElectronicos = 0;  
 
-        // 1. Petición única al servidor enviando el arreglo completo
-        const response = await fetch(`http://localhost:8081/arrayguias/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(listaGuias) // Enviamos el arreglo tal cual
-        });
-
-        const resServidor = await response.json();
-
-        if (resServidor.ok) {
-            // Reemplazamos nuestra lista con la procesada por el servidor
-            // Se asume que el servidor devuelve { ok: true, data: [...] }
-            listaGuias = resServidor.data;
-
-            let sumaContraentrega = 0; 
-            let sumaRecaudo = 0;       
-            let sumaElectronicos = 0;  
-
-            // 2. Ahora recorremos el arreglo ya actualizado para calcular sumatorias
-            listaGuias.forEach(g => {
+        if (lista && lista.length > 0) {
+            lista.forEach(g => {
                 const vFlete = parseFloat(g.valor_flete) || 0;
                 const vProd = parseFloat(g.valor_producto) || 0;
-                const fPago = parseInt(g.formaPago);
+                // FORMA SEGURA DE OBTENER EL ENTERO
+                const fPago = parseInt(String(g.formaPago).trim());
                 
                 const tienePagoElec = g.pago_electronico && g.pago_electronico.toString().trim() !== "";
-
-                // Lógica de Sumatorias
+                
+                // Este log es la clave
+                console.log(`Guía Original='${g.formaPago}', Procesado=${g.formaPago}, Tipo=${typeof g.formaPago}`);
+                // Lógica de Sumatorias (Electrónicos)
                 if (tienePagoElec) {
                     if (fPago === 3 || fPago === 7) {
                         sumaElectronicos += vFlete;
@@ -439,34 +388,26 @@ function limpiarFormularioBusqueda() {
                     }
                 } 
 
+                console.log("Evaluando fPago:", fPago); // Esto te dirá qué número está llegando realmente
+
+                // Lógica de Totales base
                 if (fPago === 3 || fPago === 7) {
                     sumaContraentrega += vFlete;
                 } else if (fPago === 4) {
                     sumaRecaudo += vProd;
                 }
             });
-
-            // Gran Total = Efectivo (Contraentrega + Recaudo)
-            const granTotal = sumaContraentrega + sumaRecaudo;
-
-            // 3. Actualizar Interfaz
-            document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
-            document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
-            document.getElementById("totalElectronico").innerText = formatoCop.format(sumaElectronicos);
-            document.getElementById("totalGeneral").innerText = formatoCop.format(granTotal);
-
-            renderGuias();
-            alertSMS("Validación masiva completada con éxito.");
-
-        } else {
-            alertSMS("El servidor no pudo procesar las guías.");
         }
+        console.log("termino de calcular totales:",sumaContraentrega,"-" ,sumaRecaudo,"-", sumaElectronicos);
+        const granTotal = sumaContraentrega + sumaRecaudo;
 
-    } catch (err) {
-        console.error("Error en validación:", err);
-        alertSMS("Error al conectar con el servidor.");
+        // Actualizar Interfaz
+        document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
+        document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
+        document.getElementById("totalElectronico").innerText = formatoCop.format(sumaElectronicos);
+        document.getElementById("totalGeneral").innerText = formatoCop.format(granTotal);
     }
-}
+/*************************************************************************************/
 
     /* =========================
     GUARDAR (Sin cambios)
@@ -562,7 +503,9 @@ function limpiarFormularioBusqueda() {
   
   return {
     guardarPlanilla,
-    validarGuias
+    validarGuias,
+    buscarPlanilla, // EXPORTRAR TAMBIÉN ESTA
+    calcularTotales // EXPORTAR POR SI LA NECESITAS FUERA
   }
 
 })();
