@@ -364,7 +364,7 @@ function limpiarFormularioBusqueda() {
             }
 
             // Gran Total = Efectivo + Electrónicos
-            const granTotal = sumaContraentrega + sumaRecaudo + sumaElectronicos;
+            const granTotal = sumaContraentrega + sumaRecaudo ;
 
             // Actualizar Interfaz
             document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
