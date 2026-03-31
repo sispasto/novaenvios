@@ -159,9 +159,13 @@
     }
 
     function agregarALista(guia) {
+      console.log("Intentando agregar guía:", guiasOriginales);
       // Validar que la guía pertenezca a la planilla
-      if (!guiasOriginales.includes(guia)) {
-        alertSMS("Error: La guía " + guia + " no pertenece a esta planilla.");
+      // ANTES (Cuando era un array de strings):
+
+      // AHORA (Como es un array de objetos):
+      if (!guiasOriginales.some((item) => item.guia === guia)) {
+        alertSMS(`La guía ${guia} no pertenece a esta planilla.`);
         return;
       }
 
