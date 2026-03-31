@@ -359,7 +359,7 @@ async function buscarPlanilla(num_planilla) {
     }
 
 /*************************************************************************************/
-    async function calcularTotales(lista) { console.log("LLego a totales:", lista);
+    async function calcularTotales(lista) { 
         const formatoCop = new Intl.NumberFormat('es-CO', {
             style: 'currency', currency: 'COP', minimumFractionDigits: 0
         });
@@ -375,10 +375,9 @@ async function buscarPlanilla(num_planilla) {
                 // FORMA SEGURA DE OBTENER EL ENTERO
                 const fPago = parseInt(String(g.formaPago).trim());
                 
-                const tienePagoElec = g.pago_electronico && g.pago_electronico.toString().trim() !== "";
+                const tienePagoElec = g.pago_electronico && g.pago_electronico.toString().trim() !== "";                
                 
-                // Este log es la clave
-                console.log(`Guía Original='${g.formaPago}', Procesado=${g.formaPago}, Tipo=${typeof g.formaPago}`);
+                //console.log(`Guía Original='${g.formaPago}', Procesado=${g.formaPago}, Tipo=${typeof g.formaPago}`);
                 // Lógica de Sumatorias (Electrónicos)
                 if (tienePagoElec) {
                     if (fPago === 3 || fPago === 7) {
@@ -386,9 +385,7 @@ async function buscarPlanilla(num_planilla) {
                     } else if (fPago === 4) {
                         sumaElectronicos += vProd;
                     }
-                } 
-
-                console.log("Evaluando fPago:", fPago); // Esto te dirá qué número está llegando realmente
+                }
 
                 // Lógica de Totales base
                 if (fPago === 3 || fPago === 7) {
