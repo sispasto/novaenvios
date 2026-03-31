@@ -342,8 +342,7 @@ async function buscarPlanilla(num_planilla) {
             const resServidor = await response.json();
 
             if (resServidor.ok) {
-                listaGuias = resServidor.data;
-                console.log("guias enviadas:", listaGuias);
+                listaGuias = resServidor.data;                
                 // Reutilizamos la nueva función
                 calcularTotales(listaGuias);
                 
