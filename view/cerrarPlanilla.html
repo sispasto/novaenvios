@@ -280,8 +280,9 @@ function limpiarFormularioBusqueda() {
             <tr>
                 <td>${i + 1}</td>
                 <td>${g.guia}</td>
-                <td><small>${g.estado || ""}</small></td>
-                <td>${obtenerTextoPago(g.formaPago)}</td> <td><small>${g.ciudad || ""}</small></td>
+                <td class="text-nowrap"><small>${g.estado || ""}</small></td>
+                <td>${obtenerTextoPago(g.formaPago)}</td> 
+                <td><small>${g.ciudad || ""}</small></td>
                 <td>${g.destinatario || ""}</td>
                 <td><small>${g.direccion || ""}</small></td>
                 <td>${g.celular || ""}</td>
