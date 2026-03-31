@@ -350,13 +350,15 @@ function limpiarFormularioBusqueda() {
                         } else if (fPago === 4) {
                             sumaElectronicos += vProd;
                         }
-                    } else {
-                        if (fPago === 3 || fPago === 7) {
-                            sumaContraentrega += vFlete;
-                        } else if (fPago === 4) {
-                            sumaRecaudo += vProd;
-                        }
+                    } 
+
+                    if (fPago === 3 || fPago === 7) {
+                        sumaContraentrega += vFlete;
+                    } 
+                    else if (fPago === 4) {
+                        sumaRecaudo += vProd;
                     }
+                    
                 }//cierre data
                 
             }
