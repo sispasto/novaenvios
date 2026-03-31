@@ -197,6 +197,7 @@
 
     async function procesarEliminacion() {
       try {
+        console.log("Guías para eliminar:", guiasParaEliminar);
         if (guiasParaEliminar.length === 0)
           throw new Error("No hay guías para eliminar");
 
@@ -215,8 +216,7 @@
               Authorization: `Bearer ${session.access_token}`,
             },
             body: JSON.stringify({
-              num_planilla: parseInt(num),
-              guias: guiasParaEliminar,
+              guiasParaEliminar,
             }),
           },
         );
