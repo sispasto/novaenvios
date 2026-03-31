@@ -265,7 +265,7 @@ function limpiarFormularioBusqueda() {
         const tbody = document.getElementById("tablaGuias");
         tbody.innerHTML = "";
 
-        // Mapeo de códigos a texto
+        // Mapeo de códigos de pago a texto/badges
         const obtenerTextoPago = (codigo) => {
             const c = parseInt(codigo);
             if (c === 1 || c === 6) return '<span class="badge bg-success">CONTADO</span>';
@@ -273,6 +273,15 @@ function limpiarFormularioBusqueda() {
             if (c === 4 || c === 8) return '<span class="badge bg-warning text-dark">CRÉDITO</span>';
             if (c === 5) return '<span class="badge bg-info text-dark">CORTESÍA</span>';
             return "";
+        };
+
+        // Nueva función para validar Nequi o Daviplata
+        const formatearPagoElectronico = (pago) => {
+            if (!pago) return "";
+            const p = pago.toUpperCase(); // Aseguramos que esté en mayúsculas para comparar
+            if (p.startsWith("NEQ")) return "NEQUI";
+            if (p.startsWith("DAV")) return "DAVIPLATA";
+            return pago; // Si no es ninguno de los dos, muestra el código original
         };
 
         listaGuias.forEach((g, i) => {
@@ -288,7 +297,7 @@ function limpiarFormularioBusqueda() {
                 <td>${g.celular || ""}</td>
                 <td class="text-nowrap">${g.valor_flete ? '$ ' + g.valor_flete.toLocaleString() : ""}</td>
                 <td class="text-nowrap">${g.valor_producto ? '$ ' + g.valor_producto.toLocaleString() : ""}</td>
-                <td class="text-nowrap">${g.pago_electronico || ""}</td>
+                <td class="text-nowrap">${formatearPagoElectronico(g.pago_electronico)}</td>
             </tr>
             `;
         });
