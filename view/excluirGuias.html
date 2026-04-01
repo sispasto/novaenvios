@@ -1,29 +1,76 @@
 <style>
-  /* Opcional: Si prefieres que en pantallas muy grandes se vea 
-     estrictamente centrado sin trucos de márgenes */
+  /* --- AJUSTES GENERALES --- */
+  .scan-input {
+    border: 2px solid #dc3545 !important; /* Rojo para indicar "Eliminación" */
+    font-weight: bold;
+  }
 
-  @media (orientation: landscape) and (max-height: 500px) {
-    .contenedor-carrusel {
-      padding: 5px; /* Reduce espacio para dar más aire a la tabla */
+  /* --- RESPONSIVE: PC --- */
+  @media (min-width: 992px) {
+    .container-fluid {
+      padding: 30px 60px;
     }
-    .card-planilla {
-      width: 150px; /* Tarjetas un poco más pequeñas en modo horizontal */
+    .table-responsive {
+      max-height: 400px;
+    } /* Evita que la lista crezca demasiado */
+  }
+
+  /* --- RESPONSIVE: MÓVIL Y TABLET --- */
+  @media (max-width: 768px) {
+    /* El encabezado (Fecha/Resp) se apila */
+    .col-md-3,
+    .col-md-6 {
+      margin-bottom: 10px;
+    }
+
+    /* Input de escaneo más grande para dedos */
+    .form-control-lg {
+      font-size: 18px !important;
+    }
+
+    /* Botón de confirmar siempre visible y grande */
+    .btn-dark.w-100 {
+      padding: 15px;
+      font-size: 16px;
+      margin-top: 15px;
+    }
+
+    /* Tabla compacta */
+    .table-sm td {
+      padding: 12px 8px !important;
+      font-size: 14px;
+    }
+  }
+
+  /* MODO HORIZONTAL (LANDSCAPE) - IMPORTANTE PARA ESCANEO */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .card-header {
+      display: none;
+    } /* Ganamos espacio vertical */
+    .table-responsive {
+      max-height: 150px;
+    }
+    .container-fluid {
+      margin-top: 0 !important;
     }
   }
 </style>
-<div class="container-fluid">
+<div class="container-fluid mt-3">
   <h1></h1>
   <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-12 col-lg-10 col-xl-8">
       <div class="card shadow border-0">
-        <div class="card-header bg-dark text-white">
+        <div class="card-header bg-dark text-white py-3">
           <h5 class="mb-0 fw-bold">Sacar Guías de Planilla (Devolución)</h5>
         </div>
+
         <div class="card-body">
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label class="form-label fw-bold">1. Número de Planilla</label>
-              <div class="input-group">
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-bold small text-muted text-uppercase"
+                >1. Número de Planilla</label
+              >
+              <div class="input-group shadow-sm">
                 <input
                   type="number"
                   class="form-control"
@@ -31,7 +78,7 @@
                   placeholder="Ingrese planilla"
                 />
                 <button
-                  class="btn btn-dark"
+                  class="btn btn-dark px-4"
                   type="button"
                   onclick="nsSacarGuias.validarPlanilla()"
                 >
@@ -39,8 +86,11 @@
                 </button>
               </div>
             </div>
-            <div class="col-md-3">
-              <label class="form-label">Fecha Creación</label>
+
+            <div class="col-6 col-md-3">
+              <label class="form-label small text-muted fw-bold"
+                >Fecha Creación</label
+              >
               <input
                 type="text"
                 class="form-control bg-light"
@@ -48,8 +98,11 @@
                 readonly
               />
             </div>
-            <div class="col-md-3">
-              <label class="form-label">Responsable</label>
+
+            <div class="col-6 col-md-3">
+              <label class="form-label small text-muted fw-bold"
+                >Responsable</label
+              >
               <input
                 type="text"
                 class="form-control bg-light"
@@ -59,30 +112,35 @@
             </div>
           </div>
 
-          <hr />
+          <hr class="opacity-25" />
 
           <div id="seccionEscaneo" style="display: none">
-            <div class="section-title">
-              <strong>2. Escanear guías para eliminar</strong>
+            <div class="mb-2">
+              <strong class="text-danger"
+                ><i class="fas fa-barcode"></i> 2. Escanear guías para
+                eliminar</strong
+              >
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text bg-danger text-white"
-                ><i class="fas fa-barcode"></i
-              ></span>
+
+            <div class="input-group mb-3 shadow-sm">
+              <span class="input-group-text bg-danger text-white border-danger">
+                <i class="fas fa-search"></i>
+              </span>
               <input
                 type="text"
                 class="form-control form-control-lg scan-input"
                 id="input_scan_sacar"
                 placeholder="Pistolee la guía aquí..."
+                autofocus
               />
             </div>
 
-            <div class="table-responsive">
-              <table class="table table-sm table-hover">
+            <div class="table-responsive border rounded mb-3">
+              <table class="table table-sm table-hover mb-0">
                 <thead class="table-danger">
                   <tr>
-                    <th>Guía a Eliminar</th>
-                    <th width="50"></th>
+                    <th class="ps-3">Guía a Eliminar</th>
+                    <th width="80" class="text-center">Quitar</th>
                   </tr>
                 </thead>
                 <tbody id="tablaSacar"></tbody>
@@ -90,7 +148,7 @@
             </div>
 
             <button
-              class="btn btn-dark w-100 fw-bold"
+              class="btn btn-dark w-100 fw-bold shadow"
               onclick="nsSacarGuias.procesarEliminacion()"
             >
               CONFIRMAR Y ELIMINAR GUIAS

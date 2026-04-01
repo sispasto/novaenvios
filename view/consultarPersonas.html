@@ -1,47 +1,80 @@
 <style>
   .tabla-personas {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
-  /* Opcional: Si prefieres que en pantallas muy grandes se vea 
-     estrictamente centrado sin trucos de márgenes */
 
+  /* --- AJUSTES PARA PC Y TABLET --- */
+  @media (min-width: 992px) {
+    .container-fluid {
+      padding: 2rem 5rem;
+    }
+  }
+
+  /* --- AJUSTES PARA MÓVIL --- */
+  @media (max-width: 768px) {
+    /* El header se vuelve vertical para que el buscador ocupe todo el ancho */
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 10px;
+    }
+
+    .card-header input {
+      width: 100% !important; /* Buscador full width en móvil */
+      font-size: 16px; /* Evita el zoom automático en iOS */
+    }
+
+    .tabla-personas {
+      font-size: 0.85rem;
+    }
+
+    .tabla-personas td,
+    .tabla-personas th {
+      padding: 10px 5px !important;
+    }
+  }
+
+  /* MODO HORIZONTAL (LANDSCAPE) */
   @media (orientation: landscape) and (max-height: 500px) {
-    .contenedor-carrusel {
-      padding: 5px; /* Reduce espacio para dar más aire a la tabla */
+    .table-responsive {
+      max-height: 250px;
+      overflow-y: auto;
     }
-    .card-planilla {
-      width: 150px; /* Tarjetas un poco más pequeñas en modo horizontal */
-    }
+  }
+
+  /* Efecto hover suave para las filas */
+  .tabla-personas tbody tr {
+    transition: background-color 0.2s;
   }
 </style>
 
 <div class="container-fluid mt-3">
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-10">
+    <div class="col-12 col-lg-10 col-xl-8">
       <div class="card shadow border-0">
         <div
-          class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
+          class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3"
         >
           <h5 class="mb-0 fw-bold">Consulta de Personas</h5>
           <input
             type="text"
-            class="form-control form-control-sm w-50"
-            placeholder="Buscar por código, cédula o nombre"
+            class="form-control form-control-sm w-50 shadow-sm"
+            placeholder="🔎 Buscar código, cédula o nombre..."
             onkeyup="nsConsultarPersonas.filtrar(this.value)"
           />
         </div>
 
         <div class="card-body p-0">
-          <div id="alertaConsulta" class="p-3"></div>
+          <div id="alertaConsulta"></div>
 
           <div class="table-responsive">
             <table class="table table-hover table-striped mb-0 tabla-personas">
               <thead class="table-dark">
                 <tr>
-                  <th>Código</th>
+                  <th class="ps-3">Código</th>
                   <th>Cédula</th>
                   <th>Nombre</th>
-                  <th>Estado</th>
+                  <th class="text-center pe-3">Estado</th>
                 </tr>
               </thead>
               <tbody id="tbodyPersonas"></tbody>

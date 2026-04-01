@@ -1,34 +1,97 @@
 <style>
+  /* ==========================================
+     ESTILOS POR DEFECTO (PC / TABLETS)
+     ========================================== */
   .section-title {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
     color: #444;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .scan-input {
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 20px;
+    font-weight: 600;
     text-align: center;
+    border: 2px solid #212529;
+    padding: 12px;
   }
 
-  .table-sm td {
+  .table-sm td,
+  .table-sm th {
     font-size: 14px;
+    padding: 8px !important;
   }
 
   .badge-counter {
-    font-size: 14px;
+    font-size: 16px;
+    padding: 8px 12px;
   }
 
-  /* Opcional: Si prefieres que en pantallas muy grandes se vea 
-     estrictamente centrado sin trucos de márgenes */
-
-  @media (orientation: landscape) and (max-height: 500px) {
-    .contenedor-carrusel {
-      padding: 5px; /* Reduce espacio para dar más aire a la tabla */
+  /* ==========================================
+     OPTIMIZACIÓN PARA MÓVILES (RETRATO)
+     ========================================== */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 14px;
+      margin-bottom: 8px;
     }
-    .card-planilla {
-      width: 150px; /* Tarjetas un poco más pequeñas en modo horizontal */
+
+    .scan-input {
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      font-size: 13px;
+      padding: 5px !important;
+    }
+
+    /* Botones de acción al final más grandes para el pulgar */
+    .card-footer {
+      flex-direction: column;
+    }
+
+    .card-footer button {
+      width: 100%;
+      padding: 12px;
+    }
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN MODO HORIZONTAL (LANDSCAPE MÓVIL)
+     ========================================== */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .container-fluid {
+      padding-top: 5px !important;
+    }
+
+    /* Ocultamos títulos redundantes para ganar espacio */
+    .card-header h5,
+    .section-title:first-of-type {
+      display: none;
+    }
+
+    .row .mb-3 {
+      margin-bottom: 0.5rem !important;
+    }
+
+    /* Limitamos altura de la tabla para que no empuje los botones fuera de la pantalla */
+    .table-responsive {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      font-size: 12px !important;
+      padding: 3px !important;
+    }
+
+    .scan-input {
+      font-size: 15px;
+      padding: 5px;
     }
   }
 </style>
@@ -48,9 +111,7 @@
             <div class="section-title"><strong>Datos de Planilla</strong></div>
 
             <div class="row">
-              <!-- NUEVO CAMPO PLANILLA -->
-
-              <div class="col-md-4 mb-3">
+              <div class="col-6 col-md-4 mb-3">
                 <label class="form-label">N° Planilla</label>
                 <input
                   type="text"
@@ -60,7 +121,7 @@
                 />
               </div>
 
-              <div class="col-md-4 mb-3">
+              <div class="col-6 col-md-4 mb-3">
                 <label class="form-label">Fecha creación</label>
                 <input
                   type="text"
@@ -70,9 +131,8 @@
                 />
               </div>
 
-              <div class="col-md-4 mb-3">
+              <div class="col-12 col-md-4 mb-3">
                 <label class="form-label">Responsable</label>
-
                 <select class="form-select" id="responsable" required>
                   <option value="">Cargando responsables...</option>
                 </select>

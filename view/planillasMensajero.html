@@ -1,4 +1,5 @@
 <style>
+  /* --- CARRUSEL Y TARJETAS --- */
   .contenedor-carrusel {
     display: flex;
     overflow-x: auto;
@@ -6,77 +7,96 @@
     padding: 15px 10px;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-
-    /* CAMBIO CLAVE: Quitamos justify-content: center de aquí */
     justify-content: flex-start;
   }
 
-  /* Usamos pseudo-elementos para crear un "colchón" que centre las tarjetas 
-     solo si hay espacio suficiente, sin cortar la primera */
-  .contenedor-carrusel::before,
-  .contenedor-carrusel::after {
-    content: "";
-    margin: auto;
-  }
-
-  /* Opcional: Si prefieres que en pantallas muy grandes se vea 
-     estrictamente centrado sin trucos de márgenes */
+  /* Centrado inteligente en pantallas grandes */
   @media (min-width: 992px) {
     .contenedor-carrusel {
       justify-content: center;
     }
-    .contenedor-carrusel::before,
-    .contenedor-carrusel::after {
-      display: none;
-    }
   }
 
-  @media (orientation: landscape) and (max-height: 500px) {
-    .contenedor-carrusel {
-      padding: 5px; /* Reduce espacio para dar más aire a la tabla */
-    }
-    .card-planilla {
-      width: 150px; /* Tarjetas un poco más pequeñas en modo horizontal */
-    }
-  }
-
-  /* Estilos Tarjetas */
   .card-planilla {
     flex: 0 0 auto;
-    width: 180px;
+    width: 160px; /* Un poco más estrecha para ver la siguiente */
     transition: all 0.2s ease;
     border-radius: 12px;
     border: 1px solid #dee2e6;
     background: #fff;
     cursor: pointer;
     text-align: center;
-  }
-  .card-planilla:hover,
-  .card-planilla.active {
-    border-color: #007bff;
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.15);
-  }
-  .card-planilla.active {
-    background-color: #f8fbff;
-    border-width: 2px;
+    padding: 12px !important;
   }
 
-  /* Estilos de la Tabla (tomados de tu vista de consulta) */
-  .section-title {
-    font-weight: 600;
-    font-size: 14px;
-    color: #444;
-    margin-bottom: 10px;
+  .card-planilla.active {
+    border-color: #007bff;
+    background-color: #f8fbff;
+    border-width: 2px;
+    transform: translateY(-3px);
   }
-  .table-sm td {
-    font-size: 13px;
-    vertical-align: middle;
+
+  /* --- CUADROS DE TOTALES (GRID) --- */
+  .card-total {
+    border-radius: 8px;
+    padding: 8px !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
-  .badge-counter {
-    font-size: 14px;
+
+  /* --- RESPONSIVE --- */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 13px;
+    }
+
+    /* Reducimos fuentes de los totales en móvil */
+    .card-total small {
+      font-size: 9px !important;
+    }
+    .card-total h6 {
+      font-size: 13px !important;
+    }
+
+    /* Tabla ultra compacta */
+    .table-sm td,
+    .table-sm th {
+      font-size: 11px !important;
+      padding: 4px 2px !important;
+    }
   }
+
+  /* MODO HORIZONTAL MÓVIL */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .contenedor-carrusel {
+      padding: 5px;
+    }
+    .card-planilla {
+      width: 140px;
+      padding: 5px !important;
+    }
+    .card-planilla h6 {
+      font-size: 12px;
+    }
+    .card-planilla .planilla-icon {
+      display: none;
+    } /* Quitamos icono para ganar altura */
+
+    .table-responsive {
+      max-height: 180px;
+    }
+
+    /* En horizontal, los totales ocupan mucho. Los hacemos más pequeños */
+    .row.g-2.mb-3 {
+      margin-bottom: 5px !important;
+    }
+  }
+
   .text-xs {
-    font-size: 11px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
   }
 </style>
 
@@ -111,32 +131,41 @@
         <div class="card-body">
           <div class="row g-2 mb-3">
             <div class="col-6 col-md-3">
-              <div class="card bg-light border-0 text-center p-2">
-                <small class="text-muted d-block fw-bold text-xs"
+              <div class="card bg-light border-0 text-center card-total">
+                <small class="text-muted d-block fw-bold text-xs text-uppercase"
                   >TOTAL CONTRAENTREGA</small
                 >
                 <h6 class="mb-0 fw-bold" id="totalContraentrega">$ 0</h6>
               </div>
             </div>
+
             <div class="col-6 col-md-3">
-              <div class="card bg-light border-0 text-center p-2">
-                <small class="text-muted d-block fw-bold text-xs"
+              <div class="card bg-light border-0 text-center card-total">
+                <small class="text-muted d-block fw-bold text-xs text-uppercase"
                   >TOTAL RECAUDOS</small
                 >
                 <h6 class="mb-0 fw-bold text-primary" id="totalRecaudo">$ 0</h6>
               </div>
             </div>
+
             <div class="col-6 col-md-3">
-              <div class="card bg-info text-white border-0 text-center p-2">
-                <small class="d-block fw-bold text-xs"
+              <div
+                class="card bg-info text-white border-0 text-center card-total"
+              >
+                <small class="d-block fw-bold text-xs text-uppercase"
                   >PAGOS ELECTRÓNICOS</small
                 >
                 <h6 class="mb-0 fw-bold" id="totalElectronico">$ 0</h6>
               </div>
             </div>
+
             <div class="col-6 col-md-3">
-              <div class="card bg-dark text-white border-0 text-center p-2">
-                <small class="d-block fw-bold text-xs">GRAN TOTAL</small>
+              <div
+                class="card bg-dark text-white border-0 text-center card-total"
+              >
+                <small class="d-block fw-bold text-xs text-uppercase"
+                  >GRAN TOTAL</small
+                >
                 <h6 class="mb-0 fw-bold" id="totalGeneral">$ 0</h6>
               </div>
             </div>
