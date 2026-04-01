@@ -448,18 +448,34 @@
       //################################################################################
 
       function mostrarMenuPorRol(rol) {
+        // Ocultamos todo primero para evitar solapamientos
         document.getElementById("navbarItemsDefault").style.display = "none";
-        document.getElementById("navbarItemsEmpresa").style.display =
-          rol === 1 ? "block" : "none";
-        document.getElementById("navbarItemsAdmin").style.display =
-          rol === 2 ? "block" : "none";
+        document.getElementById("navbarItemsEmpresa").style.display = "none";
+        document.getElementById("navbarItemsMensajero").style.display = "none";
+        document.getElementById("navbarItemsAdmin").style.display = "none";
+
+        // Activamos solo el que corresponde (usamos Number(rol) por si viene como string)
+        const userRol = Number(rol);
+
+        if (userRol === 1) {
+          document.getElementById("navbarItemsEmpresa").style.display = "block";
+        } else if (userRol === 2) {
+          document.getElementById("navbarItemsMensajero").style.display =
+            "block";
+        } else if (userRol === 3) {
+          document.getElementById("navbarItemsAdmin").style.display = "block";
+        } else {
+          // Si no coincide con ninguno, vuelve al default
+          mostrarMenuInvitado();
+        }
       }
 
       /*******************************************************************************/
       function mostrarMenuInvitado() {
-        document.getElementById("textUser").textContent = ""; //Menu Invitado
+        document.getElementById("textUser").textContent = "";
         document.getElementById("navbarItemsDefault").style.display = "block";
         document.getElementById("navbarItemsEmpresa").style.display = "none";
+        document.getElementById("navbarItemsMensajero").style.display = "none"; // Agregado
         document.getElementById("navbarItemsAdmin").style.display = "none";
       }
 
@@ -525,12 +541,8 @@
             const { nombre, rol, persona_id, empresa_id } = data;
 
             // Habilitar menús según rol
-            document.getElementById("navbarItemsAdmin").style.display =
-              rol === 2 ? "block" : "none";
-            document.getElementById("navbarItemsEmpresa").style.display =
-              rol === 1 ? "block" : "none";
-            document.getElementById("navbarItemsDefault").style.display =
-              "none";
+            // Llama a la función centralizada
+            mostrarMenuPorRol(rol);
 
             // GUARDAR DATOS CLAVE PARA EL RESTO DE LA APP
             sessionStorage.setItem("nombreUsuario", nombre);
@@ -649,6 +661,8 @@
           // Ocultar menús privados y mostrar el de invitado
           document.getElementById("navbarItemsDefault").style.display = "block";
           document.getElementById("navbarItemsEmpresa").style.display = "none";
+          document.getElementById("navbarItemsMensajero").style.display =
+            "none"; // Agregado
           document.getElementById("navbarItemsAdmin").style.display = "none";
 
           // 5. Limpiar campos físicos de los formularios de login/password
