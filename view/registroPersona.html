@@ -1,0 +1,173 @@
+<style>
+  .icono {
+    width: 32px;
+    height: 32px;
+    max-width: 60%;
+  }
+
+  .texto-icono {
+    font-size: 10px;
+    font-family: "Poppins", sans-serif;
+  }
+
+  @media screen and (min-width: 768px) {
+    .icono {
+      width: 48px;
+      height: 48px;
+    }
+
+    .texto-icono {
+      font-size: 14px;
+      font-family: "Poppins", sans-serif;
+    }
+  }
+</style>
+
+<div>
+  <div class="container-fluid">
+    <h3></h3>
+
+    <form
+      id="formPersona"
+      onsubmit="nsRegistroPersona.procesarFormulario(event, this)"
+    >
+      <div class="container-fluid p-0 m-0">
+        <div class="row justify-content-center">
+          <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-5">
+            <div class="card shadow border-0">
+              <!-- HEADER -->
+              <div
+                class="card-header bg-dark text-white d-flex align-items-center"
+                style="height: 3rem"
+              >
+                <h5 class="card-title mb-0 fw-bold">Registro de Persona</h5>
+              </div>
+
+              <!-- BODY -->
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Nombres</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nombres"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Apellidos</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="apellidos"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Celular</label>
+                  <input
+                    type="tel"
+                    name="celular"
+                    id="celular"
+                    placeholder="Ej: 3001234567"
+                    pattern="^3[0-9]{9}$"
+                    maxlength="10"
+                    class="form-control"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- FOOTER -->
+              <div class="card-footer d-flex gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-dark flex-fill"
+                  id="btnGuardar"
+                >
+                  GUARDAR REGISTRO
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  var nsRegistroPersona = (function () {
+    /***********************************************/
+
+    // Evitar submit con ENTER en inputs numéricos
+    document.querySelectorAll("input[type=number]").forEach((node) =>
+      node.addEventListener("keypress", (e) => {
+        if (e.keyCode === 13) e.preventDefault();
+      }),
+    );
+
+    /***********************************************/
+    async function procesarFormulario(event, form) {
+      event.preventDefault();
+
+      const btn = document.getElementById("btnGuardar");
+      btn.disabled = true;
+      btn.classList.add("disabled");
+
+      try {
+        const nombres = document.getElementById("nombres").value.trim();
+        const apellidos = document.getElementById("apellidos").value.trim();
+        const celular = document.getElementById("celular").value.trim();
+
+        if (!nombres || !apellidos || !celular) {
+          throw new Error("Todos los campos son obligatorios");
+        }
+
+        // --- OBTENER TOKEN DE SESIÓN ACTIVA ---
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        if (!session)
+          throw new Error("Debes estar autenticado para registrar personas");
+
+        // Enviamos como JSON para que la función lo lea más fácil
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/mse_registrar_persona`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`, // Token de la empresa
+            },
+            body: JSON.stringify({ nombres, apellidos, celular }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Error al registrar persona");
+        }
+
+        alertSMS(
+          `${nombres.toUpperCase()} ${apellidos.toUpperCase()} fue registrad@ correctamente ✅`,
+        );
+
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        alertSMS(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove("disabled");
+      }
+    }
+    /***********************************************/
+    return {
+      procesarFormulario,
+    };
+  })();
+</script>

@@ -6,6 +6,14 @@ let swRegistration = null; // 🔥 referencia global
 let intervalSW = null;
 let newVersionAvailable = null;
 
+function registrarPersona() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const registroPersona = document.createElement("registro-persona-component");
+  registroPersona.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(registroPersona);
+}
+
 function crearPlanilla() {
   let main = document.getElementById("App");
   removeALLChilds(main);
