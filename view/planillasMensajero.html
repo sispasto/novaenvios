@@ -1,58 +1,61 @@
 <style>
-  /* Carrusel horizontal para las tarjetas */
+  /* Carrusel centrado y scrollable */
   .contenedor-carrusel {
     display: flex;
     overflow-x: auto;
     gap: 15px;
-    padding: 10px 5px;
-    scrollbar-width: thin; /* Para Firefox */
+    padding: 15px 5px;
+    scrollbar-width: none; /* Ocultar scroll en Firefox */
     -webkit-overflow-scrolling: touch;
+    justify-content: center; /* Centra las tarjetas si son pocas */
   }
 
-  /* Estilo de tarjeta compacta */
+  .contenedor-carrusel::-webkit-scrollbar {
+    display: none; /* Ocultar scroll en Chrome/Safari */
+  }
+
+  /* Tarjeta compacta centrada */
   .card-planilla {
-    flex: 0 0 auto; /* Evita que las tarjetas se encojan */
-    width: 220px;
+    flex: 0 0 auto;
+    width: 200px; /* Un poco más pequeña para mejor balance */
     transition: all 0.2s ease;
     border-radius: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #dee2e6;
     background: #fff;
     cursor: pointer;
+    text-align: center; /* Centra el texto interno */
   }
 
   .card-planilla:hover,
   .card-planilla.active {
     border-color: #007bff;
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
     transform: translateY(-3px);
   }
 
   .card-planilla.active {
-    background-color: #f0f7ff;
+    background-color: #f8fbff;
     border-width: 2px;
   }
 
-  /* Ajustes de fuente para tamaño compacto */
-  .card-planilla .card-title {
-    font-size: 1rem;
-    margin-bottom: 0.2rem;
-  }
-  .card-planilla .card-text {
-    font-size: 0.85rem;
+  /* Icono y texto */
+  .planilla-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
   }
 
-  /* Tabla de guías */
-  .detalle-contenedor {
-    margin-top: 20px;
-    border-radius: 15px;
-    overflow: hidden;
+  .fecha-planilla {
+    font-size: 0.75rem;
+    color: #6c757d;
+    display: block;
+    margin-top: 5px;
   }
 </style>
 
 <div class="container-fluid mt-3">
   <div class="row mb-2">
-    <div class="col">
-      <h6 class="text-uppercase fw-bold text-muted small">
+    <div class="col text-center">
+      <h6 class="text-uppercase fw-bold text-muted small mb-3">
         Mis Planillas Abiertas
       </h6>
       <div id="contenedor-planillas" class="contenedor-carrusel"></div>
@@ -63,23 +66,23 @@
 
   <div id="seccion-detalle" class="row d-none">
     <div class="col-12">
-      <div class="card detalle-contenedor shadow-sm">
+      <div class="card shadow-sm border-0">
         <div
           class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
         >
-          <h5 class="mb-0" id="titulo-detalle">Detalle Planilla</h5>
+          <h5 class="mb-0 small" id="titulo-detalle">Detalle</h5>
           <span class="badge bg-primary" id="contador-detalle">0 Guías</span>
         </div>
         <div class="card-body p-0">
           <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-sm table-hover mb-0">
               <thead class="table-light">
                 <tr>
-                  <th>Guía</th>
+                  <th class="ps-3">Guía</th>
                   <th>Destinatario</th>
                   <th>Dirección</th>
                   <th>Ciudad</th>
-                  <th class="text-end">Valor</th>
+                  <th class="text-end pe-3">Valor</th>
                 </tr>
               </thead>
               <tbody id="tabla-guias-detalle"></tbody>
@@ -94,22 +97,18 @@
 <script>
   var nsPlanillasMensajero = (function () {
     function consultar_guias_planilla(numPlanilla, elemento) {
-      // 1. Marcar tarjeta activa visualmente
       document
         .querySelectorAll(".card-planilla")
         .forEach((c) => c.classList.remove("active"));
       elemento.classList.add("active");
 
-      // 2. Mostrar sección de tabla
-      const seccion = document.getElementById("seccion-detalle");
-      seccion.classList.remove("d-none");
-
+      document.getElementById("seccion-detalle").classList.remove("d-none");
       document.getElementById("titulo-detalle").innerText =
         `Guías en Planilla #${numPlanilla}`;
 
-      // 3. Renderizar tabla estática (Simulación)
+      // Datos estáticos de ejemplo basándonos en tu captura
       const tbody = document.getElementById("tabla-guias-detalle");
-      const guiasEstaticas = [
+      const guias = [
         {
           guia: "7000123",
           cliente: "Anderson Quiñones",
@@ -126,28 +125,27 @@
         },
       ];
 
-      tbody.innerHTML = guiasEstaticas
+      tbody.innerHTML = guias
         .map(
           (g) => `
         <tr>
-          <td><strong>${g.guia}</strong></td>
+          <td class="ps-3"><strong>${g.guia}</strong></td>
           <td>${g.cliente}</td>
           <td>${g.dir}</td>
           <td>${g.ciudad}</td>
-          <td class="text-end fw-bold text-success">${g.valor}</td>
+          <td class="text-end pe-3 fw-bold text-success">${g.valor}</td>
         </tr>
       `,
         )
         .join("");
 
       document.getElementById("contador-detalle").innerText =
-        `${guiasEstaticas.length} Guías`;
+        `${guias.length} Guías`;
     }
 
     async function cargarPlanillasReales() {
-      const contenedor = document.getElementById("contenedor-planillas");
       try {
-        const personaId = sessionStorage.getItem("personaId") || "4"; // Fallback según tu imagen
+        const personaId = sessionStorage.getItem("personald"); // Valor 4 en tu sesión
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
@@ -167,27 +165,28 @@
         const result = await response.json();
         if (result.ok) renderizarTarjetas(result.data);
       } catch (err) {
-        console.error(err);
+        console.error("Error cargando planillas:", err);
       }
     }
 
     function renderizarTarjetas(planillas) {
       const contenedor = document.getElementById("contenedor-planillas");
       contenedor.innerHTML = planillas
-        .map(
-          (p) => `
-        <div class="card card-planilla p-2" onclick="nsPlanillasMensajero.consultar_guias_planilla(${p.num_planilla}, this)">
-          <div class="d-flex align-items-center">
-            <div class="planilla-icon me-2" style="font-size: 1.2rem;">📦</div>
-            <div class="flex-grow-1">
-              <h6 class="card-title fw-bold">#${p.num_planilla}</h6>
-              <p class="card-text text-muted mb-0">${p.total_guias || 0} guías</p>
-            </div>
-            <span class="badge bg-primary rounded-pill small" style="font-size: 0.6rem;">Abierta</span>
+        .map((p) => {
+          // Formatear fecha para mostrar solo YYYY-MM-DD
+          const fechaSoloDia = new Date(p.fecha_creacion)
+            .toISOString()
+            .split("T")[0];
+
+          return `
+          <div class="card card-planilla p-3" onclick="nsPlanillasMensajero.consultar_guias_planilla(${p.num_planilla}, this)">
+            <div class="planilla-icon">📦</div>
+            <h6 class="fw-bold mb-1">Planilla #${p.num_planilla}</h6>
+            <div class="small text-primary fw-semibold">${p.total_guias || 0} Guías</div>
+            <span class="fecha-planilla">Creada: ${fechaSoloDia}</span>
           </div>
-        </div>
-      `,
-        )
+        `;
+        })
         .join("");
     }
 
