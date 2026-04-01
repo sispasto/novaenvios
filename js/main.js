@@ -30,6 +30,14 @@ function cerrarPlanilla() {
   main.appendChild(frmCerrarplanilla);
 }
 
+function getPlanillasMensajero() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const frmPlanillasMensajero = document.createElement("planillas-mensajero");
+  frmPlanillasMensajero.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(frmPlanillasMensajero);
+}
+
 function consultarPlanilla() {
   let main = document.getElementById("App");
   removeALLChilds(main);

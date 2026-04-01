@@ -8,3 +8,4 @@ import "./consultarPlanillas.js";
 import "./cerrarPlanilla.js";
 import "./excluirGuias.js";
 import "./consultarPlanilla.js";
+import "./planillasMensajero.js";
