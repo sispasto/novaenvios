@@ -66,6 +66,33 @@
       font-size: 16px;
     }
   }
+
+  /* Agregar al bloque <style> */
+  .text-nova {
+    color: var(--nova-blue);
+    letter-spacing: 1px;
+  }
+
+  #tablaGuias tr {
+    transition: all 0.2s ease;
+  }
+
+  #tablaGuias tr:hover {
+    background-color: var(--nova-light-blue) !important;
+  }
+
+  /* Animación para cuando entra una guía nueva */
+  @keyframes highlight {
+    0% {
+      background-color: var(--dev-bg);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+  .new-row {
+    animation: highlight 1.5s ease-out;
+  }
 </style>
 
 <div class="container-fluid py-3">
@@ -259,6 +286,9 @@
 
         listaGuias.push(guia);
         renderGuias();
+        // Dentro del evento keydown de inputGuia, después de renderGuias():
+        const container = document.querySelector(".table-responsive");
+        container.scrollTop = container.scrollHeight;
         this.value = "";
         this.focus();
       }
@@ -288,18 +318,24 @@
 
     async function guardarPlanilla(event, form) {
       event.preventDefault();
+      const btnGuardar = document.getElementById("btnGuardar");
+
       try {
         if (listaGuias.length === 0)
-          throw new Error("Escanee al menos una guía para devolver");
+          throw new Error("Escanee al menos una guía");
+
         const responsable = document.getElementById("responsable").value;
-        if (!responsable)
-          throw new Error("Seleccione el responsable de la devolución");
+        if (!responsable) throw new Error("Seleccione el responsable");
+
+        // Bloquear botón para evitar doble envío
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i>PROCESANDO...';
 
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
 
-        // IMPORTANTE: Asegúrate que este sea el endpoint de devolución
         const response = await fetch(
           `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla_devolucion`,
           {
@@ -311,22 +347,39 @@
             body: JSON.stringify({
               id_responsable: responsable,
               guias: listaGuias,
-              tipo: "DEVOLUCION", // Parámetro adicional si tu función lo requiere
             }),
           },
         );
 
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error);
+        if (!response.ok) throw new Error(result.error || "Error desconocido");
 
-        if (result.num_planilla)
-          document.getElementById("num_planilla").value = result.num_planilla;
-        document.getElementById("btnGuardar").disabled = true;
+        // 1. Mostrar el número de planilla generado por el RPC
+        if (result.planilla) {
+          document.getElementById("num_planilla").value = result.planilla;
+        }
+
+        // 2. Manejar guías que no estaban en la base de datos (Caso B del RPC)
+        if (result.no_encontradas && result.no_encontradas.length > 0) {
+          const cantidad = result.no_encontradas.length;
+          alertSMS(
+            `Planilla #${result.planilla} creada. ⚠️ ${cantidad} guía(s) no tenían datos previos en el sistema pero fueron registradas.`,
+          );
+          console.warn("Guías sin datos previos:", result.no_encontradas);
+        } else {
+          alertSMS(
+            `¡Éxito! Planilla #${result.planilla} procesada correctamente ✅`,
+          );
+        }
+
+        // 3. Gestionar estado de la interfaz
         document.getElementById("btnNuevaPlanilla").disabled = false;
-
-        alertSMS("Planilla de devolución procesada ✅");
+        btnGuardar.innerHTML = '<i class="fas fa-check me-2"></i>PROCESADO';
       } catch (err) {
         alertSMS(err.message);
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML =
+          '<i class="fas fa-save me-2"></i>PROCESAR DEVOLUCIÓN';
       }
     }
 
