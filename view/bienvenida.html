@@ -1,28 +1,33 @@
 <style>
-  /* Contenedor principal con ajuste para subir el contenido */
+  /* Contenedor principal con ajuste agresivo para subir el contenido */
   .container-login100 {
     min-height: 100vh;
     display: flex;
-    align-items: center; /* Mantenemos center pero... */
+    align-items: center;
     justify-content: center;
     background-color: #f8f9fa;
     padding: 15px;
-    padding-bottom: 15vh; /* ...este padding empuja todo hacia ARRIBA */
+    /* Subimos el contenido un 25% respecto al centro total */
+    padding-bottom: 25vh;
     box-sizing: border-box;
+    overflow: hidden;
   }
 
-  /* Título "Bienvenido" más delgado y pequeño */
+  /* Título "Bienvenido" minimalista */
   .titulo-bienvenida {
-    font-size: 2rem; /* Más pequeño que display-4 */
+    font-family: "Poppins", sans-serif;
+    font-size: 1.8rem; /* Tamaño más elegante para móvil */
+    font-weight: 300; /* Delgado */
     color: #333;
-    margin-bottom: 1px !important; /* Más pegado a la imagen */
+    margin-bottom: 10px !important; /* Muy pegado a la imagen */
+    letter-spacing: 1px;
   }
 
   /* Control de la imagen de bienvenida */
   .login100-form-avatar {
     display: block;
     width: 100%;
-    max-width: 450px;
+    max-width: 400px;
     margin: 0 auto;
   }
 
@@ -30,47 +35,43 @@
     width: 100%;
     height: auto;
     border-radius: 20px;
-    /* Corregido: box-shadow en lugar de shadow */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   }
 
   .texto-version {
     font-family: "Poppins", sans-serif;
     font-weight: 400;
-    color: #888;
-    margin-top: 15px;
+    color: #aaa;
+    margin-top: 12px;
     display: block;
-    font-size: 14px;
+    font-size: 13px;
   }
 
-  /* --- RESPONSIVE --- */
+  /* --- AJUSTES ESPECÍFICOS PARA MÓVIL --- */
   @media (max-width: 768px) {
     .container-login100 {
-      padding-bottom: 10vh; /* Menos empuje en móvil */
+      padding-bottom: 30vh; /* En celular sube un poco más todavía */
     }
     .titulo-bienvenida {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
     }
     .login100-form-avatar {
       max-width: 280px;
     }
   }
 
-  /* MODO HORIZONTAL MÓVIL */
+  /* MODO HORIZONTAL MÓVIL (Para que no se oculte nada) */
   @media (orientation: landscape) and (max-height: 500px) {
     .container-login100 {
-      padding-bottom: 0; /* Centrado normal para que no se pierda el texto */
+      padding-bottom: 0;
       align-items: center;
     }
     .login100-form-avatar {
-      max-width: 160px;
+      max-width: 150px;
     }
     .titulo-bienvenida {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       margin-bottom: 5px !important;
-    }
-    .texto-version {
-      margin-top: 5px;
     }
   }
 </style>
@@ -92,7 +93,9 @@
         </div>
 
         <div class="mt-2">
-          <span id="version-label" class="texto-version"> </span>
+          <span id="version-label" class="texto-version">
+            NovaEnvios v2.5
+          </span>
         </div>
       </div>
     </div>
