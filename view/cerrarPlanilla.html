@@ -325,7 +325,8 @@ async function buscarPlanilla(num_planilla) {
     }
 
        
-    async function validarGuias() {
+    // Añadimos el parámetro con valor por defecto true
+    async function validarGuias(mostrarAlert = true) {
         try {
             if (!listaGuias || listaGuias.length === 0) {
                 calcularTotales([]);
@@ -343,17 +344,23 @@ async function buscarPlanilla(num_planilla) {
 
             if (resServidor.ok) {
                 listaGuias = resServidor.data;                
-                // Reutilizamos la nueva función
                 calcularTotales(listaGuias);
-                
                 renderGuias();
-                alertSMS("Validación masiva completada con éxito.");
+
+                // SOLO muestra el alert si el parámetro es true
+                if (mostrarAlert) {
+                    alertSMS("Validación masiva completada con éxito.");
+                }
+                
+                return true; // Retornamos true para confirmar que todo salió bien
             } else {
                 alertSMS("El servidor no pudo procesar las guías.");
+                return false;
             }
         } catch (err) {
             console.error("Error en validación:", err);
-            alertSMS("Error al conectar con el servidor.");
+            alertSMS("Error al conectar con el servidor local.");
+            return false;
         }
     }
 
@@ -413,6 +420,16 @@ async function buscarPlanilla(num_planilla) {
       event.preventDefault();
 
       try {
+          
+          // Llamamos a validar pasándole FALSE para que no interrumpa con el alert
+          const validacionOk = await validarGuias(false); 
+            
+          // Si la validación falló (ej. servidor C# apagado), no seguimos con el guardado
+          if (!validacionOk) {
+                alertSMS(`Ocurrio un error al validar la planilla vuelve a intentarlo.`);
+                return; 
+          }
+
           const numInput = document.getElementById("num_planilla");
           const num_planilla = numInput.value;
           
