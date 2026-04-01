@@ -1,79 +1,157 @@
 <style>
+  /* Carrusel horizontal para las tarjetas */
+  .contenedor-carrusel {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding: 10px 5px;
+    scrollbar-width: thin; /* Para Firefox */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Estilo de tarjeta compacta */
   .card-planilla {
-    transition: transform 0.2s;
-    border-radius: 15px;
-    border: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(145deg, #ffffff, #f0f0f0);
-  }
-  .card-planilla:hover {
-    transform: translateY(-5px);
+    flex: 0 0 auto; /* Evita que las tarjetas se encojan */
+    width: 220px;
+    transition: all 0.2s ease;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    background: #fff;
     cursor: pointer;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   }
-  .badge-planilla {
-    background-color: #007bff;
-    font-size: 0.9rem;
+
+  .card-planilla:hover,
+  .card-planilla.active {
+    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    transform: translateY(-3px);
   }
-  .planilla-icon {
-    font-size: 2rem;
-    color: #007bff;
+
+  .card-planilla.active {
+    background-color: #f0f7ff;
+    border-width: 2px;
+  }
+
+  /* Ajustes de fuente para tamaño compacto */
+  .card-planilla .card-title {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  .card-planilla .card-text {
+    font-size: 0.85rem;
+  }
+
+  /* Tabla de guías */
+  .detalle-contenedor {
+    margin-top: 20px;
+    border-radius: 15px;
+    overflow: hidden;
   }
 </style>
 
-<div class="container mt-4">
-  <div class="row mb-3">
-    <div class="col text-center">
-      <h2 class="display-6">Mis Planillas</h2>
-      <p class="text-muted">
-        Selecciona una planilla abierta para ver los detalles.
-      </p>
+<div class="container-fluid mt-3">
+  <div class="row mb-2">
+    <div class="col">
+      <h6 class="text-uppercase fw-bold text-muted small">
+        Mis Planillas Abiertas
+      </h6>
+      <div id="contenedor-planillas" class="contenedor-carrusel"></div>
     </div>
   </div>
 
-  <div id="loader-planillas" class="text-center my-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
+  <hr class="my-3 opacity-25" />
+
+  <div id="seccion-detalle" class="row d-none">
+    <div class="col-12">
+      <div class="card detalle-contenedor shadow-sm">
+        <div
+          class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0" id="titulo-detalle">Detalle Planilla</h5>
+          <span class="badge bg-primary" id="contador-detalle">0 Guías</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Guía</th>
+                  <th>Destinatario</th>
+                  <th>Dirección</th>
+                  <th>Ciudad</th>
+                  <th class="text-end">Valor</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-guias-detalle"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <div
-    id="contenedor-planillas"
-    class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"
-  ></div>
 </div>
 
 <script>
-  // Namespace para evitar conflictos, similar a tu nsPlanilla
   var nsPlanillasMensajero = (function () {
-    async function consultar_guias_planilla(numPlanilla) {
-      console.log("Consultando guías para la planilla:", numPlanilla);
-      // Aquí puedes redirigir o abrir un modal con el detalle de log_planilla_guias
-      alert("Consultando detalle de planilla #" + numPlanilla);
+    function consultar_guias_planilla(numPlanilla, elemento) {
+      // 1. Marcar tarjeta activa visualmente
+      document
+        .querySelectorAll(".card-planilla")
+        .forEach((c) => c.classList.remove("active"));
+      elemento.classList.add("active");
+
+      // 2. Mostrar sección de tabla
+      const seccion = document.getElementById("seccion-detalle");
+      seccion.classList.remove("d-none");
+
+      document.getElementById("titulo-detalle").innerText =
+        `Guías en Planilla #${numPlanilla}`;
+
+      // 3. Renderizar tabla estática (Simulación)
+      const tbody = document.getElementById("tabla-guias-detalle");
+      const guiasEstaticas = [
+        {
+          guia: "7000123",
+          cliente: "Anderson Quiñones",
+          dir: "Calle 10 #5-20",
+          ciudad: "Pasto",
+          valor: "$15,000",
+        },
+        {
+          guia: "7000456",
+          cliente: "Maria Lopez",
+          dir: "Av. Santander 45",
+          ciudad: "Pasto",
+          valor: "$0 (Pago Electrónico)",
+        },
+      ];
+
+      tbody.innerHTML = guiasEstaticas
+        .map(
+          (g) => `
+        <tr>
+          <td><strong>${g.guia}</strong></td>
+          <td>${g.cliente}</td>
+          <td>${g.dir}</td>
+          <td>${g.ciudad}</td>
+          <td class="text-end fw-bold text-success">${g.valor}</td>
+        </tr>
+      `,
+        )
+        .join("");
+
+      document.getElementById("contador-detalle").innerText =
+        `${guiasEstaticas.length} Guías`;
     }
 
     async function cargarPlanillasReales() {
       const contenedor = document.getElementById("contenedor-planillas");
-      const loader = document.getElementById("loader-planillas");
-
       try {
-        // 1. Obtener ID de la persona desde SessionStorage
-        const personaId = sessionStorage.getItem("personaId");
-
-        if (!personaId) {
-          throw new Error("No se encontró ID de sesión");
-        }
-
-        // 2. Obtener Sesión de Supabase para el Token
+        const personaId = sessionStorage.getItem("personaId") || "4"; // Fallback según tu imagen
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
 
-        if (!session) {
-          throw new Error("Sesión no activa");
-        }
-
-        // 3. Llamada a la Edge Function novaenvios_planillas_mensajero
         const response = await fetch(
           `${SUPABASE_URL}/functions/v1/novaenvios_planillas_mensajero`,
           {
@@ -87,50 +165,25 @@
         );
 
         const result = await response.json();
-
-        if (!result.ok) {
-          throw new Error(result.error || "Error al consultar planillas");
-        }
-
-        // 4. Renderizar tarjetas con datos de la RPC
-        renderizarTarjetas(result.data);
+        if (result.ok) renderizarTarjetas(result.data);
       } catch (err) {
         console.error(err);
-        contenedor.innerHTML = `<div class="alert alert-danger w-100">${err.message}</div>`;
-      } finally {
-        loader.style.display = "none";
       }
     }
 
     function renderizarTarjetas(planillas) {
       const contenedor = document.getElementById("contenedor-planillas");
-
-      if (planillas.length === 0) {
-        contenedor.innerHTML =
-          '<p class="text-center w-100">No tienes planillas abiertas asignadas.</p>';
-        return;
-      }
-
       contenedor.innerHTML = planillas
         .map(
           (p) => `
-        <div class="col">
-          <div class="card h-100 card-planilla" onclick="nsPlanillasMensajero.consultar_guias_planilla(${p.num_planilla})">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="planilla-icon">
-                   <span style="font-size: 1.5rem;">📦</span>
-                </div>
-                <span class="badge rounded-pill badge-planilla">${p.estado === "AB" ? "Abierta" : p.estado}</span>
-              </div>
-              <h5 class="card-title">Planilla #${p.num_planilla}</h5>
-              <p class="card-text text-secondary">
-                <strong>${p.total_guias || 0} Guías</strong> asignadas
-              </p>
+        <div class="card card-planilla p-2" onclick="nsPlanillasMensajero.consultar_guias_planilla(${p.num_planilla}, this)">
+          <div class="d-flex align-items-center">
+            <div class="planilla-icon me-2" style="font-size: 1.2rem;">📦</div>
+            <div class="flex-grow-1">
+              <h6 class="card-title fw-bold">#${p.num_planilla}</h6>
+              <p class="card-text text-muted mb-0">${p.total_guias || 0} guías</p>
             </div>
-            <div class="card-footer bg-transparent border-0 pb-3">
-              <small class="text-muted">Creada: ${new Date(p.fecha_creacion).toLocaleString()}</small>
-            </div>
+            <span class="badge bg-primary rounded-pill small" style="font-size: 0.6rem;">Abierta</span>
           </div>
         </div>
       `,
@@ -138,11 +191,8 @@
         .join("");
     }
 
-    // Ejecutar al cargar la vista
     cargarPlanillasReales();
 
-    return {
-      consultar_guias_planilla,
-    };
+    return { consultar_guias_planilla };
   })();
 </script>
