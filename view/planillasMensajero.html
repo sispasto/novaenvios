@@ -1,5 +1,4 @@
 <style>
-  /* Estilos Carrusel */
   .contenedor-carrusel {
     display: flex;
     overflow-x: auto;
@@ -7,19 +6,38 @@
     padding: 15px 10px;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+
+    /* CAMBIO CLAVE: Quitamos justify-content: center de aquí */
     justify-content: flex-start;
   }
-  @media (min-width: 768px) {
+
+  /* Usamos pseudo-elementos para crear un "colchón" que centre las tarjetas 
+     solo si hay espacio suficiente, sin cortar la primera */
+  .contenedor-carrusel::before,
+  .contenedor-carrusel::after {
+    content: "";
+    margin: auto;
+  }
+
+  /* Opcional: Si prefieres que en pantallas muy grandes se vea 
+     estrictamente centrado sin trucos de márgenes */
+  @media (min-width: 992px) {
     .contenedor-carrusel {
       justify-content: center;
     }
+    .contenedor-carrusel::before,
+    .contenedor-carrusel::after {
+      display: none;
+    }
   }
-  .contenedor-carrusel::-webkit-scrollbar {
-    height: 5px;
-  }
-  .contenedor-carrusel::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 10px;
+
+  @media (orientation: landscape) and (max-height: 500px) {
+    .contenedor-carrusel {
+      padding: 5px; /* Reduce espacio para dar más aire a la tabla */
+    }
+    .card-planilla {
+      width: 150px; /* Tarjetas un poco más pequeñas en modo horizontal */
+    }
   }
 
   /* Estilos Tarjetas */
