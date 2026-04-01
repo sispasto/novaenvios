@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (swRegistration && swRegistration.waiting) {
           // 🔥 nueva versión (NO aplicar aún)
           newVersionAvailable = event.data.version;
-          //console.log("Nueva versión detectada:", newVersionAvailable);
+          console.log("Nueva versión detectada:", newVersionAvailable);
           mostrarBotonActualizacion();
         } else {
           // 🔥 versión actual activa
@@ -289,7 +289,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
         if (swRegistration) {
-          //console.log("👀 Usuario volvió → revisando SW...");
+          console.log("Validando actualizaciones...");
           swRegistration.update();
         }
       }
