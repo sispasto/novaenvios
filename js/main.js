@@ -30,6 +30,16 @@ function cerrarPlanilla() {
   main.appendChild(frmCerrarplanilla);
 }
 
+function consultarPlanilla() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const frmConsultarPlanilla = document.createElement(
+    "consultar-planilla-component",
+  );
+  frmConsultarPlanilla.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(frmConsultarPlanilla);
+}
+
 function consultarPlanillas() {
   let main = document.getElementById("App");
   removeALLChilds(main);
