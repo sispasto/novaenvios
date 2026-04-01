@@ -93,7 +93,7 @@
             <!-- Rol Empresa -->
             <ul
               class="navbar-nav me-auto mb-2 mb-lg-0"
-              id="navbarItemsUser"
+              id="navbarItemsEmpresa"
               style="display: none"
             >
               <!-- Inicio -->
@@ -188,10 +188,6 @@
                   ><i class="bi bi-key"> Anular Planilla</i></a
                 >
               </li>
-              <!-- Histórico por fechas -->
-              <!--<li class="nav-item">
-                        <a class="nav-link" href="#" onclick="getNomina();"><i class="bi bi-card-list"> Histórico por fechas</i></a>
-                    </li> -->
               <!-- Cambiar Clave -->
               <li class="nav-item">
                 <a class="nav-link" href="#" onclick="showChangePasswordModal()"
@@ -424,7 +420,7 @@
 
       function mostrarMenuPorRol(rol) {
         document.getElementById("navbarItemsDefault").style.display = "none";
-        document.getElementById("navbarItemsUser").style.display =
+        document.getElementById("navbarItemsEmpresa").style.display =
           rol === 1 ? "block" : "none";
         document.getElementById("navbarItemsAdmin").style.display =
           rol === 2 ? "block" : "none";
@@ -432,9 +428,9 @@
 
       /*******************************************************************************/
       function mostrarMenuInvitado() {
-        document.getElementById("textUser").textContent = "Invitado";
+        document.getElementById("textUser").textContent = ""; //Menu Invitado
         document.getElementById("navbarItemsDefault").style.display = "block";
-        document.getElementById("navbarItemsUser").style.display = "none";
+        document.getElementById("navbarItemsEmpresa").style.display = "none";
         document.getElementById("navbarItemsAdmin").style.display = "none";
       }
 
@@ -502,7 +498,7 @@
             // Habilitar menús según rol
             document.getElementById("navbarItemsAdmin").style.display =
               rol === 2 ? "block" : "none";
-            document.getElementById("navbarItemsUser").style.display =
+            document.getElementById("navbarItemsEmpresa").style.display =
               rol === 1 ? "block" : "none";
             document.getElementById("navbarItemsDefault").style.display =
               "none";
@@ -619,11 +615,11 @@
           sessionStorage.setItem("userRol", "0");
 
           // 4. Actualizar visualmente la interfaz
-          document.getElementById("textUser").textContent = "Invitado";
+          document.getElementById("textUser").textContent = ""; //esta es la de invitado
 
           // Ocultar menús privados y mostrar el de invitado
           document.getElementById("navbarItemsDefault").style.display = "block";
-          document.getElementById("navbarItemsUser").style.display = "none";
+          document.getElementById("navbarItemsEmpresa").style.display = "none";
           document.getElementById("navbarItemsAdmin").style.display = "none";
 
           // 5. Limpiar campos físicos de los formularios de login/password
