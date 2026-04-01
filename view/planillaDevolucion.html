@@ -1,47 +1,52 @@
 <style>
   /* Colores de Identidad Nova Envios */
   :root {
-    --nova-blue: #1d438a; /* Azul del logo */
+    --nova-blue: #1d438a;
+    --nova-dark-blue: #153266;
     --nova-light-blue: #f0f4f8;
-    --dev-red: #d32f2f; /* Rojo más profesional */
+    --dev-red: #e63946; /* Rojo acción */
     --dev-bg: #fff5f5;
   }
 
   .section-title {
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
     color: var(--nova-blue);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-left: 4px solid var(--dev-red);
+    border-left: 4px solid var(--nova-blue);
     padding-left: 10px;
     margin-bottom: 15px;
   }
 
+  /* Header azul Nova Envios */
   .card-header.bg-devolucion {
     background: linear-gradient(
       135deg,
-      var(--dev-red) 0%,
-      #b71c1c 100%
+      var(--nova-blue) 0%,
+      var(--nova-dark-blue) 100%
     ) !important;
     border-bottom: 3px solid rgba(0, 0, 0, 0.1);
   }
 
   .scan-input-dev {
-    border: 2px solid var(--dev-red) !important;
-    background-color: var(--dev-bg);
+    border: 2px solid var(--nova-blue) !important;
+    background-color: var(--nova-light-blue);
     border-radius: 8px;
     transition: all 0.3s ease;
-    color: var(--dev-red);
+    color: var(--nova-blue);
+    font-weight: bold;
+    text-align: center;
   }
 
   .scan-input-dev:focus {
-    box-shadow: 0 0 0 0.25rem rgba(211, 47, 47, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(29, 67, 138, 0.2);
     background-color: #fff;
+    border-color: var(--nova-blue) !important;
   }
 
   .badge-devolucion {
-    background-color: var(--dev-red);
+    background-color: var(--nova-blue);
     color: white;
     font-size: 1.1rem;
     padding: 10px 15px;
@@ -49,54 +54,52 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
-  .table thead.table-danger th {
-    background-color: var(--dev-red);
-    color: white;
+  /* Tabla con cabecera azul */
+  .table thead.table-nova th {
+    background-color: #f8f9fa;
+    color: var(--nova-blue);
     text-transform: uppercase;
+    font-size: 11px;
+    border-bottom: 2px solid var(--nova-blue);
+  }
+
+  /* Botón de eliminar mejorado */
+  .btn-remove-guia {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dev-red);
+    color: white !important;
+    border: none;
+    transition: transform 0.2s;
+  }
+
+  .btn-remove-guia:hover {
+    transform: scale(1.1);
+    background-color: #c62828;
+  }
+
+  .btn-remove-guia i {
     font-size: 12px;
+    /* Forzamos que el icono sea visible */
+    display: inline-block !important;
   }
 
-  /* Estilos para móviles */
-  @media (max-width: 768px) {
-    .scan-input {
-      font-size: 18px;
-    }
-    .card-footer button {
-      padding: 15px;
-      font-size: 16px;
-    }
-  }
-
-  /* Agregar al bloque <style> */
   .text-nova {
     color: var(--nova-blue);
-    letter-spacing: 1px;
-  }
-
-  #tablaGuias tr {
-    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
   }
 
   #tablaGuias tr:hover {
-    background-color: var(--nova-light-blue) !important;
-  }
-
-  /* Animación para cuando entra una guía nueva */
-  @keyframes highlight {
-    0% {
-      background-color: var(--dev-bg);
-    }
-    100% {
-      background-color: transparent;
-    }
-  }
-  .new-row {
-    animation: highlight 1.5s ease-out;
+    background-color: #f1f3f9 !important;
   }
 </style>
 
 <div class="container-fluid py-3">
-  <br />
   <form
     id="formDevolucion"
     onsubmit="nsDevolucion.guardarPlanilla(event, this)"
@@ -109,7 +112,7 @@
         >
           <div class="card-header bg-devolucion py-3">
             <h5 class="mb-0 fw-bold text-center text-white">
-              <i class="fas fa-undo-alt me-2"></i>PLANILLA DE DEVOLUCIÓN
+              <i class="fas fa-box-open me-2"></i>RECURSOS Y DEVOLUCIONES
             </h5>
           </div>
 
@@ -122,7 +125,7 @@
                 >
                 <input
                   type="text"
-                  class="form-control bg-light fw-bold"
+                  class="form-control bg-light fw-bold text-center"
                   id="num_planilla"
                   readonly
                   placeholder="PENDIENTE"
@@ -134,7 +137,7 @@
                 >
                 <input
                   type="text"
-                  class="form-control bg-light"
+                  class="form-control bg-light text-center"
                   id="fecha_creacion"
                   readonly
                 />
@@ -144,7 +147,7 @@
                   >Responsable Bodega</label
                 >
                 <select
-                  class="form-select border-primary"
+                  class="form-select border-nova"
                   id="responsable"
                   required
                 >
@@ -155,62 +158,62 @@
 
             <hr class="my-4 opacity-10" />
 
-            <div class="text-center mb-3">
-              <span
-                class="text-danger fw-bold uppercase"
-                style="font-size: 0.8rem"
-                >Modo de escaneo activo</span
-              >
-            </div>
-
             <div class="mb-4">
+              <div class="text-center mb-2">
+                <span
+                  class="badge rounded-pill bg-light text-primary border px-3"
+                >
+                  <i class="fas fa-barcode me-2"></i> LECTOR ACTIVO
+                </span>
+              </div>
               <input
                 type="text"
-                class="form-control scan-input scan-input-dev"
+                class="form-control py-3 scan-input-dev"
                 id="inputGuia"
-                placeholder="ESCANEAR GUÍA PARA RETORNO"
+                placeholder="ESCANEAR GUÍA AQUÍ"
                 autocomplete="off"
               />
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
               <button
                 type="button"
-                class="btn btn-sm btn-link text-decoration-none text-muted"
+                class="btn btn-sm text-danger fw-bold"
                 onclick="nsDevolucion.limpiarGuias()"
               >
-                <i class="fas fa-trash-alt me-1"></i> Limpiar lista
+                <i class="fas fa-trash-alt me-1"></i> Limpiar
               </button>
-              <div class="d-flex align-items-center gap-3">
-                <span class="fw-bold text-dark">TOTAL GUÍAS:</span>
+              <div class="d-flex align-items-center gap-2">
+                <span class="small fw-bold text-muted">TOTAL ESCANEADO:</span>
                 <span class="badge badge-devolucion" id="contadorGuias">0</span>
               </div>
             </div>
 
             <div
-              class="table-responsive"
-              style="max-height: 350px; border-radius: 8px"
+              class="table-responsive border"
+              style="max-height: 300px; border-radius: 8px"
             >
-              <table class="table table-hover align-middle">
-                <thead class="table-danger sticky-top">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-nova sticky-top">
                   <tr>
-                    <th class="text-center">#</th>
+                    <th class="text-center" style="width: 50px">#</th>
                     <th>CÓDIGO DE GUÍA</th>
-                    <th class="text-center">ACCIÓN</th>
+                    <th class="text-center" style="width: 100px">ACCIÓN</th>
                   </tr>
                 </thead>
-                <tbody id="tablaGuias" class="border-top-0"></tbody>
+                <tbody id="tablaGuias"></tbody>
               </table>
             </div>
           </div>
 
-          <div class="card-footer p-3 bg-white border-top-0 d-flex gap-2">
+          <div class="card-footer p-3 bg-light d-flex gap-2">
             <button
               type="submit"
-              class="btn btn-danger flex-fill py-3 fw-bold shadow-sm"
+              class="btn btn-primary flex-fill py-3 fw-bold shadow-sm"
               id="btnGuardar"
+              style="background-color: var(--nova-blue); border: none"
             >
-              <i class="fas fa-save me-2"></i>PROCESAR DEVOLUCIÓN
+              <i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN
             </button>
             <button
               type="button"
@@ -300,12 +303,12 @@
       tbody.innerHTML = listaGuias
         .map(
           (g, i) => `
-    <tr class="animate__animated animate__fadeInIn">
+    <tr>
       <td class="text-center text-muted small">${i + 1}</td>
       <td><span class="fw-bold text-nova">${g}</span></td>
       <td class="text-center">
-        <button type="button" class="btn btn-sm btn-light text-danger border" 
-                onclick="nsDevolucion.quitarGuia(${i})">
+        <button type="button" class="btn-remove-guia" 
+                onclick="nsDevolucion.quitarGuia(${i})" title="Quitar">
           <i class="fas fa-times"></i>
         </button>
       </td>
