@@ -72,8 +72,10 @@
                     name="celular"
                     id="celular"
                     placeholder="Ej: 3001234567"
-                    pattern="^3[0-9]{9}$"
+                    pattern="[0-9]{10}"
+                    minlength="10"
                     maxlength="10"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     class="form-control"
                     required
                   />
@@ -121,6 +123,14 @@
         const nombres = document.getElementById("nombres").value.trim();
         const apellidos = document.getElementById("apellidos").value.trim();
         const celular = document.getElementById("celular").value.trim();
+
+        // NUEVA VALIDACIÓN DE CELULAR
+        const regexCelular = /^[0-9]{10}$/;
+        if (!regexCelular.test(celular)) {
+          throw new Error(
+            "El número de celular debe tener exactamente 10 dígitos numéricos",
+          );
+        }
 
         if (!nombres || !apellidos || !celular) {
           throw new Error("Todos los campos son obligatorios");
