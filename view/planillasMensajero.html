@@ -80,17 +80,38 @@
     .card-planilla h6 {
       font-size: 12px;
     }
+    /* Quitamos icono para ganar altura */
     .card-planilla .planilla-icon {
       display: none;
-    } /* Quitamos icono para ganar altura */
+    }
 
     .table-responsive {
-      max-height: 180px;
+      max-height: 180px; /* Ajusta según prefieras el scroll */
+    }
+
+    /* --- AJUSTE SOLICITADO: TEXTO DE TABLA MÁS PEQUEÑO --- */
+    .table-sm td,
+    .table-sm th {
+      font-size: 9px !important; /* Bajamos de 11px a 9px */
+      padding: 2px 1px !important; /* Reducimos padding para que quepan más columnas */
+    }
+
+    /* Ajuste para que los badges (CONTADO, CRÉDITO, etc) no se vean gigantes */
+    .table-sm .badge {
+      font-size: 8px !important;
+      padding: 2px 4px !important;
     }
 
     /* En horizontal, los totales ocupan mucho. Los hacemos más pequeños */
     .row.g-2.mb-3 {
       margin-bottom: 5px !important;
+    }
+
+    .card-total h6 {
+      font-size: 11px !important;
+    }
+    .card-total small {
+      font-size: 8px !important;
     }
   }
 
