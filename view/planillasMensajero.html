@@ -119,6 +119,16 @@
     font-size: 10px;
     letter-spacing: 0.5px;
   }
+  /* Estilo para el mensaje de aviso cuando está vacío */
+  .mensaje-vacio {
+    width: 100%;
+    padding: 40px 20px;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+    color: #6c757d;
+  }
 </style>
 
 <div class="container-fluid mt-3">
@@ -271,6 +281,20 @@
 
     function renderizarTarjetas(planillas) {
       const contenedor = document.getElementById("contenedor-planillas");
+
+      // Validamos si hay planillas en el arreglo
+      if (!planillas || planillas.length === 0) {
+        contenedor.innerHTML = `
+      <div class="mensaje-vacio">
+        <div style="font-size: 24px;">📂</div>
+        <h6 class="fw-bold mt-2">No tienes planillas asignadas</h6>
+        <p class="small mb-0">Comunícate con el despachador si crees que es un error.</p>
+      </div>
+    `;
+        return; // Salimos de la función
+      }
+
+      // Si hay planillas, renderizamos el carrusel normal
       contenedor.innerHTML = planillas
         .map((p) => {
           const fecha = new Date(p.fecha_creacion).toISOString().split("T")[0];
