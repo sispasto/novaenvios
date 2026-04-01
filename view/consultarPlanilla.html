@@ -1,66 +1,97 @@
 <style>
+  /* ==========================================
+     ESTILOS POR DEFECTO (PC / TABLETS GRANDES)
+     ========================================== */
   .section-title {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px; /* Más grande en PC */
     color: #444;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
   }
 
   .scan-input {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 500;
     text-align: center;
   }
 
-  /* Ajuste general de fuentes para tablas en móvil */
-  .table-sm td {
-    font-size: 13px; /* Reducido de 14px para ganar espacio */
+  /* Tabla normal en PC */
+  .table-sm td, .table-sm th {
+    font-size: 14px; 
     vertical-align: middle;
+    padding: 8px !important; /* Más aire en PC */
   }
 
   .badge-counter {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  .form-label {
     font-size: 14px;
+    font-weight: 600;
   }
 
-  /* Ajuste de los inputs de cabecera para que no ocupen tanto espacio */
-  .form-control-sm, .form-label {
-    font-size: 12px;
-  }
-
-  /* OPTIMIZACIÓN MODO HORIZONTAL (LANDSCAPE) */
-  @media (orientation: landscape) and (max-height: 500px) {
-    .container-fluid {
-      padding-top: 5px !important;
+  /* ==========================================
+     OPTIMIZACIÓN PARA MÓVILES (PANTALLAS PEQUEÑAS)
+     ========================================== */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 14px;
+      margin-bottom: 8px;
     }
-    
+
+    .table-sm td, .table-sm th {
+      font-size: 12px; /* Fuente reducida para móvil */
+      padding: 4px 2px !important;
+    }
+
+    .form-control, .form-label {
+      font-size: 13px;
+    }
+
     .card-body {
-      padding: 10px; /* Reduce paddings internos de la tarjeta */
+      padding: 10px;
     }
 
-    .section-title, hr {
-      margin-bottom: 5px !important;
-      margin-top: 5px !important;
-    }
-
-    /* Reducimos el tamaño de los títulos de las mini-tarjetas de totales */
+    /* Reducimos los títulos de las tarjetas de totales solo en móvil */
     .card-body p-2 text-center small {
       font-size: 9px !important;
     }
+    
+    h5.mb-0 {
+      font-size: 15px !important; /* Números de los totales más ajustados */
+    }
+  }
 
-    /* Reducimos el tamaño de la tabla para que quepan más filas */
+  /* ==========================================
+     OPTIMIZACIÓN MODO HORIZONTAL (LANDSCAPE MÓVIL)
+     ========================================== */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .container-fluid {
+      padding-top: 2px !important;
+    }
+    
+    .section-title, hr {
+      margin-bottom: 4px !important;
+      margin-top: 4px !important;
+    }
+
     .table-sm td, .table-sm th {
       font-size: 11px !important;
       padding: 2px 4px !important;
     }
 
-    /* Forzamos a que los inputs de cabecera sean más compactos */
+    /* Scroll interno para la tabla en horizontal y no perder los botones */
+    .table-responsive {
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
     .mb-3 {
-      margin-bottom: 0.5rem !important;
+      margin-bottom: 0.4rem !important;
     }
   }
-</style>
-
-
 </style>
 
 <div class="container-fluid">
