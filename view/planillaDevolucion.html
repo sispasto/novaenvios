@@ -1,233 +1,198 @@
 <style>
-  /* ==========================================
-     ESTILOS POR DEFECTO (PC / TABLETS)
-     ========================================== */
+  /* Colores de Identidad Nova Envios */
+  :root {
+    --nova-blue: #1d438a; /* Azul del logo */
+    --nova-light-blue: #f0f4f8;
+    --dev-red: #d32f2f; /* Rojo más profesional */
+    --dev-bg: #fff5f5;
+  }
+
   .section-title {
-    font-weight: 600;
-    font-size: 16px;
-    color: #444;
-    margin-bottom: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--nova-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-left: 4px solid var(--dev-red);
+    padding-left: 10px;
+    margin-bottom: 15px;
   }
 
-  .scan-input {
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
-    border: 2px solid #212529;
-    padding: 12px;
+  .card-header.bg-devolucion {
+    background: linear-gradient(
+      135deg,
+      var(--dev-red) 0%,
+      #b71c1c 100%
+    ) !important;
+    border-bottom: 3px solid rgba(0, 0, 0, 0.1);
   }
 
-  .table-sm td,
-  .table-sm th {
-    font-size: 14px;
-    padding: 8px !important;
+  .scan-input-dev {
+    border: 2px solid var(--dev-red) !important;
+    background-color: var(--dev-bg);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: var(--dev-red);
   }
 
-  .badge-counter {
-    font-size: 16px;
-    padding: 8px 12px;
-  }
-
-  /* ==========================================
-     OPTIMIZACIÓN PARA MÓVILES (RETRATO)
-     ========================================== */
-  @media (max-width: 768px) {
-    .section-title {
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-
-    .scan-input {
-      font-size: 16px;
-      padding: 10px;
-    }
-
-    .table-sm td,
-    .table-sm th {
-      font-size: 13px;
-      padding: 5px !important;
-    }
-
-    /* Botones de acción al final más grandes para el pulgar */
-    .card-footer {
-      flex-direction: column;
-    }
-
-    .card-footer button {
-      width: 100%;
-      padding: 12px;
-    }
-  }
-
-  /* ==========================================
-     OPTIMIZACIÓN MODO HORIZONTAL (LANDSCAPE MÓVIL)
-     ========================================== */
-  @media (orientation: landscape) and (max-height: 500px) {
-    .container-fluid {
-      padding-top: 5px !important;
-    }
-
-    /* Ocultamos títulos redundantes para ganar espacio */
-    .card-header h5,
-    .section-title:first-of-type {
-      display: none;
-    }
-
-    .row .mb-3 {
-      margin-bottom: 0.5rem !important;
-    }
-
-    /* Limitamos altura de la tabla para que no empuje los botones fuera de la pantalla */
-    .table-responsive {
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    .table-sm td,
-    .table-sm th {
-      font-size: 12px !important;
-      padding: 3px !important;
-    }
-
-    .scan-input {
-      font-size: 15px;
-      padding: 5px;
-    }
-  }
-  /*********************************************/
-  .bg-devolucion {
-    background-color: #dc3545 !important; /* Rojo para indicar devolución/alerta */
-    color: white;
+  .scan-input-dev:focus {
+    box-shadow: 0 0 0 0.25rem rgba(211, 47, 47, 0.25);
+    background-color: #fff;
   }
 
   .badge-devolucion {
-    background-color: #f8d7da;
-    color: #842029;
-    border: 1px solid #f5c2c7;
-    font-size: 16px;
-    padding: 8px 12px;
+    background-color: var(--dev-red);
+    color: white;
+    font-size: 1.1rem;
+    padding: 10px 15px;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
-  /* Resaltado para el input de escaneo en devolución */
-  .scan-input-dev {
-    border: 2px solid #dc3545 !important;
-    background-color: #fff8f8;
+  .table thead.table-danger th {
+    background-color: var(--dev-red);
+    color: white;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  /* Estilos para móviles */
+  @media (max-width: 768px) {
+    .scan-input {
+      font-size: 18px;
+    }
+    .card-footer button {
+      padding: 15px;
+      font-size: 16px;
+    }
   }
 </style>
 
-<div class="container-fluid">
+<div class="container-fluid py-3">
+  <br />
   <form
     id="formDevolucion"
     onsubmit="nsDevolucion.guardarPlanilla(event, this)"
   >
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="card shadow border-0">
-          <div class="card-header bg-devolucion">
-            <h5 class="mb-0 fw-bold text-center">Planilla de Devolución</h5>
+        <div
+          class="card shadow-lg border-0"
+          style="border-radius: 12px; overflow: hidden"
+        >
+          <div class="card-header bg-devolucion py-3">
+            <h5 class="mb-0 fw-bold text-center text-white">
+              <i class="fas fa-undo-alt me-2"></i>PLANILLA DE DEVOLUCIÓN
+            </h5>
           </div>
 
-          <div class="card-body">
-            <div class="section-title">
-              <strong>Datos de Recepción (Retorno)</strong>
-            </div>
-
-            <div class="row">
-              <div class="col-6 col-md-4 mb-3">
-                <label class="form-label text-muted small"
-                  >N° Planilla Dev.</label
+          <div class="card-body p-4">
+            <div class="section-title">Datos de Recepción</div>
+            <div class="row g-3">
+              <div class="col-6 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >N° Planilla</label
                 >
                 <input
                   type="text"
-                  class="form-control fw-bold"
+                  class="form-control bg-light fw-bold"
                   id="num_planilla"
                   readonly
-                  placeholder="Pendiente..."
+                  placeholder="PENDIENTE"
                 />
               </div>
-
-              <div class="col-6 col-md-4 mb-3">
-                <label class="form-label text-muted small">Fecha Retorno</label>
+              <div class="col-6 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >Fecha Retorno</label
+                >
                 <input
                   type="text"
-                  class="form-control"
+                  class="form-control bg-light"
                   id="fecha_creacion"
                   readonly
                 />
               </div>
-
-              <div class="col-12 col-md-4 mb-3">
-                <label class="form-label text-muted small"
-                  >Recibido por (Responsable)</label
+              <div class="col-12 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >Responsable Bodega</label
                 >
-                <select class="form-select" id="responsable" required>
+                <select
+                  class="form-select border-primary"
+                  id="responsable"
+                  required
+                >
                   <option value="">Cargando...</option>
                 </select>
               </div>
             </div>
 
-            <hr class="my-4" />
+            <hr class="my-4 opacity-10" />
 
-            <div class="section-title text-danger">
-              <strong>Escaneo de Guías a Devolver</strong>
+            <div class="text-center mb-3">
+              <span
+                class="text-danger fw-bold uppercase"
+                style="font-size: 0.8rem"
+                >Modo de escaneo activo</span
+              >
             </div>
 
-            <div class="row">
-              <div class="col-md-12 mb-3">
-                <input
-                  type="text"
-                  class="form-control scan-input scan-input-dev"
-                  id="inputGuia"
-                  placeholder="Escanee guías para retornar a bodega"
-                  autocomplete="off"
-                />
-              </div>
+            <div class="mb-4">
+              <input
+                type="text"
+                class="form-control scan-input scan-input-dev"
+                id="inputGuia"
+                placeholder="ESCANEAR GUÍA PARA RETORNO"
+                autocomplete="off"
+              />
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex justify-content-between align-items-center mb-3">
               <button
                 type="button"
-                class="btn btn-sm btn-outline-secondary"
+                class="btn btn-sm btn-link text-decoration-none text-muted"
                 onclick="nsDevolucion.limpiarGuias()"
               >
-                Limpiar Lista
+                <i class="fas fa-trash-alt me-1"></i> Limpiar lista
               </button>
-              <div class="d-flex align-items-center gap-2">
-                <span class="fw-semibold">Total a Devolver:</span>
+              <div class="d-flex align-items-center gap-3">
+                <span class="fw-bold text-dark">TOTAL GUÍAS:</span>
                 <span class="badge badge-devolucion" id="contadorGuias">0</span>
               </div>
             </div>
 
-            <div class="table-responsive">
-              <table class="table table-sm table-hover">
-                <thead class="table-danger">
+            <div
+              class="table-responsive"
+              style="max-height: 350px; border-radius: 8px"
+            >
+              <table class="table table-hover align-middle">
+                <thead class="table-danger sticky-top">
                   <tr>
-                    <th width="60">#</th>
-                    <th>Número de Guía</th>
-                    <th width="50" class="text-center">Quitar</th>
+                    <th class="text-center">#</th>
+                    <th>CÓDIGO DE GUÍA</th>
+                    <th class="text-center">ACCIÓN</th>
                   </tr>
                 </thead>
-                <tbody id="tablaGuias"></tbody>
+                <tbody id="tablaGuias" class="border-top-0"></tbody>
               </table>
             </div>
           </div>
 
-          <div class="card-footer d-flex gap-2 bg-light">
+          <div class="card-footer p-3 bg-white border-top-0 d-flex gap-2">
             <button
               type="submit"
-              class="btn btn-danger flex-fill fw-bold"
+              class="btn btn-danger flex-fill py-3 fw-bold shadow-sm"
               id="btnGuardar"
             >
-              PROCESAR DEVOLUCIÓN
+              <i class="fas fa-save me-2"></i>PROCESAR DEVOLUCIÓN
             </button>
             <button
               type="button"
-              class="btn btn-secondary"
+              class="btn btn-outline-secondary px-4"
               id="btnNuevaPlanilla"
               onclick="nsDevolucion.nuevaPlanilla()"
               disabled
             >
-              NUEVA ENTRADA
+              NUEVA
             </button>
           </div>
         </div>
@@ -299,20 +264,25 @@
       }
     });
 
+    // Dentro de tu función renderGuias(), cambia el template de la fila:
     function renderGuias() {
       const tbody = document.getElementById("tablaGuias");
       tbody.innerHTML = listaGuias
         .map(
           (g, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td class="fw-bold">${g}</td>
-          <td class="text-center">
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="nsDevolucion.quitarGuia(${i})">&times;</button>
-          </td>
-        </tr>`,
+    <tr class="animate__animated animate__fadeInIn">
+      <td class="text-center text-muted small">${i + 1}</td>
+      <td><span class="fw-bold text-nova">${g}</span></td>
+      <td class="text-center">
+        <button type="button" class="btn btn-sm btn-light text-danger border" 
+                onclick="nsDevolucion.quitarGuia(${i})">
+          <i class="fas fa-times"></i>
+        </button>
+      </td>
+    </tr>`,
         )
         .join("");
+
       document.getElementById("contadorGuias").innerText = listaGuias.length;
     }
 
