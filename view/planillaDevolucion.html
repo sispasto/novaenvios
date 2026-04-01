@@ -1,0 +1,389 @@
+<style>
+  /* ==========================================
+     ESTILOS POR DEFECTO (PC / TABLETS)
+     ========================================== */
+  .section-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 12px;
+  }
+
+  .scan-input {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid #212529;
+    padding: 12px;
+  }
+
+  .table-sm td,
+  .table-sm th {
+    font-size: 14px;
+    padding: 8px !important;
+  }
+
+  .badge-counter {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN PARA MÓVILES (RETRATO)
+     ========================================== */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .scan-input {
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      font-size: 13px;
+      padding: 5px !important;
+    }
+
+    /* Botones de acción al final más grandes para el pulgar */
+    .card-footer {
+      flex-direction: column;
+    }
+
+    .card-footer button {
+      width: 100%;
+      padding: 12px;
+    }
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN MODO HORIZONTAL (LANDSCAPE MÓVIL)
+     ========================================== */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .container-fluid {
+      padding-top: 5px !important;
+    }
+
+    /* Ocultamos títulos redundantes para ganar espacio */
+    .card-header h5,
+    .section-title:first-of-type {
+      display: none;
+    }
+
+    .row .mb-3 {
+      margin-bottom: 0.5rem !important;
+    }
+
+    /* Limitamos altura de la tabla para que no empuje los botones fuera de la pantalla */
+    .table-responsive {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      font-size: 12px !important;
+      padding: 3px !important;
+    }
+
+    .scan-input {
+      font-size: 15px;
+      padding: 5px;
+    }
+  }
+  /*********************************************/
+  .bg-devolucion {
+    background-color: #dc3545 !important; /* Rojo para indicar devolución/alerta */
+    color: white;
+  }
+
+  .badge-devolucion {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  /* Resaltado para el input de escaneo en devolución */
+  .scan-input-dev {
+    border: 2px solid #dc3545 !important;
+    background-color: #fff8f8;
+  }
+</style>
+
+<div class="container-fluid">
+  <form
+    id="formDevolucion"
+    onsubmit="nsDevolucion.guardarPlanilla(event, this)"
+  >
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow border-0">
+          <div class="card-header bg-devolucion">
+            <h5 class="mb-0 fw-bold text-center">Planilla de Devolución</h5>
+          </div>
+
+          <div class="card-body">
+            <div class="section-title">
+              <strong>Datos de Recepción (Retorno)</strong>
+            </div>
+
+            <div class="row">
+              <div class="col-6 col-md-4 mb-3">
+                <label class="form-label text-muted small"
+                  >N° Planilla Dev.</label
+                >
+                <input
+                  type="text"
+                  class="form-control fw-bold"
+                  id="num_planilla"
+                  readonly
+                  placeholder="Pendiente..."
+                />
+              </div>
+
+              <div class="col-6 col-md-4 mb-3">
+                <label class="form-label text-muted small">Fecha Retorno</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="fecha_creacion"
+                  readonly
+                />
+              </div>
+
+              <div class="col-12 col-md-4 mb-3">
+                <label class="form-label text-muted small"
+                  >Recibido por (Responsable)</label
+                >
+                <select class="form-select" id="responsable" required>
+                  <option value="">Cargando...</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="section-title text-danger">
+              <strong>Escaneo de Guías a Devolver</strong>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <input
+                  type="text"
+                  class="form-control scan-input scan-input-dev"
+                  id="inputGuia"
+                  placeholder="Escanee guías para retornar a bodega"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                onclick="nsDevolucion.limpiarGuias()"
+              >
+                Limpiar Lista
+              </button>
+              <div class="d-flex align-items-center gap-2">
+                <span class="fw-semibold">Total a Devolver:</span>
+                <span class="badge badge-devolucion" id="contadorGuias">0</span>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead class="table-danger">
+                  <tr>
+                    <th width="60">#</th>
+                    <th>Número de Guía</th>
+                    <th width="50" class="text-center">Quitar</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaGuias"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-footer d-flex gap-2 bg-light">
+            <button
+              type="submit"
+              class="btn btn-danger flex-fill fw-bold"
+              id="btnGuardar"
+            >
+              PROCESAR DEVOLUCIÓN
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="btnNuevaPlanilla"
+              onclick="nsDevolucion.nuevaPlanilla()"
+              disabled
+            >
+              NUEVA ENTRADA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  var nsDevolucion = (function () {
+    let listaGuias = [];
+
+    function cargarFecha() {
+      const hoy = new Date();
+      const fecha =
+        ("0" + hoy.getDate()).slice(-2) +
+        "/" +
+        ("0" + (hoy.getMonth() + 1)).slice(-2) +
+        "/" +
+        hoy.getFullYear();
+      document.getElementById("fecha_creacion").value = fecha;
+    }
+
+    async function cargarResponsables() {
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        // Reutilizamos el servicio de responsables (operadores de bodega/admins)
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          },
+        );
+        const result = await response.json();
+        const select = document.getElementById("responsable");
+        select.innerHTML = '<option value="">Seleccione quien recibe</option>';
+        result.data.forEach((r) => {
+          select.innerHTML += `<option value="${r.id_persona}">${r.nombres} ${r.apellidos}</option>`;
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Lector de códigos
+    const inputGuia = document.getElementById("inputGuia");
+    inputGuia.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        const guia = this.value.replace(/[^0-9]/g, "");
+        if (!guia) return;
+
+        if (listaGuias.includes(guia)) {
+          alertSMS(`Guía ${guia} ya está en la lista`);
+          this.value = "";
+          return;
+        }
+
+        listaGuias.push(guia);
+        renderGuias();
+        this.value = "";
+        this.focus();
+      }
+    });
+
+    function renderGuias() {
+      const tbody = document.getElementById("tablaGuias");
+      tbody.innerHTML = listaGuias
+        .map(
+          (g, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td class="fw-bold">${g}</td>
+          <td class="text-center">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="nsDevolucion.quitarGuia(${i})">&times;</button>
+          </td>
+        </tr>`,
+        )
+        .join("");
+      document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }
+
+    async function guardarPlanilla(event, form) {
+      event.preventDefault();
+      try {
+        if (listaGuias.length === 0)
+          throw new Error("Escanee al menos una guía para devolver");
+        const responsable = document.getElementById("responsable").value;
+        if (!responsable)
+          throw new Error("Seleccione el responsable de la devolución");
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        // IMPORTANTE: Asegúrate que este sea el endpoint de devolución
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla_devolucion`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              id_responsable: responsable,
+              guias: listaGuias,
+              tipo: "DEVOLUCION", // Parámetro adicional si tu función lo requiere
+            }),
+          },
+        );
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+
+        if (result.num_planilla)
+          document.getElementById("num_planilla").value = result.num_planilla;
+        document.getElementById("btnGuardar").disabled = true;
+        document.getElementById("btnNuevaPlanilla").disabled = false;
+
+        alertSMS("Planilla de devolución procesada ✅");
+      } catch (err) {
+        alertSMS(err.message);
+      }
+    }
+
+    function nuevaPlanilla() {
+      listaGuias = [];
+      renderGuias();
+      document.getElementById("num_planilla").value = "";
+      document.getElementById("responsable").value = "";
+      document.getElementById("btnGuardar").disabled = false;
+      document.getElementById("btnNuevaPlanilla").disabled = true;
+      document.getElementById("inputGuia").focus();
+    }
+
+    cargarFecha();
+    cargarResponsables();
+
+    return {
+      guardarPlanilla,
+      limpiarGuias: () => {
+        listaGuias = [];
+        renderGuias();
+      },
+      nuevaPlanilla,
+      quitarGuia: (i) => {
+        listaGuias.splice(i, 1);
+        renderGuias();
+      },
+    };
+  })();
+</script>

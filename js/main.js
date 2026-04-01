@@ -66,6 +66,16 @@ function consultarPlanillas() {
   main.appendChild(frmConsultarPlanillas);
 }
 
+function crearPlanillaDevolucion() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const frmCrearPlanillaDevolucion = document.createElement(
+    "planilla-devolucion-component",
+  );
+  frmCrearPlanillaDevolucion.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(frmCrearPlanillaDevolucion);
+}
+
 function anularPlanilla() {
   let main = document.getElementById("App");
   removeALLChilds(main);
