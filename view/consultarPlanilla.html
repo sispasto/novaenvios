@@ -210,8 +210,8 @@ async function buscarPlanilla(num_planilla) {
 
         const data = result.data;
         
-        if (data.estado === 'AN' || data.estado === 'CE') {
-             alertSMS(`La planilla N° ${num_planilla} está ${data.estado === 'AN' ? 'ANULADA' : 'CERRADA'}.`);
+        if (data.estado === 'AN' ) {
+             alertSMS(`La planilla N° ${num_planilla} está ANULADA`);
              limpiarCampos(true);
              return;
         }
