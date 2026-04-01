@@ -145,7 +145,7 @@
 
     async function cargarPlanillasReales() {
       try {
-        const personaId = sessionStorage.getItem("personald"); // Valor 4 en tu sesión
+        const personaId = sessionStorage.getItem("personaId"); // Valor 4 en tu sesión
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
