@@ -1,113 +1,102 @@
 <style>
-  /* --- FUENTES (Asegúrate de tener Poppins en tu proyecto) --- */
-  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
-
-  /* --- CONTENEDOR PRINCIPAL CON FLEXBOX (SOLUCIONA EL SCROLL) --- */
-  .container-bienvenida-total {
-    min-height: 100vh; /* Ocupa todo el alto de la ventana */
+  /* Contenedor principal con ajuste para subir el contenido */
+  .container-login100 {
+    min-height: 100vh;
     display: flex;
-    align-items: center; /* Centrado vertical */
-    justify-content: center; /* Centrado horizontal */
-    background-color: #f8f9fa; /* Fondo gris muy suave */
-    padding: 20px;
+    align-items: center; /* Mantenemos center pero... */
+    justify-content: center;
+    background-color: #f8f9fa;
+    padding: 15px;
+    padding-bottom: 15vh; /* ...este padding empuja todo hacia ARRIBA */
     box-sizing: border-box;
-    overflow: hidden; /* Previene scroll si nada sobresale */
   }
 
-  /* --- TARJETA DE BIENVENIDA (PROFESIONAL) --- */
-  .card-bienvenida {
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08); /* Sombra suave y moderna */
-    padding: 40px;
-    text-align: center;
-    max-width: 480px; /* Ancho máximo en PC */
-    width: 100%;
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
+  /* Título "Bienvenido" más delgado y pequeño */
+  .titulo-bienvenida {
+    font-family: "Poppins", sans-serif;
+    font-size: 2.5rem; /* Más pequeño que display-4 */
+    font-weight: 300; /* Más delgado */
+    color: #333;
+    margin-bottom: 15px !important; /* Más pegado a la imagen */
   }
 
-  /* Pequeño efecto al pasar el mouse en PC */
-  .card-bienvenida:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
-  }
-
-  /* --- LOGO Y TEXTO --- */
+  /* Control de la imagen de bienvenida */
   .login100-form-avatar {
     display: block;
     width: 100%;
-    margin-bottom: 25px;
+    max-width: 450px;
+    margin: 0 auto;
   }
 
   .login100-form-avatar img {
     width: 100%;
     height: auto;
-    max-width: 320px; /* Tamaño controlado del logo */
-    border-radius: 12px;
+    border-radius: 20px;
+    /* Corregido: box-shadow en lugar de shadow */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   }
 
-  .texto-version-profesional {
+  .texto-version {
     font-family: "Poppins", sans-serif;
-    font-size: 16px;
-    font-weight: 300;
+    font-weight: 400;
     color: #888;
-    margin-top: 10px;
-    letter-spacing: 0.5px;
+    margin-top: 15px;
     display: block;
+    font-size: 14px;
   }
 
-  /* --- RESPONSIVE MÓVIL --- */
+  /* --- RESPONSIVE --- */
   @media (max-width: 768px) {
-    .card-bienvenida {
-      padding: 30px 20px;
+    .container-login100 {
+      padding-bottom: 10vh; /* Menos empuje en móvil */
     }
-
-    .login100-form-avatar img {
-      max-width: 250px;
+    .titulo-bienvenida {
+      font-size: 1.8rem;
     }
-
-    .texto-version-profesional {
-      font-size: 14px;
+    .login100-form-avatar {
+      max-width: 280px;
     }
   }
 
-  /* --- MODO HORIZONTAL (LANDSCAPE) MÓVIL (MUY IMPORTANTE) --- */
+  /* MODO HORIZONTAL MÓVIL */
   @media (orientation: landscape) and (max-height: 500px) {
-    .container-bienvenida-total {
-      padding: 10px;
-      overflow-y: auto; /* Permite scroll solo si la pantalla es MUY bajita */
+    .container-login100 {
+      padding-bottom: 0; /* Centrado normal para que no se pierda el texto */
+      align-items: center;
     }
-
-    .card-bienvenida {
-      padding: 15px;
-      max-width: 380px;
+    .login100-form-avatar {
+      max-width: 160px;
     }
-
-    .login100-form-avatar img {
-      max-width: 200px;
+    .titulo-bienvenida {
+      font-size: 1.4rem;
+      margin-bottom: 5px !important;
     }
-
-    .texto-version-profesional {
+    .texto-version {
       margin-top: 5px;
-      font-size: 13px;
     }
   }
 </style>
 
-<div class="container-bienvenida-total">
-  <div class="card-bienvenida">
-    <div class="login100-form-avatar">
-      <img
-        id="imgBienvenida"
-        src="/novaenvios/assets/bienvenida.jpeg"
-        alt="AVATAR"
-      />
-    </div>
+<div class="container-login100">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 text-center">
+        <div class="mb-0">
+          <h1 class="titulo-bienvenida">Bienvenido</h1>
+        </div>
 
-    <div>
-      <span id="version-label" class="texto-version-profesional"> </span>
+        <div class="login100-form-avatar shadow-lg rounded-4 overflow-hidden">
+          <img
+            id="imgBienvenida"
+            src="/novaenvios/assets/bienvenida.jpeg"
+            alt="AVATAR"
+          />
+        </div>
+
+        <div class="mt-2">
+          <span id="version-label" class="texto-version"> </span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
