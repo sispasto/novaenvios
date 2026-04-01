@@ -139,23 +139,6 @@ font-size:14px;
 </div>
 
 </div>
-<!--
-<div class="card-footer d-flex gap-2">
-  <button
-    type="button"
-    class="btn btn-dark w-100" 
-    id="btnValidar"
-    onclick="nsPlanilla.validarGuias()">
-    VALIDAR
-  </button>
-  <button 
-    type="submit"
-    class="btn btn-dark w-100"
-    id="btnGuardar">
-    CERRAR PLANILLA
-  </button>   
-</div>-->
-
 </div>
 </div>
 </div>
@@ -243,21 +226,7 @@ async function buscarPlanilla(num_planilla) {
         }));        
         
         calcularTotales(listaGuias);
-        renderGuias();
-
-        /* ============================================================
-           LÓGICA ADICIONAL: ¿Qué hacemos tras cargar?
-           ============================================================ */
-        // Filtrar las guías que aún NO están sincronizadas
-        const pendientes = listaGuias.filter(g => !g.sincronizado).map(g => g.guia);
-
-        /*if (pendientes.length > 0) {
-            console.log("Hay guías pendientes de sincronizar:", pendientes);
-            // Aquí llamarías a tu función de C# enviando solo los números de 'pendientes'
-            // sincronizarConServidorLocal(pendientes);
-        } else {
-            console.log("Planilla totalmente sincronizada. No se requiere consultar al backend local.");
-        }*/
+        renderGuias();        
 
     } catch (err) {
         console.error(err);

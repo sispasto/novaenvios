@@ -1,27 +1,19 @@
 <style>
-  /* Contenedor con Scroll Lateral Responsive */
+  /* Estilos Carrusel */
   .contenedor-carrusel {
     display: flex;
-    overflow-x: auto; /* Habilita el scroll horizontal */
+    overflow-x: auto;
     gap: 12px;
     padding: 15px 10px;
-
-    /* Scroll suave en móviles */
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-
-    /* Centrado dinámico */
-    justify-content: flex-start; /* Por defecto a la izquierda para permitir scroll */
+    justify-content: flex-start;
   }
-
-  /* Media query para centrar solo si el contenido cabe en pantalla */
   @media (min-width: 768px) {
     .contenedor-carrusel {
       justify-content: center;
     }
   }
-
-  /* Personalización de la barra de scroll (opcional para que no sea tosca) */
   .contenedor-carrusel::-webkit-scrollbar {
     height: 5px;
   }
@@ -30,9 +22,9 @@
     border-radius: 10px;
   }
 
-  /* Tarjeta compacta */
+  /* Estilos Tarjetas */
   .card-planilla {
-    flex: 0 0 auto; /* Importante: evita que las tarjetas se encojan al scrollear */
+    flex: 0 0 auto;
     width: 180px;
     transition: all 0.2s ease;
     border-radius: 12px;
@@ -41,26 +33,32 @@
     cursor: pointer;
     text-align: center;
   }
-
   .card-planilla:hover,
   .card-planilla.active {
     border-color: #007bff;
     box-shadow: 0 4px 10px rgba(0, 123, 255, 0.15);
   }
-
   .card-planilla.active {
     background-color: #f8fbff;
     border-width: 2px;
   }
 
-  .planilla-icon {
-    font-size: 1.3rem;
-    margin-bottom: 4px;
+  /* Estilos de la Tabla (tomados de tu vista de consulta) */
+  .section-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 10px;
   }
-  .fecha-planilla {
-    font-size: 0.7rem;
-    color: #6c757d;
-    display: block;
+  .table-sm td {
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .badge-counter {
+    font-size: 14px;
+  }
+  .text-xs {
+    font-size: 11px;
   }
 </style>
 
@@ -78,28 +76,70 @@
 
   <div id="seccion-detalle" class="row d-none">
     <div class="col-12">
-      <div class="card shadow-sm border-0">
+      <div class="card shadow border-0">
         <div
           class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
         >
-          <h5 class="mb-0 small" id="titulo-detalle">Detalle</h5>
-          <span class="badge bg-primary" id="contador-detalle">0 Guías</span>
+          <h5 class="mb-0 fw-bold" id="titulo-detalle" style="font-size: 16px">
+            Detalle de Planilla
+          </h5>
+          <span
+            class="badge bg-light text-dark badge-counter"
+            id="contadorGuias"
+            >0</span
+          >
         </div>
-        <div class="card-body p-0">
+
+        <div class="card-body">
+          <div class="row g-2 mb-3">
+            <div class="col-6 col-md-3">
+              <div class="card bg-light border-0 text-center p-2">
+                <small class="text-muted d-block fw-bold text-xs"
+                  >TOTAL CONTRAENTREGA</small
+                >
+                <h6 class="mb-0 fw-bold" id="totalContraentrega">$ 0</h6>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card bg-light border-0 text-center p-2">
+                <small class="text-muted d-block fw-bold text-xs"
+                  >TOTAL RECAUDOS</small
+                >
+                <h6 class="mb-0 fw-bold text-primary" id="totalRecaudo">$ 0</h6>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card bg-info text-white border-0 text-center p-2">
+                <small class="d-block fw-bold text-xs"
+                  >PAGOS ELECTRÓNICOS</small
+                >
+                <h6 class="mb-0 fw-bold" id="totalElectronico">$ 0</h6>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card bg-dark text-white border-0 text-center p-2">
+                <small class="d-block fw-bold text-xs">GRAN TOTAL</small>
+                <h6 class="mb-0 fw-bold" id="totalGeneral">$ 0</h6>
+              </div>
+            </div>
+          </div>
+
           <div class="table-responsive">
-            <table
-              class="table table-sm table-hover mb-0"
-              style="font-size: 13px"
-            >
-              <thead class="table-light">
+            <table class="table table-sm table-striped table-hover">
+              <thead class="table-dark text-xs">
                 <tr>
-                  <th class="ps-3">Guía</th>
+                  <th>#</th>
+                  <th>Guía</th>
+                  <th>Estado</th>
+                  <th>Forma Pago</th>
                   <th>Destinatario</th>
                   <th>Dirección</th>
-                  <th class="text-end pe-3">Valor</th>
+                  <th>Flete</th>
+                  <th>Valor Producto</th>
+                  <th>Pago Elec.</th>
                 </tr>
               </thead>
-              <tbody id="tabla-guias-detalle"></tbody>
+              <tbody id="tablaGuias"></tbody>
             </table>
           </div>
         </div>
@@ -110,55 +150,34 @@
 
 <script>
   var nsPlanillasMensajero = (function () {
-    function consultar_guias_planilla(numPlanilla, elemento) {
-      // Feedback visual de selección
-      document
-        .querySelectorAll(".card-planilla")
-        .forEach((c) => c.classList.remove("active"));
-      elemento.classList.add("active");
+    let listaGuias = [];
 
-      // Mostrar tabla y actualizar título
-      document.getElementById("seccion-detalle").classList.remove("d-none");
-      document.getElementById("titulo-detalle").innerText =
-        `Guías en Planilla #${numPlanilla}`;
+    // Función para obtener el texto del pago (según tu código)
+    const obtenerTextoPago = (codigo) => {
+      const c = parseInt(codigo);
+      if (c === 1 || c === 6)
+        return '<span class="badge bg-success">CONTADO</span>';
+      if (c === 3 || c === 7)
+        return '<span class="badge bg-primary">CONTRAENTREGA</span>';
+      if (c === 4 || c === 8)
+        return '<span class="badge bg-warning text-dark">CRÉDITO</span>';
+      if (c === 5)
+        return '<span class="badge bg-info text-dark">CORTESÍA</span>';
+      return "";
+    };
 
-      // Simulación de datos basada en tus tablas log_planilla_guias
-      const tbody = document.getElementById("tabla-guias-detalle");
-      const guiasEjemplo = [
-        {
-          guia: "7000123",
-          cliente: "Anderson Quiñones",
-          dir: "Calle 10 #5-20",
-          valor: "$15,000",
-        },
-        {
-          guia: "7000456",
-          cliente: "Maria Lopez",
-          dir: "Av. Santander 45",
-          valor: "$0 (E)",
-        },
-      ];
+    const formatearPagoElectronico = (pago) => {
+      if (!pago) return "";
+      const p = pago.toUpperCase();
+      if (p.startsWith("NEQ")) return "NEQUI";
+      if (p.startsWith("DAV")) return "DAVIPLATA";
+      return pago;
+    };
 
-      tbody.innerHTML = guiasEjemplo
-        .map(
-          (g) => `
-        <tr>
-          <td class="ps-3"><strong>${g.guia}</strong></td>
-          <td>${g.cliente}</td>
-          <td><small>${g.dir}</small></td>
-          <td class="text-end pe-3 fw-bold text-success">${g.valor}</td>
-        </tr>
-      `,
-        )
-        .join("");
-
-      document.getElementById("contador-detalle").innerText =
-        `${guiasEjemplo.length} Guías`;
-    }
-
-    async function cargarPlanillasReales() {
+    // 1. CARGAR TARJETAS INICIALES
+    async function cargarPlanillasMensajero() {
       try {
-        const personaId = sessionStorage.getItem("personaId"); // ID del mensajero
+        const personaId = sessionStorage.getItem("personaId"); //
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
@@ -178,7 +197,7 @@
         const result = await response.json();
         if (result.ok) renderizarTarjetas(result.data);
       } catch (err) {
-        console.error("Error:", err);
+        console.error(err);
       }
     }
 
@@ -186,25 +205,123 @@
       const contenedor = document.getElementById("contenedor-planillas");
       contenedor.innerHTML = planillas
         .map((p) => {
-          // Formatear fecha para mostrar solo YYYY-MM-DD
-          const fechaSimple = new Date(p.fecha_creacion)
-            .toISOString()
-            .split("T")[0];
-
+          const fecha = new Date(p.fecha_creacion).toISOString().split("T")[0];
           return `
-          <div class="card card-planilla p-3" onclick="nsPlanillasMensajero.consultar_guias_planilla(${p.num_planilla}, this)">
-            <div class="planilla-icon">📦</div>
-            <h6 class="fw-bold mb-1">Planilla #${p.num_planilla}</h6>
-            <div class="small text-primary fw-semibold">${p.total_guias || 0} Guías</div>
-            <span class="fecha-planilla">${fechaSimple}</span>
-          </div>
-        `;
+        <div class="card card-planilla p-3" onclick="nsPlanillasMensajero.seleccionarPlanilla(${p.num_planilla}, this)">
+          <div class="planilla-icon">📦</div>
+          <h6 class="fw-bold mb-1">Planilla #${p.num_planilla}</h6>
+          <div class="small text-primary fw-semibold">${p.total_guias || 0} Guías</div>
+          <span class="fecha-planilla small text-muted">${fecha}</span>
+        </div>
+      `;
         })
         .join("");
     }
 
-    cargarPlanillasReales();
+    // 2. BUSCAR DETALLE (Al dar clic en tarjeta)
+    async function seleccionarPlanilla(num_planilla, elemento) {
+      // Feedback visual
+      document
+        .querySelectorAll(".card-planilla")
+        .forEach((c) => c.classList.remove("active"));
+      elemento.classList.add("active");
 
-    return { consultar_guias_planilla };
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ num_planilla: parseInt(num_planilla) }),
+          },
+        );
+
+        const result = await response.json();
+        if (!result.ok) {
+          alert(result.error);
+          return;
+        }
+
+        document.getElementById("seccion-detalle").classList.remove("d-none");
+        document.getElementById("titulo-detalle").innerText =
+          `Detalle Planilla #${num_planilla}`;
+
+        listaGuias = result.data.guias;
+        renderTabla();
+        calcularTotales(listaGuias);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTabla() {
+      const tbody = document.getElementById("tablaGuias");
+      tbody.innerHTML = listaGuias
+        .map(
+          (g, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${g.guia}</strong></td>
+        <td><small>${g.estado || ""}</small></td>
+        <td>${obtenerTextoPago(g.formaPago)}</td>
+        <td>${g.destinatario || ""}</td>
+        <td><small>${g.direccion || ""}</small></td>
+        <td class="text-nowrap">$ ${parseFloat(g.valor_flete || 0).toLocaleString()}</td>
+        <td class="text-nowrap">$ ${parseFloat(g.valor_producto || 0).toLocaleString()}</td>
+        <td>${formatearPagoElectronico(g.pago_electronico)}</td>
+      </tr>
+    `,
+        )
+        .join("");
+      document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }
+
+    function calcularTotales(lista) {
+      const formatoCop = new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+      });
+      let sumaCE = 0,
+        sumaRE = 0,
+        sumaElec = 0;
+
+      lista.forEach((g) => {
+        const flete = parseFloat(g.valor_flete) || 0;
+        const prod = parseFloat(g.valor_producto) || 0;
+        const fPago = parseInt(g.formaPago);
+        const esElec =
+          g.pago_electronico && g.pago_electronico.toString().trim() !== "";
+
+        if (fPago === 3 || fPago === 7) sumaCE += flete;
+        else if (fPago === 4) sumaRE += prod;
+
+        if (esElec) {
+          if (fPago === 3 || fPago === 7) sumaElec += flete;
+          else if (fPago === 4) sumaElec += prod;
+        }
+      });
+
+      document.getElementById("totalContraentrega").innerText =
+        formatoCop.format(sumaCE);
+      document.getElementById("totalRecaudo").innerText =
+        formatoCop.format(sumaRE);
+      document.getElementById("totalElectronico").innerText =
+        formatoCop.format(sumaElec);
+      document.getElementById("totalGeneral").innerText = formatoCop.format(
+        sumaCE + sumaRE,
+      );
+    }
+
+    cargarPlanillasMensajero();
+
+    return { seleccionarPlanilla };
   })();
 </script>
