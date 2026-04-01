@@ -23,11 +23,17 @@
 
 <div class="container mt-4">
   <div class="row mb-3">
-    <div class="col">
+    <div class="col text-center">
       <h2 class="display-6">Mis Planillas</h2>
       <p class="text-muted">
         Selecciona una planilla abierta para ver los detalles.
       </p>
+    </div>
+  </div>
+
+  <div id="loader-planillas" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
 
@@ -38,48 +44,92 @@
 </div>
 
 <script>
-  (function () {
-    // Datos de ejemplo para visualizar la interfaz
-    const planillasEjemplo = [
-      {
-        num_planilla: 1024,
-        total_guias: 15,
-        fecha_creacion: "2026-03-31 08:30",
-      },
-      {
-        num_planilla: 1025,
-        total_guias: 8,
-        fecha_creacion: "2026-03-31 10:15",
-      },
-      {
-        num_planilla: 1028,
-        total_guias: 22,
-        fecha_creacion: "2026-03-31 14:00",
-      },
-    ];
+  // Namespace para evitar conflictos, similar a tu nsPlanilla
+  var nsPlanillasMensajero = (function () {
+    async function consultar_guias_planilla(numPlanilla) {
+      console.log("Consultando guías para la planilla:", numPlanilla);
+      // Aquí puedes redirigir o abrir un modal con el detalle de log_planilla_guias
+      alert("Consultando detalle de planilla #" + numPlanilla);
+    }
 
-    const contenedor = document.getElementById("contenedor-planillas");
+    async function cargarPlanillasReales() {
+      const contenedor = document.getElementById("contenedor-planillas");
+      const loader = document.getElementById("loader-planillas");
 
-    if (contenedor) {
-      contenedor.innerHTML = planillasEjemplo
+      try {
+        // 1. Obtener ID de la persona desde SessionStorage
+        const personaId = sessionStorage.getItem("personald");
+
+        if (!personaId) {
+          throw new Error("No se encontró ID de sesión");
+        }
+
+        // 2. Obtener Sesión de Supabase para el Token
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) {
+          throw new Error("Sesión no activa");
+        }
+
+        // 3. Llamada a la Edge Function novaenvios_planillas_mensajero
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_planillas_mensajero`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ personaId: personaId }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!result.ok) {
+          throw new Error(result.error || "Error al consultar planillas");
+        }
+
+        // 4. Renderizar tarjetas con datos de la RPC
+        renderizarTarjetas(result.data);
+      } catch (err) {
+        console.error(err);
+        contenedor.innerHTML = `<div class="alert alert-danger w-100">${err.message}</div>`;
+      } finally {
+        loader.style.display = "none";
+      }
+    }
+
+    function renderizarTarjetas(planillas) {
+      const contenedor = document.getElementById("contenedor-planillas");
+
+      if (planillas.length === 0) {
+        contenedor.innerHTML =
+          '<p class="text-center w-100">No tienes planillas abiertas asignadas.</p>';
+        return;
+      }
+
+      contenedor.innerHTML = planillas
         .map(
           (p) => `
         <div class="col">
-          <div class="card h-100 card-planilla" onclick="console.log('Click en planilla ${p.num_planilla}')">
+          <div class="card h-100 card-planilla" onclick="nsPlanillasMensajero.consultar_guias_planilla(${p.num_planilla})">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="planilla-icon">
-                  <i class="bi bi-box-seam"></i> <span style="font-size: 1.5rem;">📦</span>
+                   <span style="font-size: 1.5rem;">📦</span>
                 </div>
-                <span class="badge rounded-pill badge-planilla">Abierta</span>
+                <span class="badge rounded-pill badge-planilla">${p.estado === "AB" ? "Abierta" : p.estado}</span>
               </div>
               <h5 class="card-title">Planilla #${p.num_planilla}</h5>
               <p class="card-text text-secondary">
-                <strong>${p.total_guias} Guías</strong> asignadas
+                <strong>${p.total_guias || 0} Guías</strong> asignadas
               </p>
             </div>
             <div class="card-footer bg-transparent border-0 pb-3">
-              <small class="text-muted">Creada: ${p.fecha_creacion}</small>
+              <small class="text-muted">Creada: ${new Date(p.fecha_creacion).toLocaleString()}</small>
             </div>
           </div>
         </div>
@@ -87,5 +137,12 @@
         )
         .join("");
     }
+
+    // Ejecutar al cargar la vista
+    cargarPlanillasReales();
+
+    return {
+      consultar_guias_planilla,
+    };
   })();
 </script>
