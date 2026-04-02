@@ -233,73 +233,72 @@ var nsPlanilla=(function(){
         }
     });
 
-/**********************************************************************/
-async function buscarPlanilla(num_planilla) {
-    try {
-        limpiarCampos(false); 
+    /**********************************************************************/
+    async function buscarPlanilla(num_planilla) {
+        try {
+            limpiarCampos(false); 
 
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) throw new Error("Debe iniciar sesión");
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) throw new Error("Debe iniciar sesión");
 
-        const response = await fetch(
-            `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({ num_planilla: parseInt(num_planilla) })
+            const response = await fetch(
+                `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({ num_planilla: parseInt(num_planilla) })
+                }
+            );
+
+            const result = await response.json();
+
+            if (!result.ok) {
+                alertSMS(result.error); 
+                limpiarCampos(true);
+                return;
             }
-        );
 
-        const result = await response.json();
+            const data = result.data;
+            
+            if (data.estado === 'AN' ) {
+                alertSMS(`La planilla N° ${num_planilla} está ANULADA`);
+                limpiarCampos(true);
+                return;
+            }
 
-        if (!result.ok) {
-            alertSMS(result.error); 
+            // Llenar campos de cabecera
+            document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleDateString('es-CO');
+            document.getElementById("responsable").value = data.nombre_responsable;
+
+            /* ============================================================
+            CAMBIO CLAVE: Mapeo de guías con datos de sincronización
+            ============================================================ */
+            listaGuias = data.guias.map(g => ({
+                guia: g.guia,             
+                sincronizado: g.sincronizado, 
+                estado: g.estado || "",   
+                ciudad: g.ciudad || "",
+                destinatario: g.destinatario || "",
+                direccion: g.direccion || "",
+                celular: g.celular || "",
+                formaPago: g.formaPago || "",            
+                valor_flete: g.valor_flete || "",
+                valor_producto: g.valor_producto || "",
+                pago_electronico: g.pago_electronico || ""
+            }));        
+            
+            calcularTotales(listaGuias);
+            renderGuias();        
+
+        } catch (err) {
+            console.error(err);
+            alertSMS("Error de conexión con el servidor");
             limpiarCampos(true);
-            return;
         }
-
-        const data = result.data;
-        
-        if (data.estado === 'AN' ) {
-             alertSMS(`La planilla N° ${num_planilla} está ANULADA`);
-             limpiarCampos(true);
-             return;
-        }
-
-        // Llenar campos de cabecera
-        document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleDateString('es-CO');
-        document.getElementById("responsable").value = data.nombre_responsable;
-
-        /* ============================================================
-           CAMBIO CLAVE: Mapeo de guías con datos de sincronización
-           ============================================================ */
-        listaGuias = data.guias.map(g => ({
-            guia: g.guia,             
-            sincronizado: g.sincronizado, 
-            estado: g.estado || "",   
-            ciudad: g.ciudad || "",
-            destinatario: g.destinatario || "",
-            direccion: g.direccion || "",
-            celular: g.celular || "",
-            formaPago: g.formaPago || "",            
-            valor_flete: g.valor_flete || "",
-            valor_producto: g.valor_producto || "",
-            pago_electronico: g.pago_electronico || ""
-        }));        
-        
-        calcularTotales(listaGuias);
-        renderGuias();        
-
-    } catch (err) {
-        console.error(err);
-        alertSMS("Error de conexión con el servidor");
-        limpiarCampos(true);
     }
-}
-/*********************************************************************/   
 
     /* =========================
     RENDER TABLA (Sin cambios)
@@ -346,49 +345,10 @@ async function buscarPlanilla(num_planilla) {
         });
 
         document.getElementById("contadorGuias").innerText = listaGuias.length;
-    }
+    }    
 
-       
-    // Añadimos el parámetro con valor por defecto true
-    /*async function validarGuias(mostrarAlert = true) {
-        try {
-            if (!listaGuias || listaGuias.length === 0) {
-                calcularTotales([]);
-                renderGuias();
-                return;
-            }
-
-            const response = await fetch(`http://localhost:8081/arrayguias/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json; charset=utf-8' },
-                body: JSON.stringify(listaGuias)
-            });
-
-            const resServidor = await response.json();
-
-            if (resServidor.ok) {
-                listaGuias = resServidor.data;                
-                calcularTotales(listaGuias);
-                renderGuias();
-
-                // SOLO muestra el alert si el parámetro es true
-                if (mostrarAlert) {
-                    alertSMS("Validación masiva completada con éxito.");
-                }
-                
-                return true; // Retornamos true para confirmar que todo salió bien
-            } else {
-                alertSMS("El servidor no pudo procesar las guías.");
-                return false;
-            }
-        } catch (err) {
-            console.error("Error en validación:", err);
-            alertSMS("Error al conectar con el servidor local.");
-            return false;
-        }
-    }*/
-
-/*************************************************************************************/
+    /*************************************************************************************/
+    
     async function calcularTotales(lista) { 
         const formatoCop = new Intl.NumberFormat('es-CO', {
             style: 'currency', currency: 'COP', minimumFractionDigits: 0
@@ -434,106 +394,33 @@ async function buscarPlanilla(num_planilla) {
         document.getElementById("totalElectronico").innerText = formatoCop.format(sumaElectronicos);
         document.getElementById("totalGeneral").innerText = formatoCop.format(granTotal);
     }
-/*************************************************************************************/
+    /*************************************************************************************/
+    function limpiarCampos(borrarTodo = true) {
+        listaGuias = [];
+        renderGuias();
+        
+        document.getElementById("fecha_creacion").value = "";
+        document.getElementById("responsable").value = "";
+        
+        // Limpiar totales visuales
+        document.getElementById("totalContraentrega").innerText = "$ 0";
+        document.getElementById("totalRecaudo").innerText = "$ 0";
+        document.getElementById("totalElectronico").innerText = "$ 0";
+        document.getElementById("totalGeneral").innerText = "$ 0";   
 
-    /* =========================
-    GUARDAR (Sin cambios)
-    ========================= */
-    
-    /*async function guardarPlanilla(event, form) {
-      event.preventDefault();
-
-      try {
-          
-          // Llamamos a validar pasándole FALSE para que no interrumpa con el alert
-          const validacionOk = await validarGuias(false); 
-            
-          // Si la validación falló (ej. servidor C# apagado), no seguimos con el guardado
-          if (!validacionOk) {
-                alertSMS(`Ocurrio un error al validar la planilla vuelve a intentarlo.`);
-                return; 
-          }
-
-          const numInput = document.getElementById("num_planilla");
-          const num_planilla = numInput.value;
-          
-          if (!num_planilla) throw new Error("No hay un número de planilla válido");
-
-          // 1. Extraemos los totales de los elementos HTML que ya calculamos
-          const totalCE = parseFloat(document.getElementById("totalContraentrega").innerText.replace(/[^0-9]/g,"")) || 0;
-          const totalRE = parseFloat(document.getElementById("totalRecaudo").innerText.replace(/[^0-9]/g,"")) || 0;
-
-          // 2. Obtenemos sesión
-          const { data: { session } } = await supabaseClient.auth.getSession();
-          if (!session) throw new Error("Sesión no activa");
-
-          // 3. Petición a la Edge Function
-          const response = await fetch(
-              `${SUPABASE_URL}/functions/v1/novaenvios_cerrar_planilla`,
-              {
-                  method: "POST",
-                  headers: {
-                      "Content-Type": "application/json",
-                      "Authorization": `Bearer ${session.access_token}`
-                  },
-                  body: JSON.stringify({
-                      num_planilla: parseInt(num_planilla),
-                      total_ce: totalCE,
-                      total_re: totalRE
-                  })
-              }
-          );
-
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.error || "Error al procesar el cierre");
-
-          //ACCIONES POST-CIERRE (Interfaz)
-          
-          alertSMS(`Planilla ${num_planilla} cerrada y guardada con éxito.`);
-          
-          // Deshabilitar botones para evitar clics dobles o validaciones extra
-          document.getElementById("btnGuardar").disabled = true;
-          
-          // --- AQUÍ SE DESHABILITA EL BOTÓN VALIDAR ---
-          const btnValidar = document.querySelector('button[onclick="nsPlanilla.validarGuias()"]');
-          if (btnValidar) btnValidar.disabled = true;
-          
-          // Bloquear el input del número para que no lo cambien
-          numInput.readOnly = true;
-
-      } catch (err) {
-          console.error("Error en el cierre:", err);
-          alertSMS("Error: " + err.message);
-      }
-  }*/
-    
-    /*********************************************************************/
-  function limpiarCampos(borrarTodo = true) {
-    listaGuias = [];
-    renderGuias();
-    
-    document.getElementById("fecha_creacion").value = "";
-    document.getElementById("responsable").value = "";
-    
-    // Limpiar totales visuales
-    document.getElementById("totalContraentrega").innerText = "$ 0";
-    document.getElementById("totalRecaudo").innerText = "$ 0";
-    document.getElementById("totalElectronico").innerText = "$ 0";
-    document.getElementById("totalGeneral").innerText = "$ 0";   
-
-    if (borrarTodo) {
-        document.getElementById("num_planilla").value = "";
-        document.getElementById("num_planilla").readOnly = false;
-    } else {
-        // Si solo estamos limpiando para una nueva búsqueda, 
-        // nos aseguramos que el input sea escribible
-        document.getElementById("num_planilla").readOnly = false;
+        if (borrarTodo) {
+            document.getElementById("num_planilla").value = "";
+            document.getElementById("num_planilla").readOnly = false;
+        } else {
+            // Si solo estamos limpiando para una nueva búsqueda, 
+            // nos aseguramos que el input sea escribible
+            document.getElementById("num_planilla").readOnly = false;
+        }
     }
-}
   
-  return {    
-    buscarPlanilla, // EXPORTRAR TAMBIÉN ESTA
-    calcularTotales // EXPORTAR POR SI LA NECESITAS FUERA
-  }
+    return {    
+        buscarPlanilla, // EXPORTRAR TAMBIÉN ESTA
+        calcularTotales // EXPORTAR POR SI LA NECESITAS FUERA
+    }
 
 })();
