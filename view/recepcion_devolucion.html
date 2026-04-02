@@ -28,46 +28,66 @@
     padding: 12px !important;
   }
 
-  /* Azul Corporativo al activar */
   .card-planilla.active {
     border-color: #004085;
     background-color: #f0f7ff;
     border-width: 2px;
     transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 64, 133, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 64, 133, 0.15);
   }
 
-  .text-xs {
-    font-size: 10px;
-    letter-spacing: 0.5px;
+  /* --- DETALLE CON ALTURA FIJA Y SCROLL INTERNO --- */
+  .card-detalle-fijo {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh; /* Ocupa el 80% de la pantalla máximo */
+    border-radius: 15px;
+    overflow: hidden;
   }
 
-  .mensaje-vacio {
-    width: 100%;
-    padding: 40px 20px;
-    text-align: center;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border: 2px dashed #004085;
+  .cuerpo-tabla-scroll {
+    flex: 1 1 auto;
+    overflow-y: auto; /* Solo la tabla hace scroll */
+    background: #fff;
+  }
+
+  /* --- FORMULARIO ANCLADO (STICKY) --- */
+  .footer-confirmacion-fijo {
+    flex: 0 0 auto;
+    background-color: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+    padding: 20px;
+    z-index: 10;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .form-control-corp {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .form-control-corp:focus {
+    border-color: #004085;
+    box-shadow: 0 0 0 3px rgba(0, 64, 133, 0.1);
+  }
+
+  .label-corp {
+    font-size: 11px;
+    font-weight: 700;
     color: #004085;
-  }
-
-  /* Badge personalizado azul */
-  .badge-azul {
-    background-color: #004085;
-    color: white;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
   }
 </style>
 
 <div class="container-fluid mt-3">
   <div class="row mb-2">
     <div class="col text-center">
-      <h6
-        class="text-uppercase fw-bold text-primary small mb-2"
-        style="color: #004085 !important"
-      >
-        <i class="bi bi-box-arrow-in-left"></i> Devoluciones Pendientes de
-        Recibir (Estado CE)
+      <h6 class="text-uppercase fw-bold small mb-2" style="color: #004085">
+        <i class="bi bi-box-arrow-in-left"></i> Devoluciones Pendientes
       </h6>
       <div
         id="contenedor-planillas-devolucion"
@@ -76,58 +96,77 @@
     </div>
   </div>
 
-  <hr class="my-3 opacity-25" />
-
-  <div id="seccion-detalle-dev" class="row d-none">
+  <div id="seccion-detalle-dev" class="row d-none mt-3">
     <div class="col-12 col-lg-10 mx-auto">
-      <div class="card shadow border-0">
+      <div class="card shadow-lg border-0 card-detalle-fijo">
         <div
           class="card-header text-white d-flex justify-content-between align-items-center"
-          style="background-color: #004085"
+          style="background-color: #004085; padding: 15px 20px"
         >
           <h5
             class="mb-0 fw-bold"
             id="titulo-detalle-dev"
             style="font-size: 16px"
           >
-            Detalle Devolución
+            Detalle
           </h5>
           <span
-            class="badge bg-light text-primary fw-bold"
+            class="badge bg-white text-primary fw-bold"
             id="contadorGuiasDev"
             style="color: #004085 !important"
             >0 Guías</span
           >
         </div>
 
-        <div class="card-body p-0">
-          <div class="table-responsive" style="max-height: 350px">
+        <div class="cuerpo-tabla-scroll">
+          <div class="table-responsive">
             <table class="table table-sm table-striped table-hover mb-0">
               <thead
-                class="text-xs text-white"
-                style="background-color: #002752"
+                class="text-white sticky-top"
+                style="background-color: #002752; font-size: 11px"
               >
                 <tr>
-                  <th>#</th>
-                  <th>Número de Guía</th>
-                  <th>Destinatario</th>
-                  <th>Ciudad</th>
-                  <th>Estado</th>
+                  <th class="py-2 ps-3">#</th>
+                  <th class="py-2">GUÍA</th>
+                  <th class="py-2">DESTINATARIO</th>
+                  <th class="py-2">CIUDAD</th>
+                  <th class="py-2">ESTADO</th>
                 </tr>
               </thead>
-              <tbody id="tablaGuiasDev" class="text-xs"></tbody>
+              <tbody id="tablaGuiasDev" style="font-size: 12px"></tbody>
             </table>
           </div>
         </div>
 
-        <div class="card-footer bg-white p-3 text-center">
+        <div class="footer-confirmacion-fijo">
+          <div class="row g-2 mb-3">
+            <div class="col-12 col-md-6">
+              <label class="label-corp">Recibido por:</label>
+              <input
+                type="text"
+                id="nombreRecibe"
+                class="form-control form-control-corp"
+                placeholder="Nombre completo"
+              />
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="label-corp">Correo de notificación:</label>
+              <input
+                type="email"
+                id="emailRecibe"
+                class="form-control form-control-corp"
+                placeholder="email@empresa.com"
+              />
+            </div>
+          </div>
+
           <button
             id="btnRecibirDev"
             class="btn btn-primary w-100 fw-bold py-2 shadow-sm"
-            style="background-color: #004085; border-color: #004085"
+            style="background-color: #004085; border: none; height: 50px"
             onclick="nsRecepcionDevolucion.confirmarRecibo()"
           >
-            <i class="bi bi-check-circle"></i> CONFIRMAR RECEPCIÓN FÍSICA
+            <i class="bi bi-check-all fs-5"></i> CONFIRMAR RECEPCIÓN FÍSICA
           </button>
         </div>
       </div>
