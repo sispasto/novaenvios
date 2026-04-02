@@ -121,11 +121,12 @@
               <thead class="table-dark text-nowrap" style="font-size: 11px">
                 <tr>
                   <th>N° Planilla</th>
+                  <th>Tipo / Observación</th>
                   <th>Estado</th>
                   <th>Responsable</th>
                   <th># Guías</th>
-                  <th>Flete Contraentrega</th>
-                  <th>Flete Recaudo</th>
+                  <th class="text-end">Flete Contraentrega</th>
+                  <th class="text-end">Flete Recaudo</th>
                 </tr>
               </thead>
 
@@ -186,51 +187,65 @@
       }
     }
 
-    /* =========================
-RENDER TABLA
-========================= */
+    /* =========================*/
 
-    /* =========================
-RENDER TABLA
-========================= */
     function renderTabla(data) {
       const tbody = document.getElementById("tablaPlanillas");
       tbody.innerHTML = "";
 
       if (!data || data.length === 0) {
-        // Cambiamos colspan="4" por colspan="6"
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No hay datos disponibles</td></tr>`;
+        // Aumentamos el colspan a 7 por la nueva columna
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No hay datos disponibles</td></tr>`;
         return;
       }
 
       data.forEach((p) => {
-        const badgeColor =
-          p.estado === "ABIERTA" ? "bg-success" : "bg-secondary";
+        // 1. Lógica para el Badge de Estado
+        const badgeEstado = p.estado === "AB" ? "bg-success" : "bg-secondary";
+        const textoEstado =
+          p.estado === "AB"
+            ? "ABIERTA"
+            : p.estado === "AN"
+              ? "ANULADA"
+              : p.estado;
 
-        // Formateo de moneda para que se vea profesional 💰
-        const fleteCE = (p.flete_contraentrega || 0).toLocaleString("es-CO", {
-          style: "currency",
-          currency: "COP",
-          maximumFractionDigits: 0,
-        });
-        const fleteRE = (p.flete_recaudo || 0).toLocaleString("es-CO", {
-          style: "currency",
-          currency: "COP",
-          maximumFractionDigits: 0,
-        });
+        // 2. Lógica para el Badge de Tipo (Observación)
+        const esDevolucion =
+          p.observacion === "DEVOLUCION A ENVIA - RETORNO FISICO";
+        const badgeTipo = esDevolucion
+          ? '<span class="badge bg-danger"><i class="fas fa-undo-alt me-1"></i> DEVOLUCIÓN</span>'
+          : '<span class="badge bg-info text-dark">DESPACHO</span>';
+
+        // 3. Formateo de moneda
+        const fleteCE = (parseFloat(p.flete_contraentrega) || 0).toLocaleString(
+          "es-CO",
+          {
+            style: "currency",
+            currency: "COP",
+            maximumFractionDigits: 0,
+          },
+        );
+        const fleteRE = (parseFloat(p.flete_recaudo) || 0).toLocaleString(
+          "es-CO",
+          {
+            style: "currency",
+            currency: "COP",
+            maximumFractionDigits: 0,
+          },
+        );
 
         tbody.innerHTML += `
       <tr>
-          <td><strong>${p.num_planilla}</strong></td>
-          <td>
-              <span class="badge ${badgeColor}">${p.estado || "N/A"}</span>
-          </td>
-          <td>${p.responsable}</td>
-          <td>
-              <span class="badge bg-light text-dark border">${p.total_guias}</span>
-          </td>
-          <td class="text-end text-primary fw-bold">${fleteCE}</td> <td class="text-end text-success fw-bold">${fleteRE}</td> </tr>
-      `;
+        <td><strong>${p.num_planilla}</strong></td>
+        <td>${badgeTipo}</td> <td><span class="badge ${badgeEstado}">${textoEstado}</span></td>
+        <td><small>${p.responsable}</small></td>
+        <td class="text-center">
+            <span class="badge bg-light text-dark border">${p.total_guias}</span>
+        </td>
+        <td class="text-end text-primary fw-bold">${fleteCE}</td> 
+        <td class="text-end text-success fw-bold">${fleteRE}</td> 
+      </tr>
+    `;
       });
     }
 
