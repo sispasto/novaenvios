@@ -299,17 +299,7 @@ async function buscarPlanilla(num_planilla) {
         limpiarCampos(true);
     }
 }
-/*********************************************************************/
-
-    /**
-     * Función auxiliar para limpiar los campos si la búsqueda falla o es inválida
-     */
-    function limpiarFormularioBusqueda() {
-        document.getElementById("fecha_creacion").value = "";
-        document.getElementById("responsable").value = "";
-        listaGuias = [];
-        renderGuias();
-    }
+/*********************************************************************/   
 
     /* =========================
     RENDER TABLA (Sin cambios)
@@ -360,7 +350,7 @@ async function buscarPlanilla(num_planilla) {
 
        
     // Añadimos el parámetro con valor por defecto true
-    async function validarGuias(mostrarAlert = true) {
+    /*async function validarGuias(mostrarAlert = true) {
         try {
             if (!listaGuias || listaGuias.length === 0) {
                 calcularTotales([]);
@@ -396,7 +386,7 @@ async function buscarPlanilla(num_planilla) {
             alertSMS("Error al conectar con el servidor local.");
             return false;
         }
-    }
+    }*/
 
 /*************************************************************************************/
     async function calcularTotales(lista) { 
@@ -450,7 +440,7 @@ async function buscarPlanilla(num_planilla) {
     GUARDAR (Sin cambios)
     ========================= */
     
-    async function guardarPlanilla(event, form) {
+    /*async function guardarPlanilla(event, form) {
       event.preventDefault();
 
       try {
@@ -497,9 +487,8 @@ async function buscarPlanilla(num_planilla) {
           const result = await response.json();
           if (!response.ok) throw new Error(result.error || "Error al procesar el cierre");
 
-          /* ===================================================
-            ACCIONES POST-CIERRE (Interfaz)
-          =================================================== */
+          //ACCIONES POST-CIERRE (Interfaz)
+          
           alertSMS(`Planilla ${num_planilla} cerrada y guardada con éxito.`);
           
           // Deshabilitar botones para evitar clics dobles o validaciones extra
@@ -516,7 +505,7 @@ async function buscarPlanilla(num_planilla) {
           console.error("Error en el cierre:", err);
           alertSMS("Error: " + err.message);
       }
-  }
+  }*/
     
     /*********************************************************************/
   function limpiarCampos(borrarTodo = true) {
@@ -530,13 +519,7 @@ async function buscarPlanilla(num_planilla) {
     document.getElementById("totalContraentrega").innerText = "$ 0";
     document.getElementById("totalRecaudo").innerText = "$ 0";
     document.getElementById("totalElectronico").innerText = "$ 0";
-    document.getElementById("totalGeneral").innerText = "$ 0";
-    
-    // --- REHABILITAR BOTONES ---
-    //document.getElementById("btnGuardar").disabled = false;
-    
-    //const btnValidar = document.querySelector('button[onclick="nsPlanilla.validarGuias()"]');
-    //if (btnValidar) btnValidar.disabled = false;
+    document.getElementById("totalGeneral").innerText = "$ 0";   
 
     if (borrarTodo) {
         document.getElementById("num_planilla").value = "";
@@ -548,9 +531,7 @@ async function buscarPlanilla(num_planilla) {
     }
 }
   
-  return {
-    guardarPlanilla,
-    validarGuias,
+  return {    
     buscarPlanilla, // EXPORTRAR TAMBIÉN ESTA
     calcularTotales // EXPORTAR POR SI LA NECESITAS FUERA
   }
