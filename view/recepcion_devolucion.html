@@ -195,16 +195,24 @@
         const result = await response.json();
         if (!response.ok) throw new Error(result.error);
 
+        // --- EL CAMBIO ESTÁ AQUÍ ---
+        // Accedemos a result.data.guias que es el array real
+        const guias = result.data.guias || [];
+
         document
           .getElementById("seccion-detalle-dev")
           .classList.remove("d-none");
         document.getElementById("titulo-detalle-dev").innerText =
           `Planilla #${num} - Retorno Físico`;
+
+        // Usamos guias.length en lugar de result.data.length
         document.getElementById("contadorGuiasDev").innerText =
-          `${result.data.length} Guías`;
+          `${guias.length} Guías`;
 
         const tbody = document.getElementById("tablaGuiasDev");
-        tbody.innerHTML = result.data
+
+        // Hacemos el map sobre la constante 'guias'
+        tbody.innerHTML = guias
           .map(
             (g, i) => `
           <tr>
@@ -217,6 +225,7 @@
         `,
           )
           .join("");
+        // ---------------------------
 
         document
           .getElementById("seccion-detalle-dev")
