@@ -283,7 +283,78 @@
     }
 
     async function confirmarRecibo() {
-      // Tu lógica de confirmación aquí
+      const nombre = document.getElementById("nombreRecibe").value.trim();
+      const email = document.getElementById("emailRecibe").value.trim();
+      const btn = document.getElementById("btnRecibirDev");
+
+      // 1. VALIDACIONES PREVIAS
+      if (!planillaSeleccionada) {
+        alertSMS("⚠️ No has seleccionado ninguna planilla.");
+        return;
+      }
+
+      if (!nombre || !email) {
+        alertSMS("⚠️ Debes ingresar el nombre y correo de quien recibe.");
+        return;
+      }
+
+      // Validación básica de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alertSMS("⚠️ El formato del correo electrónico no es válido.");
+        return;
+      }
+
+      // 2. BLOQUEO DE BOTÓN (LOADING)
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> PROCESANDO ENTREGA...`;
+
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_entregar_pdevolucion`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              num_planilla: planillaSeleccionada,
+              recibido_por: nombre,
+              email_notificacion: email,
+            }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok)
+          throw new Error(result.error || "Error al procesar la entrega");
+
+        // 3. ÉXITO
+        alertSMS(
+          `✅ ¡Éxito! La planilla #${planillaSeleccionada} ha sido recibida físicamente.`,
+        );
+
+        // Limpiar formulario y ocultar detalle
+        document.getElementById("nombreRecibe").value = "";
+        document.getElementById("emailRecibe").value = "";
+        document.getElementById("seccion-detalle-dev").classList.add("d-none");
+
+        // Refrescar el carrusel para quitar la planilla procesada
+        await cargarPendientes();
+      } catch (err) {
+        console.error("Error en confirmación:", err);
+        alertSMS("❌ " + err.message);
+      } finally {
+        // 4. RESTAURAR BOTÓN
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-check-all fs-5"></i> CONFIRMAR RECEPCIÓN FÍSICA`;
+      }
     }
 
     cargarPendientes();
