@@ -28,11 +28,13 @@
     padding: 12px !important;
   }
 
+  /* Azul Corporativo al activar */
   .card-planilla.active {
-    border-color: #dc3545; /* Rojo para devoluciones */
-    background-color: #fff5f5;
+    border-color: #004085;
+    background-color: #f0f7ff;
     border-width: 2px;
     transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 64, 133, 0.1);
   }
 
   .text-xs {
@@ -46,15 +48,24 @@
     text-align: center;
     background: #f8f9fa;
     border-radius: 12px;
-    border: 2px dashed #dee2e6;
-    color: #6c757d;
+    border: 2px dashed #004085;
+    color: #004085;
+  }
+
+  /* Badge personalizado azul */
+  .badge-azul {
+    background-color: #004085;
+    color: white;
   }
 </style>
 
 <div class="container-fluid mt-3">
   <div class="row mb-2">
     <div class="col text-center">
-      <h6 class="text-uppercase fw-bold text-danger small mb-2">
+      <h6
+        class="text-uppercase fw-bold text-primary small mb-2"
+        style="color: #004085 !important"
+      >
         <i class="bi bi-box-arrow-in-left"></i> Devoluciones Pendientes de
         Recibir (Estado CE)
       </h6>
@@ -71,7 +82,8 @@
     <div class="col-12 col-lg-10 mx-auto">
       <div class="card shadow border-0">
         <div
-          class="card-header bg-danger text-white d-flex justify-content-between align-items-center"
+          class="card-header text-white d-flex justify-content-between align-items-center"
+          style="background-color: #004085"
         >
           <h5
             class="mb-0 fw-bold"
@@ -80,7 +92,10 @@
           >
             Detalle Devolución
           </h5>
-          <span class="badge bg-light text-danger fw-bold" id="contadorGuiasDev"
+          <span
+            class="badge bg-light text-primary fw-bold"
+            id="contadorGuiasDev"
+            style="color: #004085 !important"
             >0 Guías</span
           >
         </div>
@@ -88,7 +103,10 @@
         <div class="card-body p-0">
           <div class="table-responsive" style="max-height: 350px">
             <table class="table table-sm table-striped table-hover mb-0">
-              <thead class="table-dark text-xs">
+              <thead
+                class="text-xs text-white"
+                style="background-color: #002752"
+              >
                 <tr>
                   <th>#</th>
                   <th>Número de Guía</th>
@@ -105,7 +123,8 @@
         <div class="card-footer bg-white p-3 text-center">
           <button
             id="btnRecibirDev"
-            class="btn btn-danger w-100 fw-bold py-2 shadow-sm"
+            class="btn btn-primary w-100 fw-bold py-2 shadow-sm"
+            style="background-color: #004085; border-color: #004085"
             onclick="nsRecepcionDevolucion.confirmarRecibo()"
           >
             <i class="bi bi-check-circle"></i> CONFIRMAR RECEPCIÓN FÍSICA
@@ -120,7 +139,6 @@
   var nsRecepcionDevolucion = (function () {
     let planillaSeleccionada = null;
 
-    // 1. CARGAR PLANILLAS DESDE EDGE FUNCTION
     async function cargarPendientes() {
       const contenedor = document.getElementById(
         "contenedor-planillas-devolucion",
@@ -142,7 +160,6 @@
         );
 
         const result = await response.json();
-
         if (!response.ok) throw new Error(result.error);
 
         if (!result.data || result.data.length === 0) {
@@ -154,9 +171,9 @@
           .map(
             (p) => `
           <div class="card card-planilla" onclick="nsRecepcionDevolucion.verDetalle(${p.num_planilla}, this)">
-            <div class="fs-4">↩️</div>
+            <div class="fs-4">📦</div>
             <h6 class="fw-bold mb-1">Planilla #${p.num_planilla}</h6>
-            <div class="small text-danger fw-semibold">${p.total_guias} Guías</div>
+            <div class="small fw-semibold" style="color: #004085;">${p.total_guias} Guías</div>
             <span class="text-muted text-xs">${p.fecha_creacion.split("T")[0]}</span>
           </div>
         `,
@@ -167,7 +184,6 @@
       }
     }
 
-    // 2. VER DETALLE DESDE EDGE FUNCTION
     async function verDetalle(num, elemento) {
       planillaSeleccionada = num;
       document
@@ -179,7 +195,6 @@
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
-
         const response = await fetch(
           `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
           {
@@ -195,8 +210,6 @@
         const result = await response.json();
         if (!response.ok) throw new Error(result.error);
 
-        // --- EL CAMBIO ESTÁ AQUÍ ---
-        // Accedemos a result.data.guias que es el array real
         const guias = result.data.guias || [];
 
         document
@@ -204,28 +217,23 @@
           .classList.remove("d-none");
         document.getElementById("titulo-detalle-dev").innerText =
           `Planilla #${num} - Retorno Físico`;
-
-        // Usamos guias.length en lugar de result.data.length
         document.getElementById("contadorGuiasDev").innerText =
           `${guias.length} Guías`;
 
         const tbody = document.getElementById("tablaGuiasDev");
-
-        // Hacemos el map sobre la constante 'guias'
         tbody.innerHTML = guias
           .map(
             (g, i) => `
           <tr>
             <td>${i + 1}</td>
-            <td class="fw-bold text-primary">${g.guia}</td>
+            <td class="fw-bold" style="color: #004085;">${g.guia}</td>
             <td>${g.destinatario || "N/A"}</td>
             <td>${g.ciudad || "-"}</td>
-            <td><span class="badge bg-secondary text-xs">${g.estado}</span></td>
+            <td><span class="badge text-xs" style="background-color: #e9ecef; color: #004085;">${g.estado}</span></td>
           </tr>
         `,
           )
           .join("");
-        // ---------------------------
 
         document
           .getElementById("seccion-detalle-dev")
@@ -235,13 +243,11 @@
       }
     }
 
-    // 3. CONFIRMAR (Se mantiene igual llamando a la RPC o puedes crear otra EF)
     async function confirmarRecibo() {
-      // ... (Lógica de confirmación que ya tienes)
+      // Tu lógica de confirmación aquí
     }
 
     cargarPendientes();
-
     return { verDetalle, confirmarRecibo, cargarPendientes };
   })();
 </script>
