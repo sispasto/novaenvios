@@ -128,8 +128,8 @@
                 <tr>
                   <th class="py-2 ps-3">#</th>
                   <th class="py-2">GUÍA</th>
-                  <th class="py-2">DESTINATARIO</th>
-                  <th class="py-2">CIUDAD</th>
+                  <!--<th class="py-2">DESTINATARIO</th>
+                  <th class="py-2">CIUDAD</th>-->
                   <th class="py-2">ESTADO</th>
                 </tr>
               </thead>
@@ -260,14 +260,14 @@
           `${guias.length} Guías`;
 
         const tbody = document.getElementById("tablaGuiasDev");
+        /*<td>${g.destinatario || "N/A"}</td>
+            <td>${g.ciudad || "-"}</td>*/
         tbody.innerHTML = guias
           .map(
             (g, i) => `
           <tr>
             <td>${i + 1}</td>
-            <td class="fw-bold" style="color: #004085;">${g.guia}</td>
-            <td>${g.destinatario || "N/A"}</td>
-            <td>${g.ciudad || "-"}</td>
+            <td class="fw-bold" style="color: #004085;">${g.guia}</td>            
             <td><span class="badge text-xs" style="background-color: #e9ecef; color: #004085;">${g.estado}</span></td>
           </tr>
         `,
