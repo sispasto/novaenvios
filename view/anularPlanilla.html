@@ -69,7 +69,7 @@
 
           <button
             id="btnAnular"
-            class="btn btn-dark w-100 shadow-sm"
+            class="btn btn-danger w-100 shadow-sm fw-bold"
             onclick="nsAnularPlanilla.anular()"
           >
             ANULAR PLANILLA
@@ -87,16 +87,26 @@
 <script>
   var nsAnularPlanilla = (function () {
     async function anular() {
+      const btn = document.getElementById("btnAnular");
+      const input = document.getElementById("num_planilla");
+      const num = input.value;
+
+      if (!num) {
+        alertSMS("⚠️ Ingrese el número de planilla");
+        return;
+      }
+
+      // Estado de carga
+      btn.disabled = true;
+      btn.innerHTML =
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...';
+
       try {
-        const num = document.getElementById("num_planilla").value;
-
-        if (!num) {
-          throw new Error("Ingrese número de planilla");
-        }
-
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
+        if (!session)
+          throw new Error("Sesión expirada. Inicie sesión nuevamente.");
 
         const response = await fetch(
           `${SUPABASE_URL}/functions/v1/novaenvios_anular_planilla`,
@@ -106,28 +116,37 @@
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.access_token}`,
             },
-            body: JSON.stringify({
-              num_planilla: num,
-            }),
+            body: JSON.stringify({ num_planilla: num }),
           },
         );
 
         const result = await response.json();
 
+        // 1. Validar error de red o de la Edge Function
         if (!response.ok) {
-          throw new Error(result.error);
+          throw new Error(result.error || "Error en el servidor");
         }
 
-        alertSMS("Planilla anulada correctamente");
-
-        document.getElementById("num_planilla").value = "";
+        // 2. Validar respuesta lógica de la RPC (nuestro ok: true/false de Postgres)
+        if (result.ok) {
+          alertSMS(
+            "✅ " + (result.mensaje || "Planilla anulada correctamente"),
+          );
+          input.value = "";
+        } else {
+          // Caso donde la planilla no existe o ya está anulada
+          alertSMS("❌ " + result.error);
+        }
       } catch (err) {
-        alertSMS(err.message);
+        console.error(err);
+        alertSMS("🚀 " + err.message);
+      } finally {
+        // Restaurar botón
+        btn.disabled = false;
+        btn.innerHTML = "ANULAR PLANILLA";
       }
     }
 
-    return {
-      anular,
-    };
+    return { anular };
   })();
 </script>
