@@ -263,19 +263,27 @@ var nsPlanilla=(function(){
 
             const data = result.data;
             
-            if (data.estado === 'AN' ) {
+            // 1. Validar si la planilla está anulada
+            if (data.estado === 'AN') {
                 alertSMS(`La planilla N° ${num_planilla} está ANULADA`);
                 limpiarCampos(true);
                 return;
             }
 
-            // Llenar campos de cabecera
+            // 2. Llenar información de cabecera (Siempre, para dar feedback visual)
             document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleDateString('es-CO');
             document.getElementById("responsable").value = data.nombre_responsable;
 
-            /* ============================================================
-            CAMBIO CLAVE: Mapeo de guías con datos de sincronización
-            ============================================================ */
+            // 3. Validar si la planilla no tiene guías
+            if (!data.guias || data.guias.length === 0) {
+                alertSMS(`La planilla N° ${num_planilla} no tiene guías asociadas`);
+                // Limpiamos solo la tabla y totales por si había algo de una búsqueda anterior
+                listaGuias = [];
+                renderGuias();
+                return; 
+            }
+
+            // 4. Si tiene guías, procedemos con el mapeo y cálculos
             listaGuias = data.guias.map(g => ({
                 guia: g.guia,             
                 sincronizado: g.sincronizado, 
@@ -285,9 +293,10 @@ var nsPlanilla=(function(){
                 direccion: g.direccion || "",
                 celular: g.celular || "",
                 formaPago: g.formaPago || "",            
-                valor_flete: g.valor_flete || "",
-                valor_producto: g.valor_producto || "",
-                pago_electronico: g.pago_electronico || ""
+                valor_flete: parseFloat(g.valor_flete) || 0,
+                valor_producto: parseFloat(g.valor_producto) || 0,
+                pago_electronico: g.pago_electronico || "",
+                tipo_proceso: g.tipo_proceso || ""
             }));        
             
             calcularTotales(listaGuias);
