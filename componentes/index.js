@@ -11,3 +11,4 @@ import "./consultarPlanilla.js";
 import "./planillasMensajero.js";
 import "./registroPersona.js";
 import "./PlanillaDevolucion.js";
+import "./RecepcionDevolucionComponent.js";

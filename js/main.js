@@ -66,6 +66,26 @@ function consultarPlanillas() {
   main.appendChild(frmConsultarPlanillas);
 }
 
+function entregarDevoluciones() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const frmEntregarDevoluciones = document.createElement(
+    "recepcion-devolucion-component",
+  );
+  frmEntregarDevoluciones.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(frmEntregarDevoluciones);
+}
+
+function crearPlanillaDevolucion() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const frmCrearPlanillaDevolucion = document.createElement(
+    "planilla-devolucion-component",
+  );
+  frmCrearPlanillaDevolucion.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(frmCrearPlanillaDevolucion);
+}
+
 function crearPlanillaDevolucion() {
   let main = document.getElementById("App");
   removeALLChilds(main);

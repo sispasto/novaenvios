@@ -1,0 +1,238 @@
+<style>
+  /* --- CARRUSEL Y TARJETAS --- */
+  .contenedor-carrusel {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 15px 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
+  }
+
+  @media (min-width: 992px) {
+    .contenedor-carrusel {
+      justify-content: center;
+    }
+  }
+
+  .card-planilla {
+    flex: 0 0 auto;
+    width: 165px;
+    transition: all 0.2s ease;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    padding: 12px !important;
+  }
+
+  .card-planilla.active {
+    border-color: #dc3545; /* Rojo para devoluciones */
+    background-color: #fff5f5;
+    border-width: 2px;
+    transform: translateY(-3px);
+  }
+
+  .text-xs {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .mensaje-vacio {
+    width: 100%;
+    padding: 40px 20px;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+    color: #6c757d;
+  }
+</style>
+
+<div class="container-fluid mt-3">
+  <div class="row mb-2">
+    <div class="col text-center">
+      <h6 class="text-uppercase fw-bold text-danger small mb-2">
+        <i class="bi bi-box-arrow-in-left"></i> Devoluciones Pendientes de
+        Recibir (Estado CE)
+      </h6>
+      <div
+        id="contenedor-planillas-devolucion"
+        class="contenedor-carrusel"
+      ></div>
+    </div>
+  </div>
+
+  <hr class="my-3 opacity-25" />
+
+  <div id="seccion-detalle-dev" class="row d-none">
+    <div class="col-12 col-lg-10 mx-auto">
+      <div class="card shadow border-0">
+        <div
+          class="card-header bg-danger text-white d-flex justify-content-between align-items-center"
+        >
+          <h5
+            class="mb-0 fw-bold"
+            id="titulo-detalle-dev"
+            style="font-size: 16px"
+          >
+            Detalle Devolución
+          </h5>
+          <span class="badge bg-light text-danger fw-bold" id="contadorGuiasDev"
+            >0 Guías</span
+          >
+        </div>
+
+        <div class="card-body p-0">
+          <div class="table-responsive" style="max-height: 350px">
+            <table class="table table-sm table-striped table-hover mb-0">
+              <thead class="table-dark text-xs">
+                <tr>
+                  <th>#</th>
+                  <th>Número de Guía</th>
+                  <th>Destinatario</th>
+                  <th>Ciudad</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tablaGuiasDev" class="text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card-footer bg-white p-3 text-center">
+          <button
+            id="btnRecibirDev"
+            class="btn btn-danger w-100 fw-bold py-2 shadow-sm"
+            onclick="nsRecepcionDevolucion.confirmarRecibo()"
+          >
+            <i class="bi bi-check-circle"></i> CONFIRMAR RECEPCIÓN FÍSICA
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var nsRecepcionDevolucion = (function () {
+    let planillaSeleccionada = null;
+
+    // 1. CARGAR PLANILLAS DESDE EDGE FUNCTION
+    async function cargarPendientes() {
+      const contenedor = document.getElementById(
+        "contenedor-planillas-devolucion",
+      );
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_cargarpdevoluciones`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) throw new Error(result.error);
+
+        if (!result.data || result.data.length === 0) {
+          contenedor.innerHTML = `<div class="mensaje-vacio"><h6>No hay devoluciones pendientes</h6></div>`;
+          return;
+        }
+
+        contenedor.innerHTML = result.data
+          .map(
+            (p) => `
+          <div class="card card-planilla" onclick="nsRecepcionDevolucion.verDetalle(${p.num_planilla}, this)">
+            <div class="fs-4">↩️</div>
+            <h6 class="fw-bold mb-1">Planilla #${p.num_planilla}</h6>
+            <div class="small text-danger fw-semibold">${p.total_guias} Guías</div>
+            <span class="text-muted text-xs">${p.fecha_creacion.split("T")[0]}</span>
+          </div>
+        `,
+          )
+          .join("");
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    }
+
+    // 2. VER DETALLE DESDE EDGE FUNCTION
+    async function verDetalle(num, elemento) {
+      planillaSeleccionada = num;
+      document
+        .querySelectorAll(".card-planilla")
+        .forEach((c) => c.classList.remove("active"));
+      elemento.classList.add("active");
+
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ num_planilla: num }),
+          },
+        );
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+
+        document
+          .getElementById("seccion-detalle-dev")
+          .classList.remove("d-none");
+        document.getElementById("titulo-detalle-dev").innerText =
+          `Planilla #${num} - Retorno Físico`;
+        document.getElementById("contadorGuiasDev").innerText =
+          `${result.data.length} Guías`;
+
+        const tbody = document.getElementById("tablaGuiasDev");
+        tbody.innerHTML = result.data
+          .map(
+            (g, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td class="fw-bold text-primary">${g.guia}</td>
+            <td>${g.destinatario || "N/A"}</td>
+            <td>${g.ciudad || "-"}</td>
+            <td><span class="badge bg-secondary text-xs">${g.estado}</span></td>
+          </tr>
+        `,
+          )
+          .join("");
+
+        document
+          .getElementById("seccion-detalle-dev")
+          .scrollIntoView({ behavior: "smooth" });
+      } catch (err) {
+        alertSMS("❌ " + err.message);
+      }
+    }
+
+    // 3. CONFIRMAR (Se mantiene igual llamando a la RPC o puedes crear otra EF)
+    async function confirmarRecibo() {
+      // ... (Lógica de confirmación que ya tienes)
+    }
+
+    cargarPendientes();
+
+    return { verDetalle, confirmarRecibo, cargarPendientes };
+  })();
+</script>
