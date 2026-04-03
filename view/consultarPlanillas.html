@@ -210,11 +210,19 @@
               : p.estado;
 
         // 2. Lógica para el Badge de Tipo (Observación)
-        const esDevolucion =
-          p.observacion === "DEVOLUCION A ENVIA - RETORNO FISICO";
-        const badgeTipo = esDevolucion
-          ? '<span class="badge bg-danger"><i class="fas fa-undo-alt me-1"></i> DEVOLUCIÓN</span>'
-          : '<span class="badge bg-info text-dark">DESPACHO</span>';
+        // 1. Definimos la lógica de evaluación
+        let badgeTipo = "";
+
+        if (p.observacion === "DEVOLUCION A ENVIA - RETORNO FISICO") {
+          badgeTipo =
+            '<span class="badge bg-danger"><i class="fas fa-undo-alt me-1"></i> DEVOLUCIÓN</span>';
+        } else if (p.observacion === "ENTREGA FÍSICA CONFIRMADA - BODEGA") {
+          badgeTipo =
+            '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> DEVUELTA Y RECIBIDA</span>';
+        } else {
+          // Caso por defecto: Despacho
+          badgeTipo = '<span class="badge bg-info text-dark">DESPACHO</span>';
+        }
 
         // 3. Formateo de moneda
         const fleteCE = (parseFloat(p.flete_contraentrega) || 0).toLocaleString(
