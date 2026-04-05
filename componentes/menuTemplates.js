@@ -19,7 +19,7 @@ export const MENUS = {
     <ul class="navbar-nav flex-grow-1 pe-3 custom-menu">
       <li class="nav-item mb-2">
         <a class="nav-link active d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(getHome)">
-          <i class="bi bi-speedometer2 text-primary"></i> <span>Panel Principal</span>
+          <i class="bi bi-house-door text-primary"></i> <span>Inicio</span>
         </a>
       </li>
       <li class="nav-item mb-3">
@@ -89,6 +89,7 @@ export const MENUS = {
         </a>
       </li>
     </ul>`,
+
   // ROL MENSAJERO
   MENSAJERO: `
     <ul class="navbar-nav flex-grow-1 pe-3 custom-menu">
@@ -97,13 +98,11 @@ export const MENUS = {
           <i class="bi bi-house-door"></i> <span>Inicio</span>
         </a>
       </li>
-
       <li class="nav-item mb-2">
         <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(getPlanillasMensajero)">
           <i class="bi bi-search"></i> <span>Consultar Planillas</span>
         </a>
       </li>
-
       <li class="nav-item mt-4 border-top border-secondary pt-3">
         <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(showChangePasswordModal)">
           <i class="bi bi-key"></i> <span>Cambiar Clave</span>
@@ -115,15 +114,15 @@ export const MENUS = {
         </a>
       </li>
     </ul>`,
+
   // ROL ADMINISTRADOR
   ADMIN: `
     <ul class="navbar-nav flex-grow-1 pe-3 custom-menu">
       <li class="nav-item mb-2">
         <a class="nav-link active d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(getHome)">
-          <i class="bi bi-shield-check text-success"></i> <span>Consola de Control</span>
+          <i class="bi bi-shield-check text-success"></i> <span>Inicio (Panel Admin)</span>
         </a>
       </li>
-
       <li class="nav-item menu-section">
         <a class="nav-link section-header d-flex justify-content-between align-items-center" 
            href="javascript:void(0)" onclick="NovaMenu.toggleSubMenu('catAdminConfig', event)">
@@ -140,7 +139,6 @@ export const MENUS = {
           </ul>
         </div>
       </li>
-
       <li class="nav-item menu-section mt-2">
         <a class="nav-link section-header d-flex justify-content-between align-items-center" 
            href="javascript:void(0)" onclick="NovaMenu.toggleSubMenu('catAdminAudit', event)">
@@ -156,7 +154,6 @@ export const MENUS = {
           </ul>
         </div>
       </li>
-
       <li class="nav-item mt-4 border-top border-secondary pt-3">
         <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(showChangePasswordModal)">
           <i class="bi bi-lock"></i> Seguridad Admin
@@ -168,8 +165,6 @@ export const MENUS = {
         </a>
       </li>
     </ul>`,
-
-  // ... (MENSAJERO y ADMIN se mantienen igual, solo verifica que usen NovaMenu.ejecutarAccion)
 };
 
 const MenuManager = {
