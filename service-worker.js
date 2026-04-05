@@ -1,4 +1,4 @@
-const APP_VERSION = "2.8";
+const APP_VERSION = "2.9";
 const CACHE_NAME = `app-cache-v${APP_VERSION}`;
 
 self.addEventListener("install", (e) => {
