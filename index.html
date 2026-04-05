@@ -45,227 +45,40 @@
 
   <body>
     <section id="header">
-      <nav
-        class="navbar bg-dark border-bottom border-body"
-        data-bs-theme="dark"
-      >
+      <nav class="navbar navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#"> <i class="bi bi-clock"></i></a>
-          <div class="d-flex ms-auto align-items-center">
-            <a
-              class="navbar-brand"
-              href="#"
-              id="textUser"
-              style="font-family: Arial; font-size: 12px"
-            ></a>
-            <button
-              class="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarText"
-              aria-controls="navbarText"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span class="navbar-toggler-icon"></span>
-            </button>
-          </div>
-          <div class="collapse navbar-collapse" id="navbarText">
-            <!-- Menu Default -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="navbarItemsDefault">
-              <!-- Inicio -->
-              <li class="nav-item">
-                <a
-                  class="nav-link active"
-                  aria-current="page"
-                  href="#"
-                  onclick="getHome()"
-                  ><i class="bi bi-house"> Inicio</i></a
-                >
-              </li>
-              <!-- Login Button -->
-              <li class="nav-item" id="loginNavItem">
-                <a class="nav-link" href="#" onclick="showLoginModal()"
-                  ><i class="bi bi-person-lock"> Login</i></a
-                >
-              </li>
-            </ul>
-            <!-- Rol Empresa -->
-            <ul
-              class="navbar-nav me-auto mb-2 mb-lg-0"
-              id="navbarItemsEmpresa"
-              style="display: none"
-            >
-              <!-- Inicio -->
-              <li class="nav-item">
-                <a
-                  class="nav-link active"
-                  aria-current="page"
-                  href="#"
-                  onclick="getHome()"
-                  ><i class="bi bi-house"> Inicio</i></a
-                >
-              </li>
-              <!-- Registrar Persona -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="registrarPersona()"
-                  ><i class="bi bi-person"> Registrar mensajero</i></a
-                >
-              </li>
-              <!-- Crear Planilla -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="crearPlanilla()"
-                  ><i class="bi bi-journal-text"> Crear Planilla</i></a
-                >
-              </li>
-              <!-- Anular Planilla -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="anularPlanilla()"
-                  ><i class="bi bi-trash"> Anular Planilla</i></a
-                >
-              </li>
-
-              <!-- Consultar Planilla-->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="consultarPlanilla()"
-                  ><i class="bi bi-search"> Consultar planilla</i></a
-                >
-              </li>
-
-              <!-- Consultar Planillas* -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="consultarPlanillas()"
-                  ><i class="bi bi-search"> Consultar planillas*</i></a
-                >
-              </li>
-
-              <!-- Planilla de Devolución -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="crearPlanillaDevolucion()"
-                  ><i class="bi bi-journal-text"> Planilla Devolución</i></a
-                >
-              </li>
-
-              <!-- Entregar planilla de Devolución -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="entregarDevoluciones()"
-                  ><i class="bi bi-arrow-repeat"> Entregar Devoluciones</i></a
-                >
-              </li>
-
-              <!-- Excluir guías -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="excluirGuias()"
-                  ><i class="bi bi-exclude"> Excluir Guías</i></a
-                >
-              </li>
-
-              <!-- Cerrar Planillas -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="cerrarPlanilla()"
-                  ><i class="bi bi-journal-medical"> Cerrar planilla</i></a
-                >
-              </li>
-
-              <!-- Cambiar Clave -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="showChangePasswordModal()"
-                  ><i class="bi bi-key"> Cambiar clave</i></a
-                >
-              </li>
-              <!-- Salir Button -->
-              <li class="nav-item" id="logoutNavItem">
-                <a class="nav-link" href="#" onclick="logout()"
-                  ><i class="bi bi-box-arrow-right"> Salir</i></a
-                >
-              </li>
-            </ul>
-            <!-- Rol Mensajero  -->
-            <ul
-              class="navbar-nav me-auto mb-2 mb-lg-0"
-              id="navbarItemsMensajero"
-              style="display: none"
-            >
-              <!-- Inicio -->
-              <li class="nav-item">
-                <a
-                  class="nav-link active"
-                  aria-current="page"
-                  href="#"
-                  onclick="getHome()"
-                  ><i class="bi bi-house"> Inicio</i></a
-                >
-              </li>
-              <!-- consultar Planillas -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="getPlanillasMensajero()"
-                  ><i class="bi bi-key"> Consultar Planillas</i></a
-                >
-              </li>
-              <!-- Cambiar Clave -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="showChangePasswordModal()"
-                  ><i class="bi bi-key"> Cambiar clave</i></a
-                >
-              </li>
-              <!-- Salir Button -->
-              <li class="nav-item" id="logoutNavItem">
-                <a class="nav-link" href="#" onclick="logout()"
-                  ><i class="bi bi-box-arrow-right"> Salir</i></a
-                >
-              </li>
-            </ul>
-            <!-- Rol Administrador  -->
-            <ul
-              class="navbar-nav me-auto mb-2 mb-lg-0"
-              id="navbarItemsAdmin"
-              style="display: none"
-            >
-              <!-- Inicio -->
-              <li class="nav-item">
-                <a
-                  class="nav-link active"
-                  aria-current="page"
-                  href="#"
-                  onclick="getHome()"
-                  ><i class="bi bi-house"> Inicio</i></a
-                >
-              </li>
-              <!-- Registrar Persona -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="crearPlanilla()"
-                  ><i class="bi bi-key"> Crear Planilla</i></a
-                >
-              </li>
-              <!-- Consultar Persona -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="anularPlanilla()"
-                  ><i class="bi bi-key"> Anular Planilla</i></a
-                >
-              </li>
-              <!-- Cambiar Clave -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="showChangePasswordModal()"
-                  ><i class="bi bi-key"> Cambiar clave</i></a
-                >
-              </li>
-              <!-- Acerca de -->
-              <li class="nav-item">
-                <a class="nav-link" href="#" onclick="acercade()"
-                  ><i class="bi bi-key"> Acerca de</i></a
-                >
-              </li>
-              <!-- Salir Button -->
-              <li class="nav-item" id="logoutNavItem">
-                <a class="nav-link" href="#" onclick="logout()"
-                  ><i class="bi bi-box-arrow-right"> Salir</i></a
-                >
-              </li>
-            </ul>
+          <a class="navbar-brand" id="textUser" href="#"></a
+          ><!--Aqui va el nombre del usuario logueado-->
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasDarkNavbar"
+            aria-controls="offcanvasDarkNavbar"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div
+            class="offcanvas offcanvas-start text-bg-dark"
+            tabindex="-1"
+            id="offcanvasDarkNavbar"
+            aria-labelledby="offcanvasDarkNavbarLabel"
+          >
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel"></h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="offcanvas-body"></div>
+            <!-- Aquí se inyectarán los menús según el rol -->
           </div>
         </div>
       </nav>
-
       <!-- Login Modal -->
       <div
         class="modal fade"
@@ -400,7 +213,7 @@
       </div>
     </section>
 
-    <main class="container-fluid p-0 m-0 text-center" id="App"></main>
+    <main class="container-fluid p-0 m-0 text-center mt-5 pt-3" id="App"></main>
     <script src="js/main.js"></script>
 
     <script>
@@ -411,7 +224,11 @@
         SUPABASE_URL,
         SUPABASE_ANON_KEY,
       );
-
+      /********************************************************************************/
+      // Inicializar sesión
+      sessionStorage.setItem("nombreUsuario", "");
+      document.getElementById("textUser").textContent =
+        sessionStorage.getItem("nombreUsuario");
       /*******************************************************************************/
 
       async function verificarSesion() {
@@ -420,7 +237,7 @@
         } = await supabaseClient.auth.getSession();
 
         if (!session) {
-          mostrarMenuInvitado();
+          NovaMenu.mostrarMenuInvitado();
           return;
         }
 
@@ -446,9 +263,7 @@
             sessionStorage.setItem("userRol", rol);
             sessionStorage.setItem("personaId", persona_id || "");
 
-            document.getElementById("textUser").textContent = nombre;
-
-            mostrarMenuPorRol(rol);
+            NovaMenu.mostrarMenuPorRol(rol, nombre);
           }
         } catch (error) {
           console.error("Error verificando sesión:", error);
@@ -471,45 +286,7 @@
         }
       }
 
-      //################################################################################
-
-      function mostrarMenuPorRol(rol) {
-        // Ocultamos todo primero para evitar solapamientos
-        document.getElementById("navbarItemsDefault").style.display = "none";
-        document.getElementById("navbarItemsEmpresa").style.display = "none";
-        document.getElementById("navbarItemsMensajero").style.display = "none";
-        document.getElementById("navbarItemsAdmin").style.display = "none";
-
-        // Activamos solo el que corresponde (usamos Number(rol) por si viene como string)
-        const userRol = Number(rol);
-
-        if (userRol === 1) {
-          document.getElementById("navbarItemsEmpresa").style.display = "block";
-        } else if (userRol === 2) {
-          document.getElementById("navbarItemsMensajero").style.display =
-            "block";
-        } else if (userRol === 3) {
-          document.getElementById("navbarItemsAdmin").style.display = "block";
-        } else {
-          // Si no coincide con ninguno, vuelve al default
-          mostrarMenuInvitado();
-        }
-      }
-
-      /*******************************************************************************/
-      function mostrarMenuInvitado() {
-        document.getElementById("textUser").textContent = "";
-        document.getElementById("navbarItemsDefault").style.display = "block";
-        document.getElementById("navbarItemsEmpresa").style.display = "none";
-        document.getElementById("navbarItemsMensajero").style.display = "none"; // Agregado
-        document.getElementById("navbarItemsAdmin").style.display = "none";
-      }
-
       /******************************************************************************/
-      // Inicializar sesión
-      sessionStorage.setItem("nombreUsuario", "");
-      document.getElementById("textUser").textContent =
-        sessionStorage.getItem("nombreUsuario");
 
       function showLoginModal() {
         cerrarModalesActivos();
@@ -566,16 +343,13 @@
           if (data.status === "success") {
             const { nombre, rol, persona_id, empresa_id } = data;
 
-            // Habilitar menús según rol
-            // Llama a la función centralizada
-            mostrarMenuPorRol(rol);
+            //Habilitar Menu
+            NovaMenu.mostrarMenuPorRol(rol, nombre);
 
             // GUARDAR DATOS CLAVE PARA EL RESTO DE LA APP
             sessionStorage.setItem("nombreUsuario", nombre);
             sessionStorage.setItem("userRol", rol);
             sessionStorage.setItem("personaId", persona_id || ""); // Para registros de beneficios
-
-            document.getElementById("textUser").textContent = nombre;
 
             // Cerrar modal y redirigir
             safeHideModal("loginModal");
@@ -673,23 +447,15 @@
 
           // 2. Limpieza TOTAL del almacenamiento de sesión
           // Esto borra nombreUsuario, userRol, personaId y empresaId de un golpe
+          // 2. Limpieza TOTAL
           sessionStorage.clear();
 
-          // 3. Reestablecer valores por defecto para la navegación y UI
-          sessionStorage.setItem("nombreUsuario", "");
-          // Es importante dejar los IDs vacíos para que los componentes no intenten cargar datos previos
-          sessionStorage.setItem("personaId", "");
+          // 3. Valores de seguridad para que la App no "explote" al leerlos
           sessionStorage.setItem("userRol", "0");
+          sessionStorage.setItem("nombreUsuario", "");
+          sessionStorage.setItem("personaId", "");
 
-          // 4. Actualizar visualmente la interfaz
-          document.getElementById("textUser").textContent = ""; //esta es la de invitado
-
-          // Ocultar menús privados y mostrar el de invitado
-          document.getElementById("navbarItemsDefault").style.display = "block";
-          document.getElementById("navbarItemsEmpresa").style.display = "none";
-          document.getElementById("navbarItemsMensajero").style.display =
-            "none"; // Agregado
-          document.getElementById("navbarItemsAdmin").style.display = "none";
+          NovaMenu.mostrarMenuInvitado();
 
           // 5. Limpiar campos físicos de los formularios de login/password
           const fields = [
@@ -709,6 +475,8 @@
             const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
             if (bsCollapse) bsCollapse.hide();
           }
+
+          NovaMenu.mostrarMenuInvitado();
 
           // 7. Redirigir al Home y notificar
           if (typeof getHome === "function") getHome();

@@ -1,106 +1,93 @@
 <style>
-  /* Mantengo tus definiciones de fuentes, pero añado adaptabilidad */
-  .section-title {
+  /* --- ESTILOS GENERALES (DENTRO DE #App) --- */
+  #App .section-title {
     font-weight: 600;
     font-size: 14px;
     color: #444;
     margin-bottom: 10px;
   }
 
-  .table-sm td, .table-sm th {
-    font-size: 13px; /* Un punto menos para que quepa más en PC */
+  #App .table-sm td, 
+  #App .table-sm th {
+    font-size: 13px;
     vertical-align: middle;
   }
 
   /* --- AJUSTES PARA PC --- */
   @media (min-width: 992px) {
-    .container-fluid {
+    /* Aquí estaba el error: ahora solo afecta al contenido principal */
+    #App .container-fluid {
       padding: 20px 40px;
     }
-    .card-body {
+    #App .card-body {
       padding: 2rem;
     }
-    /* En PC las tablas pueden ser un poco más amplias */
-    .table-sm td { padding: 8px 4px; }
+    #App .table-sm td { padding: 8px 4px; }
   }
 
   /* --- AJUSTES PARA MÓVIL (TABLET Y CELULAR) --- */
   @media (max-width: 768px) {
-    .container-fluid { padding: 10px 5px; }
+    #App .container-fluid { padding: 10px 5px; }
     
-    /* Hacemos que los totales h5 no se desborden */
-    #totalContraentrega, #totalRecaudo, #totalElectronico, #totalGeneral {
+    #App #totalContraentrega, 
+    #App #totalRecaudo, 
+    #App #totalElectronico, 
+    #App #totalGeneral {
       font-size: 14px !important;
     }
 
-    /* Reducimos el padding de las celdas para ver más columnas */
-    .table-sm td, .table-sm th {
+    #App .table-sm td, 
+    #App .table-sm th {
       padding: 4px 2px !important;
       font-size: 11px !important;
     }
 
-    /* Apilamos los botones del footer para que sean fáciles de tocar */
-    .card-footer {
+    #App .card-footer {
       flex-direction: column;
     }
-    .card-footer .btn {
+    #App .card-footer .btn {
       margin-bottom: 5px;
     }
   }
 
   /* MODO HORIZONTAL MÓVIL (Landscape) */
-@media (orientation: landscape) and (max-height: 500px) {
-  /* 1. Reducimos el espacio general para ganar altura */
-  .container-fluid { padding: 5px !important; }
-  .card-body { padding: 10px !important; }
-  .section-title, hr, .mb-2 { display: none; } /* Ocultamos títulos extra para priorizar la tabla */
-  
-  /* 2. Totales en una sola línea más compacta */
-  .row.g-2.mb-3 {
-    margin-bottom: 5px !important;
-  }
-  .card-total .card-body, .card-total {
-    padding: 2px !important;
-  }
-  #totalContraentrega, #totalRecaudo, #totalElectronico, #totalGeneral {
-    font-size: 11px !important;
-  }
-  .card-total small {
-    font-size: 8px !important;
-    line-height: 1;
-  }
+  @media (orientation: landscape) and (max-height: 500px) {
+    #App .container-fluid { padding: 5px !important; }
+    #App .card-body { padding: 10px !important; }
+    
+    /* Ocultamos elementos innecesarios en horizontal */
+    #App .section-title, 
+    #App hr, 
+    #App .mb-2 { display: none; } 
+    
+    #App .row.g-2.mb-3 { margin-bottom: 5px !important; }
+    #App .card-total .card-body, 
+    #App .card-total { padding: 2px !important; }
+    
+    #App #totalContraentrega, 
+    #App #totalRecaudo, 
+    #App #totalElectronico, 
+    #App #totalGeneral {
+      font-size: 11px !important;
+    }
 
-  /* 3. TABLA ULTRA-COMPACTA */
-  .table-responsive {
-    max-height: 150px; /* Ajustado para que siempre se vean los botones inferiores */
-    overflow-y: auto;
-    border: 1px solid #eee;
-  }
+    #App .table-responsive {
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+    }
 
-  .table-sm td, 
-  .table-sm th {
-    font-size: 9px !important; /* Fuente mínima legal */
-    padding: 2px 1px !important;
-    line-height: 1.1;
-  }
+    #App .table-sm td, 
+    #App .table-sm th {
+      font-size: 9px !important;
+      padding: 2px 1px !important;
+    }
 
-  /* Reducimos el tamaño de los badges de estado en la tabla */
-  .table-sm .badge {
-    font-size: 8px !important;
-    padding: 1px 3px !important;
+    #App .card-footer {
+      padding: 5px !important;
+      flex-direction: row !important;
+    }
   }
-
-  /* 4. Footer fijo o más pequeño */
-  .card-footer {
-    padding: 5px !important;
-    flex-direction: row !important; /* En horizontal es mejor que estén uno al lado del otro */
-  }
-  .card-footer .btn {
-    font-size: 11px;
-    padding: 5px;
-    margin-bottom: 0;
-  }
-}
 </style>
 
 <div class="container-fluid">

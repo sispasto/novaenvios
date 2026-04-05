@@ -12,3 +12,4 @@ import "./planillasMensajero.js";
 import "./registroPersona.js";
 import "./PlanillaDevolucion.js";
 import "./RecepcionDevolucionComponent.js";
+import "./menuTemplates.js";

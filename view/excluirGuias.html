@@ -7,12 +7,14 @@
 
   /* --- RESPONSIVE: PC --- */
   @media (min-width: 992px) {
-    .container-fluid {
+    /* Aplicamos el padding solo al div #App, NO a todos los container-fluid */
+    main#App .container-fluid {
       padding: 30px 60px;
     }
+
     .table-responsive {
       max-height: 400px;
-    } /* Evita que la lista crezca demasiado */
+    }
   }
 
   /* --- RESPONSIVE: MÓVIL Y TABLET --- */
@@ -56,7 +58,6 @@
   }
 </style>
 <div class="container-fluid mt-3">
-  <h1></h1>
   <div class="row justify-content-center">
     <div class="col-12 col-lg-10 col-xl-8">
       <div class="card shadow border-0">

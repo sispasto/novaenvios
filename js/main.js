@@ -155,19 +155,6 @@ function cerrarModalesActivos() {
   });
 }
 
-// Este código también puede ir en el archivo .js si no requiere esperar a que HTML cargue
-function setNavbarCollapse() {
-  const navLinks = document.querySelectorAll(".nav-item");
-  const menuToggle = document.getElementById("navbarText");
-  const bsCollapse = new bootstrap.Collapse(menuToggle, { toggle: false });
-
-  navLinks.forEach((l) => {
-    l.addEventListener("click", () => {
-      bsCollapse.toggle();
-    });
-  });
-}
-
 function removeALLChilds(parentNode) {
   while (parentNode.firstChild) {
     parentNode.removeChild(parentNode.firstChild);
@@ -175,10 +162,20 @@ function removeALLChilds(parentNode) {
 }
 
 function alertSMS(texto) {
-  let myToast = document.querySelector(".toast");
-  let smsToast = document.querySelector(".toast-body");
-  let toast = new bootstrap.Toast(myToast);
+  const myToast = document.getElementById("liveToast");
+  const smsToast = myToast.querySelector(".toast-body");
+
+  // 1. Insertar el texto
   smsToast.innerHTML = texto;
+
+  // 2. Forzar que el contenedor padre esté por encima de todo (z-index)
+  // Buscamos el div que tiene las clases 'position-fixed bottom-0 end-0'
+  const container = myToast.closest(".position-fixed");
+  if (container) {
+    container.style.zIndex = "1090";
+  }
+
+  const toast = new bootstrap.Toast(myToast);
   toast.show();
 }
 
@@ -326,6 +323,5 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  setNavbarCollapse();
   getHome();
 });
