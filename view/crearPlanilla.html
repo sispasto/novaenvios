@@ -1,0 +1,459 @@
+<style>
+  /* ==========================================
+     ESTILOS POR DEFECTO (PC / TABLETS)
+     ========================================== */
+  .section-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 12px;
+  }
+
+  .scan-input {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid #212529;
+    padding: 12px;
+  }
+
+  .table-sm td,
+  .table-sm th {
+    font-size: 14px;
+    padding: 8px !important;
+  }
+
+  .badge-counter {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN PARA MÓVILES (RETRATO)
+     ========================================== */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .scan-input {
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      font-size: 13px;
+      padding: 5px !important;
+    }
+
+    /* Botones de acción al final más grandes para el pulgar */
+    .card-footer {
+      flex-direction: column;
+    }
+
+    .card-footer button {
+      width: 100%;
+      padding: 12px;
+    }
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN MODO HORIZONTAL (LANDSCAPE MÓVIL)
+     ========================================== */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .container-fluid {
+      padding-top: 5px !important;
+    }
+
+    /* Ocultamos títulos redundantes para ganar espacio */
+    .card-header h5,
+    .section-title:first-of-type {
+      display: none;
+    }
+
+    .row .mb-3 {
+      margin-bottom: 0.5rem !important;
+    }
+
+    /* Limitamos altura de la tabla para que no empuje los botones fuera de la pantalla */
+    .table-responsive {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      font-size: 12px !important;
+      padding: 3px !important;
+    }
+
+    .scan-input {
+      font-size: 15px;
+      padding: 5px;
+    }
+  }
+</style>
+
+<div class="container-fluid">
+  <h1></h1>
+
+  <form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event, this)">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow border-0">
+          <div class="card-header bg-dark text-white">
+            <h5 class="mb-0 fw-bold">Planilla de Reparto</h5>
+          </div>
+
+          <div class="card-body">
+            <div class="section-title"><strong>Datos de Planilla</strong></div>
+
+            <div class="row">
+              <div class="col-6 col-md-4 mb-3">
+                <label class="form-label">N° Planilla</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="num_planilla"
+                  readonly
+                />
+              </div>
+
+              <div class="col-6 col-md-4 mb-3">
+                <label class="form-label">Fecha creación</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="fecha_creacion"
+                  readonly
+                />
+              </div>
+
+              <div class="col-12 col-md-4 mb-3">
+                <label class="form-label">Responsable</label>
+                <select class="form-select" id="responsable" required>
+                  <option value="">Cargando responsables...</option>
+                </select>
+              </div>
+            </div>
+
+            <hr />
+
+            <div class="section-title"><strong>Lectura de Guías</strong></div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <input
+                  type="text"
+                  class="form-control scan-input"
+                  id="inputGuia"
+                  placeholder="Escanee guía con lector de código de barras"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+
+            <!-- CONTADOR + BOTON LIMPIAR -->
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  onclick="nsPlanilla.limpiarGuias()"
+                >
+                  Limpiar
+                </button>
+
+                <span class="fw-semibold">Guías registradas</span>
+              </div>
+
+              <span class="badge bg-dark badge-counter" id="contadorGuias">
+                0
+              </span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-striped">
+                <thead class="table-dark">
+                  <tr>
+                    <th width="60">#</th>
+                    <th>Guía</th>
+                    <th width="50">Acción</th>
+                  </tr>
+                </thead>
+
+                <tbody id="tablaGuias"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-footer d-flex gap-2">
+            <button
+              type="submit"
+              class="btn btn-dark flex-fill"
+              id="btnGuardar"
+            >
+              GRABAR PLANILLA
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="btnNuevaPlanilla"
+              onclick="nsPlanilla.nuevaPlanilla()"
+              disabled
+            >
+              NUEVA PLANILLA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  var nsPlanilla = (function () {
+    let listaGuias = [];
+
+    /* =========================
+FECHA
+========================= */
+
+    function cargarFecha() {
+      const hoy = new Date();
+
+      const fecha =
+        ("0" + hoy.getDate()).slice(-2) +
+        "/" +
+        ("0" + (hoy.getMonth() + 1)).slice(-2) +
+        "/" +
+        hoy.getFullYear();
+
+      document.getElementById("fecha_creacion").value = fecha;
+    }
+
+    /* =========================
+RESPONSABLES
+========================= */
+
+    async function cargarResponsables() {
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          },
+        );
+
+        const result = await response.json();
+
+        const select = document.getElementById("responsable");
+
+        select.innerHTML = '<option value="">Seleccione responsable</option>';
+
+        result.data.forEach((r) => {
+          select.innerHTML += `
+<option value="${r.id_persona}">
+${r.nombres} ${r.apellidos}
+</option>
+`;
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* =========================
+LECTOR CORREGIDO
+========================= */
+    // Es mejor usar el elemento directo que el document global
+    const inputGuia = document.getElementById("inputGuia");
+
+    inputGuia.addEventListener("keydown", function (e) {
+      // Escuchamos Enter o Tab (común en lectores de barras)
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault(); // Evitamos que el Tab salte al siguiente campo
+
+        // Reemplazamos todo lo que NO sea número por un vacío ""
+        const guia = this.value.replace(/[^0-9]/g, "");
+
+        if (!guia) return;
+
+        // VALIDACIÓN: Verificamos si ya existe
+        if (listaGuias.includes(guia)) {
+          alertSMS(`La guía ${guia} ya fue escaneada`);
+          this.value = "";
+          return;
+        }
+
+        // AGREGAR
+        listaGuias.push(guia);
+        renderGuias();
+
+        // LIMPIAR Y REENFOCAR
+        this.value = "";
+        this.focus();
+      }
+    });
+
+    /* =========================
+RENDER TABLA
+========================= */
+
+    function renderGuias() {
+      const tbody = document.getElementById("tablaGuias");
+      tbody.innerHTML = "";
+
+      listaGuias.forEach((g, i) => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${i + 1}</td>
+            <td>${g}</td>
+            <td class="text-center">
+                <button 
+                    type="button" 
+                    class="btn btn-sm btn-danger px-2 py-0" 
+                    onclick="nsPlanilla.quitarGuia(${i})"
+                >
+                    &times;
+                </button>
+            </td>
+        </tr>
+        `;
+      });
+
+      document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }
+
+    function quitarGuia(index) {
+      // Eliminamos 1 elemento en la posición 'index'
+      listaGuias.splice(index, 1);
+
+      // Volvemos a dibujar la tabla para que se refleje el cambio
+      renderGuias();
+
+      // Devolvemos el foco al input para seguir escaneando
+      document.getElementById("inputGuia").focus();
+    }
+
+    /* =========================
+LIMPIAR GUIAS
+========================= */
+
+    function limpiarGuias() {
+      listaGuias = [];
+
+      renderGuias();
+
+      document.getElementById("inputGuia").focus();
+    }
+
+    /* =========================
+GUARDAR
+========================= */
+
+    async function guardarPlanilla(event, form) {
+      event.preventDefault();
+
+      try {
+        if (listaGuias.length === 0) {
+          throw new Error("Debe escanear al menos una guía");
+        }
+
+        const responsable = document.getElementById("responsable").value;
+
+        if (!responsable) {
+          throw new Error("Seleccione responsable");
+        }
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              id_responsable: responsable,
+              guias: listaGuias,
+            }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error);
+        }
+
+        /* MOSTRAR NUMERO PLANILLA */
+
+        if (result.num_planilla) {
+          document.getElementById("num_planilla").value = result.num_planilla;
+        }
+
+        /* DESHABILITAR GUARDAR */
+
+        document.getElementById("btnGuardar").disabled = true;
+
+        /* HABILITAR NUEVA PLANILLA */
+
+        document.getElementById("btnNuevaPlanilla").disabled = false;
+
+        alertSMS("Planilla registrada correctamente");
+      } catch (err) {
+        alertSMS(err.message);
+      }
+    } //Fin de guardarPlanilla
+
+    /************************************************************/
+    function nuevaPlanilla() {
+      //cargarFecha();
+
+      listaGuias = [];
+
+      renderGuias();
+
+      document.getElementById("num_planilla").value = "";
+
+      document.getElementById("responsable").value = "";
+
+      document.getElementById("inputGuia").value = "";
+
+      document.getElementById("btnGuardar").disabled = false;
+
+      document.getElementById("btnNuevaPlanilla").disabled = true;
+
+      document.getElementById("inputGuia").focus();
+    }
+
+    /************************************************************/
+
+    cargarFecha();
+    cargarResponsables();
+
+    return {
+      guardarPlanilla,
+      limpiarGuias,
+      nuevaPlanilla,
+      quitarGuia, // <-- Agrégala aquí
+    };
+  })();
+</script>

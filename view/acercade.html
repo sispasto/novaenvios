@@ -1,0 +1,73 @@
+<style>
+  .texto-version {
+    font-size: 16px;
+    font-family: "Poppins", sans-serif;
+    margin: 6px 0;
+  }
+
+  .titulo-sistema {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .subtitulo {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+    margin-top: 15px;
+  }
+
+  .card-acercade {
+    max-width: 520px;
+    margin: auto;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+  }
+  /* Opcional: Si prefieres que en pantallas muy grandes se vea 
+     estrictamente centrado sin trucos de márgenes */
+
+  @media (orientation: landscape) and (max-height: 500px) {
+    .contenedor-carrusel {
+      padding: 5px; /* Reduce espacio para dar más aire a la tabla */
+    }
+    .card-planilla {
+      width: 150px; /* Tarjetas un poco más pequeñas en modo horizontal */
+    }
+  }
+</style>
+
+<div class="container py-5">
+  <div class="card card-acercade">
+    <!-- Header -->
+    <div class="card-header text-center bg-dark text-white">
+      <span class="titulo-sistema"> ASIST </span>
+      <div class="small">Sistema de Control de Asistencias</div>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body text-center">
+      <i class="bi bi-clock"></i>
+
+      <div id="version-label" class="texto-version fw-bold"></div>
+
+      <div class="subtitulo">Periodo de licencia</div>
+      <div id="fecha-inicio" class="texto-version"></div>
+      <div id="fecha-fin" class="texto-version"></div>
+
+      <hr />
+
+      <div class="subtitulo">Desarrollado por</div>
+      <div class="texto-version">
+        Luis Almeida<br />
+        305-3081932<br />
+        <small class="text-muted">LAAP Software Solutions</small>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer text-center small text-muted">
+      © 2026 · Todos los derechos reservados
+    </div>
+  </div>
+</div>

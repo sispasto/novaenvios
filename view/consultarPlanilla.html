@@ -1,0 +1,435 @@
+<style>
+  /* ==========================================
+     ESTILOS POR DEFECTO (PC / TABLETS GRANDES)
+     ========================================== */
+  .section-title {
+    font-weight: 600;
+    font-size: 16px; /* Más grande en PC */
+    color: #444;
+    margin-bottom: 15px;
+  }
+
+  .scan-input {
+    font-size: 22px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  /* Tabla normal en PC */
+  .table-sm td, .table-sm th {
+    font-size: 14px; 
+    vertical-align: middle;
+    padding: 8px !important; /* Más aire en PC */
+  }
+
+  .badge-counter {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  .form-label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN PARA MÓVILES (PANTALLAS PEQUEÑAS)
+     ========================================== */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .table-sm td, .table-sm th {
+      font-size: 12px; /* Fuente reducida para móvil */
+      padding: 4px 2px !important;
+    }
+
+    .form-control, .form-label {
+      font-size: 13px;
+    }
+
+    .card-body {
+      padding: 10px;
+    }
+
+    /* Reducimos los títulos de las tarjetas de totales solo en móvil */
+    .card-body p-2 text-center small {
+      font-size: 9px !important;
+    }
+    
+    h5.mb-0 {
+      font-size: 15px !important; /* Números de los totales más ajustados */
+    }
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN MODO HORIZONTAL (LANDSCAPE MÓVIL)
+     ========================================== */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .container-fluid {
+      padding-top: 2px !important;
+    }
+    
+    .section-title, hr {
+      margin-bottom: 4px !important;
+      margin-top: 4px !important;
+    }
+
+    .table-sm td, .table-sm th {
+      font-size: 11px !important;
+      padding: 2px 4px !important;
+    }
+
+    /* Scroll interno para la tabla en horizontal y no perder los botones */
+    .table-responsive {
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .mb-3 {
+      margin-bottom: 0.4rem !important;
+    }
+  }
+</style>
+
+<div class="container-fluid">
+<h1></h1>
+
+<form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event,this)">
+
+<div class="row justify-content-center">
+<div class="col-lg-12"> <!-- ancho de la tabla-->
+
+<div class="card shadow border-0">
+
+<div class="card-header bg-dark text-white">
+<h5 class="mb-0 fw-bold">Consulta de planillas</h5>
+</div>
+
+<div class="card-body">
+
+<div class="section-title"><strong>Datos de Planilla</strong></div>
+
+<div class="row">
+
+<!-- NUEVO CAMPO PLANILLA -->
+
+<div class="col-md-4 mb-3">
+<label class="form-label">N° Planilla</label>
+<input type="number" class="form-control" id="num_planilla">
+</div>
+
+<div class="col-md-4 mb-3">
+<label class="form-label">Fecha creación</label>
+<input type="text" class="form-control" id="fecha_creacion" readonly>
+</div>
+
+<div class="col-md-4 mb-3">
+<label class="form-label">Responsable</label>
+<input type="text" class="form-control" id="responsable" readonly>
+</div>
+
+</div>
+<hr>
+
+<!-- CONTADOR + BOTON LIMPIAR -->
+<div class="row g-2 mb-3">
+    <div class="col-6 col-md-3">
+        <div class="card bg-light border-0">
+            <div class="card-body p-2 text-center">
+                <small class="text-muted d-block fw-bold" style="font-size: 10px;">TOTAL CONTRAENTREGA</small>
+                <h5 class="mb-0 fw-bold text-dark" id="totalContraentrega">$ 0</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-light border-0">
+            <div class="card-body p-2 text-center">
+                <small class="text-muted d-block fw-bold" style="font-size: 10px;">TOTAL RECAUDOS</small>
+                <h5 class="mb-0 fw-bold text-primary" id="totalRecaudo">$ 0</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-info text-white border-0">
+            <div class="card-body p-2 text-center">
+                <small class="d-block fw-bold" style="font-size: 10px;">PAGOS ELECTRÓNICOS</small>
+                <h5 class="mb-0 fw-bold" id="totalElectronico">$ 0</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-dark text-white border-0">
+            <div class="card-body p-2 text-center">
+                <small class="d-block fw-bold" style="font-size: 10px;">GRAN TOTAL</small>
+                <h5 class="mb-0 fw-bold" id="totalGeneral">$ 0</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+
+<div class="d-flex align-items-center gap-2">
+
+<span class="fw-semibold">Guías registradas</span>
+
+</div>
+
+<span class="badge bg-dark badge-counter" id="contadorGuias">
+0
+</span>
+
+</div>
+
+<div class="table-responsive">
+  <table class="table table-sm table-striped table-hover"> <thead class="table-dark text-nowrap" style="font-size: 11px;"> <tr>
+        <th width="40">#</th>
+            <th>Guía</th>
+            <th>Estado</th>
+            <th>Forma Pago</th>
+            <th>Ciudad Destino</th>
+            <th>Destinatario</th>
+            <th>Dirección</th>
+            <th>Celular</th>
+            <th>Flete</th>
+            <th>Valor producto</th>
+            <th>Pago Elec.</th> 
+      </tr>
+    </thead>
+    <tbody id="tablaGuias"></tbody>
+  </table>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</form>
+
+</div>
+
+<script>
+
+var nsPlanilla=(function(){
+
+    let listaGuias=[];
+
+    /* =========================
+    EVENTO: BUSCAR PLANILLA POR NÚMERO
+    ========================= */
+    document.getElementById("num_planilla").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const num = e.target.value.trim();
+            
+            if (num) {
+                // Esto habilitará los botones y limpiará la tabla/totales               
+                buscarPlanilla(num);
+            }
+        }
+    });
+
+    /**********************************************************************/
+    async function buscarPlanilla(num_planilla) {
+        try {
+            limpiarCampos(false); 
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) throw new Error("Debe iniciar sesión");
+
+            const response = await fetch(
+                `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({ num_planilla: parseInt(num_planilla) })
+                }
+            );
+
+            const result = await response.json();
+
+            if (!result.ok) {
+                alertSMS(result.error); 
+                limpiarCampos(true);
+                return;
+            }
+
+            const data = result.data;
+            
+            // 1. Validar si la planilla está anulada
+            if (data.estado === 'AN') {
+                alertSMS(`La planilla N° ${num_planilla} está ANULADA`);
+                limpiarCampos(true);
+                return;
+            }
+
+            // 2. Llenar información de cabecera (Siempre, para dar feedback visual)
+            document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleDateString('es-CO');
+            document.getElementById("responsable").value = data.nombre_responsable;
+
+            // 3. Validar si la planilla no tiene guías
+            if (!data.guias || data.guias.length === 0) {
+                alertSMS(`La planilla N° ${num_planilla} no tiene guías asociadas`);
+                // Limpiamos solo la tabla y totales por si había algo de una búsqueda anterior
+                listaGuias = [];
+                renderGuias();
+                return; 
+            }
+
+            // 4. Si tiene guías, procedemos con el mapeo y cálculos
+            listaGuias = data.guias.map(g => ({
+                guia: g.guia,             
+                sincronizado: g.sincronizado, 
+                estado: g.estado || "",   
+                ciudad: g.ciudad || "",
+                destinatario: g.destinatario || "",
+                direccion: g.direccion || "",
+                celular: g.celular || "",
+                formaPago: g.formaPago || "",            
+                valor_flete: parseFloat(g.valor_flete) || 0,
+                valor_producto: parseFloat(g.valor_producto) || 0,
+                pago_electronico: g.pago_electronico || "",
+                tipo_proceso: g.tipo_proceso || ""
+            }));        
+            
+            calcularTotales(listaGuias);
+            renderGuias();        
+
+        } catch (err) {
+            console.error(err);
+            alertSMS("Error de conexión con el servidor");
+            limpiarCampos(true);
+        }
+    }
+
+    /* =========================
+    RENDER TABLA (Sin cambios)
+    ========================= */
+    function renderGuias() {
+        const tbody = document.getElementById("tablaGuias");
+        tbody.innerHTML = "";
+
+        // Mapeo de códigos de pago a texto/badges
+        const obtenerTextoPago = (codigo) => {
+            const c = parseInt(codigo);
+            if (c === 1 || c === 6) return '<span class="badge bg-success">CONTADO</span>';
+            if (c === 3 || c === 7) return '<span class="badge bg-primary">CONTRAENTREGA</span>';
+            if (c === 4 || c === 8) return '<span class="badge bg-warning text-dark">CRÉDITO</span>';
+            if (c === 5) return '<span class="badge bg-info text-dark">CORTESÍA</span>';
+            return "";
+        };
+
+        // Nueva función para validar Nequi o Daviplata
+        const formatearPagoElectronico = (pago) => {
+            if (!pago) return "";
+            const p = pago.toUpperCase(); // Aseguramos que esté en mayúsculas para comparar
+            if (p.startsWith("NEQ")) return "NEQUI";
+            if (p.startsWith("DAV")) return "DAVIPLATA";
+            return pago; // Si no es ninguno de los dos, muestra el código original
+        };
+
+        listaGuias.forEach((g, i) => {
+            tbody.innerHTML += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${g.guia}</td>
+                <td class="text-nowrap"><small>${g.estado || ""}</small></td>
+                <td>${obtenerTextoPago(g.formaPago)}</td> 
+                <td><small>${g.ciudad || ""}</small></td>
+                <td>${g.destinatario || ""}</td>
+                <td><small>${g.direccion || ""}</small></td>
+                <td>${g.celular || ""}</td>
+                <td class="text-nowrap">${g.valor_flete ? '$ ' + g.valor_flete.toLocaleString() : ""}</td>
+                <td class="text-nowrap">${g.valor_producto ? '$ ' + g.valor_producto.toLocaleString() : ""}</td>
+                <td class="text-nowrap">${formatearPagoElectronico(g.pago_electronico)}</td>
+            </tr>
+            `;
+        });
+
+        document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }    
+
+    /*************************************************************************************/
+    
+    async function calcularTotales(lista) { 
+        const formatoCop = new Intl.NumberFormat('es-CO', {
+            style: 'currency', currency: 'COP', minimumFractionDigits: 0
+        });
+
+        let sumaContraentrega = 0; 
+        let sumaRecaudo = 0;       
+        let sumaElectronicos = 0;  
+
+        if (lista && lista.length > 0) {
+            lista.forEach(g => {
+                const vFlete = parseFloat(g.valor_flete) || 0;
+                const vProd = parseFloat(g.valor_producto) || 0;
+                // FORMA SEGURA DE OBTENER EL ENTERO
+                const fPago = parseInt(String(g.formaPago).trim());
+                
+                const tienePagoElec = g.pago_electronico && g.pago_electronico.toString().trim() !== "";                
+                
+                //console.log(`Guía Original='${g.formaPago}', Procesado=${g.formaPago}, Tipo=${typeof g.formaPago}`);
+                // Lógica de Sumatorias (Electrónicos)
+                if (tienePagoElec) {
+                    if (fPago === 3 || fPago === 7) {
+                        sumaElectronicos += vFlete;
+                    } else if (fPago === 4) {
+                        sumaElectronicos += vProd;
+                    }
+                }
+
+                // Lógica de Totales base
+                if (fPago === 3 || fPago === 7) {
+                    sumaContraentrega += vFlete;
+                } else if (fPago === 4) {
+                    sumaRecaudo += vProd;
+                }
+            });
+        }
+        
+        const granTotal = sumaContraentrega + sumaRecaudo;
+
+        // Actualizar Interfaz
+        document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
+        document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
+        document.getElementById("totalElectronico").innerText = formatoCop.format(sumaElectronicos);
+        document.getElementById("totalGeneral").innerText = formatoCop.format(granTotal);
+    }
+    /*************************************************************************************/
+    function limpiarCampos(borrarTodo = true) {
+        listaGuias = [];
+        renderGuias();
+        
+        document.getElementById("fecha_creacion").value = "";
+        document.getElementById("responsable").value = "";
+        
+        // Limpiar totales visuales
+        document.getElementById("totalContraentrega").innerText = "$ 0";
+        document.getElementById("totalRecaudo").innerText = "$ 0";
+        document.getElementById("totalElectronico").innerText = "$ 0";
+        document.getElementById("totalGeneral").innerText = "$ 0";   
+
+        if (borrarTodo) {
+            document.getElementById("num_planilla").value = "";
+            document.getElementById("num_planilla").readOnly = false;
+        } else {
+            // Si solo estamos limpiando para una nueva búsqueda, 
+            // nos aseguramos que el input sea escribible
+            document.getElementById("num_planilla").readOnly = false;
+        }
+    }
+  
+    return {    
+        buscarPlanilla, // EXPORTRAR TAMBIÉN ESTA
+        calcularTotales // EXPORTAR POR SI LA NECESITAS FUERA
+    }
+
+})();

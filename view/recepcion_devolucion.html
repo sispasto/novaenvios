@@ -1,0 +1,363 @@
+<style>
+  /* --- CARRUSEL Y TARJETAS --- */
+  .contenedor-carrusel {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 15px 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
+  }
+
+  @media (min-width: 992px) {
+    .contenedor-carrusel {
+      justify-content: center;
+    }
+  }
+
+  .card-planilla {
+    flex: 0 0 auto;
+    width: 165px;
+    transition: all 0.2s ease;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    padding: 12px !important;
+  }
+
+  .card-planilla.active {
+    border-color: #004085;
+    background-color: #f0f7ff;
+    border-width: 2px;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 64, 133, 0.15);
+  }
+
+  /* --- DETALLE CON ALTURA FIJA Y SCROLL INTERNO --- */
+  .card-detalle-fijo {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh; /* Ocupa el 80% de la pantalla máximo */
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .cuerpo-tabla-scroll {
+    flex: 1 1 auto;
+    overflow-y: auto; /* Solo la tabla hace scroll */
+    background: #fff;
+  }
+
+  /* --- FORMULARIO ANCLADO (STICKY) --- */
+  .footer-confirmacion-fijo {
+    flex: 0 0 auto;
+    background-color: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+    padding: 20px;
+    z-index: 10;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .form-control-corp {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .form-control-corp:focus {
+    border-color: #004085;
+    box-shadow: 0 0 0 3px rgba(0, 64, 133, 0.1);
+  }
+
+  .label-corp {
+    font-size: 11px;
+    font-weight: 700;
+    color: #004085;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+  }
+</style>
+
+<div class="container-fluid mt-3">
+  <div class="row mb-2">
+    <div class="col text-center">
+      <h6 class="text-uppercase fw-bold small mb-2" style="color: #004085">
+        <i class="bi bi-box-arrow-in-left"></i> Devoluciones Pendientes
+      </h6>
+      <div
+        id="contenedor-planillas-devolucion"
+        class="contenedor-carrusel"
+      ></div>
+    </div>
+  </div>
+
+  <div id="seccion-detalle-dev" class="row d-none mt-3">
+    <div class="col-12 col-lg-10 mx-auto">
+      <div class="card shadow-lg border-0 card-detalle-fijo">
+        <div
+          class="card-header text-white d-flex justify-content-between align-items-center"
+          style="background-color: #004085; padding: 15px 20px"
+        >
+          <h5
+            class="mb-0 fw-bold"
+            id="titulo-detalle-dev"
+            style="font-size: 16px"
+          >
+            Detalle
+          </h5>
+          <span
+            class="badge bg-white text-primary fw-bold"
+            id="contadorGuiasDev"
+            style="color: #004085 !important"
+            >0 Guías</span
+          >
+        </div>
+
+        <div class="cuerpo-tabla-scroll">
+          <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover mb-0">
+              <thead
+                class="text-white sticky-top"
+                style="background-color: #002752; font-size: 11px"
+              >
+                <tr>
+                  <th class="py-2 ps-3">#</th>
+                  <th class="py-2">GUÍA</th>
+                  <!--<th class="py-2">DESTINATARIO</th>
+                  <th class="py-2">CIUDAD</th>-->
+                  <th class="py-2">ESTADO</th>
+                </tr>
+              </thead>
+              <tbody id="tablaGuiasDev" style="font-size: 12px"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="footer-confirmacion-fijo">
+          <div class="row g-2 mb-3">
+            <div class="col-12 col-md-6">
+              <label class="label-corp">Recibido por:</label>
+              <input
+                type="text"
+                id="nombreRecibe"
+                class="form-control form-control-corp"
+                placeholder="Nombre completo"
+              />
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="label-corp">Correo de notificación:</label>
+              <input
+                type="email"
+                id="emailRecibe"
+                class="form-control form-control-corp"
+                placeholder="email@empresa.com"
+              />
+            </div>
+          </div>
+
+          <button
+            id="btnRecibirDev"
+            class="btn btn-primary w-100 fw-bold py-2 shadow-sm"
+            style="background-color: #004085; border: none; height: 50px"
+            onclick="nsRecepcionDevolucion.confirmarRecibo()"
+          >
+            <i class="bi bi-check-all fs-5"></i> CONFIRMAR RECEPCIÓN FÍSICA
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var nsRecepcionDevolucion = (function () {
+    let planillaSeleccionada = null;
+
+    async function cargarPendientes() {
+      const contenedor = document.getElementById(
+        "contenedor-planillas-devolucion",
+      );
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_cargarpdevoluciones`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          },
+        );
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+
+        if (!result.data || result.data.length === 0) {
+          contenedor.innerHTML = `<div class="mensaje-vacio"><h6>No hay devoluciones pendientes</h6></div>`;
+          return;
+        }
+
+        contenedor.innerHTML = result.data
+          .map(
+            (p) => `
+          <div class="card card-planilla" onclick="nsRecepcionDevolucion.verDetalle(${p.num_planilla}, this)">
+            <div class="fs-4">📦</div>
+            <h6 class="fw-bold mb-1">Planilla #${p.num_planilla}</h6>
+            <div class="small fw-semibold" style="color: #004085;">${p.total_guias} Guías</div>
+            <span class="text-muted text-xs">${p.fecha_creacion.split("T")[0]}</span>
+          </div>
+        `,
+          )
+          .join("");
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    }
+
+    async function verDetalle(num, elemento) {
+      planillaSeleccionada = num;
+      document
+        .querySelectorAll(".card-planilla")
+        .forEach((c) => c.classList.remove("active"));
+      elemento.classList.add("active");
+
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ num_planilla: num }),
+          },
+        );
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+
+        const guias = result.data.guias || [];
+
+        document
+          .getElementById("seccion-detalle-dev")
+          .classList.remove("d-none");
+        document.getElementById("titulo-detalle-dev").innerText =
+          `Planilla #${num} - Retorno Físico`;
+        document.getElementById("contadorGuiasDev").innerText =
+          `${guias.length} Guías`;
+
+        const tbody = document.getElementById("tablaGuiasDev");
+        /*<td>${g.destinatario || "N/A"}</td>
+            <td>${g.ciudad || "-"}</td>*/
+        tbody.innerHTML = guias
+          .map(
+            (g, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td class="fw-bold" style="color: #004085;">${g.guia}</td>            
+            <td><span class="badge text-xs" style="background-color: #e9ecef; color: #004085;">${g.estado}</span></td>
+          </tr>
+        `,
+          )
+          .join("");
+
+        document
+          .getElementById("seccion-detalle-dev")
+          .scrollIntoView({ behavior: "smooth" });
+      } catch (err) {
+        alertSMS("❌ " + err.message);
+      }
+    }
+
+    async function confirmarRecibo() {
+      const nombre = document.getElementById("nombreRecibe").value.trim();
+      const email = document.getElementById("emailRecibe").value.trim();
+      const btn = document.getElementById("btnRecibirDev");
+
+      // 1. VALIDACIONES PREVIAS
+      if (!planillaSeleccionada) {
+        alertSMS("⚠️ No has seleccionado ninguna planilla.");
+        return;
+      }
+
+      if (!nombre || !email) {
+        alertSMS("⚠️ Debes ingresar el nombre y correo de quien recibe.");
+        return;
+      }
+
+      // Validación básica de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alertSMS("⚠️ El formato del correo electrónico no es válido.");
+        return;
+      }
+
+      // 2. BLOQUEO DE BOTÓN (LOADING)
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> PROCESANDO ENTREGA...`;
+
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_entregar_pdevolucion`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              num_planilla: planillaSeleccionada,
+              recibido_por: nombre,
+              email_notificacion: email,
+            }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok)
+          throw new Error(result.error || "Error al procesar la entrega");
+
+        // 3. ÉXITO
+        alertSMS(
+          `✅ ¡Éxito! La planilla #${planillaSeleccionada} ha sido recibida físicamente.`,
+        );
+
+        // Limpiar formulario y ocultar detalle
+        document.getElementById("nombreRecibe").value = "";
+        document.getElementById("emailRecibe").value = "";
+        document.getElementById("seccion-detalle-dev").classList.add("d-none");
+
+        // Refrescar el carrusel para quitar la planilla procesada
+        await cargarPendientes();
+      } catch (err) {
+        console.error("Error en confirmación:", err);
+        alertSMS("❌ " + err.message);
+      } finally {
+        // 4. RESTAURAR BOTÓN
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-check-all fs-5"></i> CONFIRMAR RECEPCIÓN FÍSICA`;
+      }
+    }
+
+    cargarPendientes();
+    return { verDetalle, confirmarRecibo, cargarPendientes };
+  })();
+</script>

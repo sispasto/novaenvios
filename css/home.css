@@ -1,0 +1,136 @@
+/* Estilos para mejorar el diseño del formulario */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+html,
+body {
+  height: auto;
+  overflow-y: auto;
+}
+.modal-dialog {
+  margin-top: 70px !important;
+}
+#loginModal .modal-content {
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#loginForm {
+  padding: 20px;
+}
+
+#loginForm .form-label {
+  font-weight: bold;
+}
+
+#loginForm .form-control {
+  border-radius: 8px;
+}
+
+#loginForm .btn-primary {
+  background-color: black;
+  border-color: black;
+  border-radius: 8px;
+}
+
+#loginForm .btn-primary:hover {
+  background-color: #333;
+}
+
+/* Ajustes adicionales */
+.navbar-collapse {
+  transition: height 0.3s ease;
+}
+
+/* Estilos para mejorar el diseño del formulario */
+#loginModal .modal-content,
+#changePasswordModal .modal-content {
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-body form {
+  padding: 20px;
+}
+
+.modal-body .form-label {
+  font-weight: bold;
+}
+
+.modal-body .form-control {
+  border-radius: 8px;
+}
+
+.modal-body .btn-primary {
+  background-color: black;
+  border-color: black;
+  border-radius: 8px;
+}
+
+.modal-body .btn-primary:hover {
+  background-color: #333;
+}
+
+/* Estilo Profesional para el Menú Lateral */
+.offcanvas-body {
+  padding-top: 1.5rem !important;
+  background: #1a1d20; /* Un gris casi negro más suave que el negro puro */
+}
+
+/* Encabezados de sección */
+.section-header {
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  color: #adb5bd !important;
+  text-transform: uppercase;
+  font-weight: 600 !important;
+  padding: 10px 15px !important;
+}
+
+/* Efecto Hover sutil */
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  color: #fff !important;
+}
+
+/* Submenús */
+.submenu-list .nav-link {
+  font-size: 0.85rem;
+  padding: 6px 20px !important;
+  color: #8c9196 !important;
+  transition: all 0.2s ease;
+}
+
+.submenu-list .nav-link:hover {
+  color: #0d6efd !important; /* Azul sutil al pasar el mouse */
+  background: transparent;
+}
+
+/* Animación del Chevron */
+.section-header[aria-expanded="true"] .chevron-icon {
+  transform: rotate(90deg);
+}
+
+.chevron-icon {
+  transition: transform 0.3s ease;
+}
+
+@media (max-width: 576px) {
+  .position-fixed.bottom-0.end-0 {
+    width: 100%; /* Ocupa todo el ancho */
+    padding: 10px !important;
+    display: flex;
+    justify-content: center; /* Centra el mensaje en el celular */
+  }
+
+  #liveToast {
+    width: 90%; /* Que no toque los bordes laterales */
+    margin-bottom: 20px;
+  }
+}
+
+/* Esto hará que el icono de la empresa brille un poco más que el texto */
+#textUser i {
+  color: #4dabf7; /* Un azul suave profesional */
+  font-size: 1.1rem;
+}

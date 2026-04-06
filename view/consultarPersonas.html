@@ -1,0 +1,190 @@
+<style>
+  .tabla-personas {
+    font-size: 0.95rem;
+  }
+
+  /* --- AJUSTES PARA PC Y TABLET --- */
+  @media (min-width: 992px) {
+    .container-fluid {
+      padding: 2rem 5rem;
+    }
+  }
+
+  /* --- AJUSTES PARA MÓVIL --- */
+  @media (max-width: 768px) {
+    /* El header se vuelve vertical para que el buscador ocupe todo el ancho */
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 10px;
+    }
+
+    .card-header input {
+      width: 100% !important; /* Buscador full width en móvil */
+      font-size: 16px; /* Evita el zoom automático en iOS */
+    }
+
+    .tabla-personas {
+      font-size: 0.85rem;
+    }
+
+    .tabla-personas td,
+    .tabla-personas th {
+      padding: 10px 5px !important;
+    }
+  }
+
+  /* MODO HORIZONTAL (LANDSCAPE) */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .table-responsive {
+      max-height: 250px;
+      overflow-y: auto;
+    }
+  }
+
+  /* Efecto hover suave para las filas */
+  .tabla-personas tbody tr {
+    transition: background-color 0.2s;
+  }
+</style>
+
+<div class="container-fluid mt-3">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      <div class="card shadow border-0">
+        <div
+          class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3"
+        >
+          <h5 class="mb-0 fw-bold">Consulta de Personas</h5>
+          <input
+            type="text"
+            class="form-control form-control-sm w-50 shadow-sm"
+            placeholder="🔎 Buscar código, cédula o nombre..."
+            onkeyup="nsConsultarPersonas.filtrar(this.value)"
+          />
+        </div>
+
+        <div class="card-body p-0">
+          <div id="alertaConsulta"></div>
+
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 tabla-personas">
+              <thead class="table-dark">
+                <tr>
+                  <th class="ps-3">Código</th>
+                  <th>Cédula</th>
+                  <th>Nombre</th>
+                  <th class="text-center pe-3">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPersonas"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var nsConsultarPersonas = (function () {
+    /***********************************************/
+    const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
+    /***********************************************/
+    let personas = [];
+
+    async function cargar() {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/functions/v1/consultar_personas`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              apikey: SUPABASE_ANON_KEY,
+            },
+            body: JSON.stringify({}), // 👈 OBLIGATORIO
+          },
+        );
+
+        const result = await res.json();
+
+        if (!res.ok)
+          throw new Error(result.error || "Error al consultar personas");
+
+        personas = result.data.sort(
+          (a, b) => Number(a.codigo) - Number(b.codigo),
+        );
+
+        render(personas);
+      } catch (err) {
+        mostrarError(err.message);
+      }
+    }
+
+    function render(data) {
+      const tbody = document.getElementById("tbodyPersonas");
+      tbody.innerHTML = "";
+
+      if (!data.length) {
+        tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="text-center text-muted py-3">
+            No hay registros
+          </td>
+        </tr>
+      `;
+        return;
+      }
+
+      data.forEach((p) => {
+        tbody.innerHTML += `
+        <tr>
+          <td>${p.codigo}</td>
+          <td>${p.cedula}</td>
+          <td>${p.nombre}</td>
+          <td>
+            <span class="badge ${p.estado ? "bg-success" : "bg-secondary"}">
+              ${p.estado ? "ACTIVO" : "INACTIVO"}
+            </span>
+          </td>
+        </tr>
+      `;
+      });
+    }
+
+    function filtrar(txt) {
+      txt = txt.toLowerCase();
+
+      const filtradas = personas.filter(
+        (p) =>
+          String(p.codigo).includes(txt) ||
+          String(p.cedula).includes(txt) ||
+          p.nombre.toLowerCase().includes(txt),
+      );
+
+      // Mantener orden numérico después del filtro
+      filtradas.sort((a, b) => Number(a.codigo) - Number(b.codigo));
+
+      render(filtradas);
+    }
+
+    function mostrarError(msg) {
+      document.getElementById("alertaConsulta").innerHTML = `
+      <div class="alert alert-danger">${msg}</div>
+    `;
+    }
+
+    return {
+      cargar,
+      filtrar,
+    };
+  })();
+
+  // 👇 ejecutar automáticamente
+  document.addEventListener("DOMContentLoaded", () => {
+    nsConsultarPersonas.cargar();
+  });
+</script>

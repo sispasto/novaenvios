@@ -1,0 +1,415 @@
+<style>
+  /* Colores de Identidad Nova Envios */
+  :root {
+    --nova-blue: #1d438a;
+    --nova-dark-blue: #153266;
+    --nova-light-blue: #f0f4f8;
+    --dev-red: #e63946; /* Rojo acción */
+    --dev-bg: #fff5f5;
+  }
+
+  .section-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--nova-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-left: 4px solid var(--nova-blue);
+    padding-left: 10px;
+    margin-bottom: 15px;
+  }
+
+  /* Header azul Nova Envios */
+  .card-header.bg-devolucion {
+    background: linear-gradient(
+      135deg,
+      var(--nova-blue) 0%,
+      var(--nova-dark-blue) 100%
+    ) !important;
+    border-bottom: 3px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .scan-input-dev {
+    border: 2px solid var(--nova-blue) !important;
+    background-color: var(--nova-light-blue);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: var(--nova-blue);
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .scan-input-dev:focus {
+    box-shadow: 0 0 0 0.25rem rgba(29, 67, 138, 0.2);
+    background-color: #fff;
+    border-color: var(--nova-blue) !important;
+  }
+
+  .badge-devolucion {
+    background-color: var(--nova-blue);
+    color: white;
+    font-size: 1.1rem;
+    padding: 10px 15px;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Tabla con cabecera azul */
+  .table thead.table-nova th {
+    background-color: #f8f9fa;
+    color: var(--nova-blue);
+    text-transform: uppercase;
+    font-size: 11px;
+    border-bottom: 2px solid var(--nova-blue);
+  }
+
+  /* Botón de eliminar mejorado */
+  .btn-remove-guia {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dev-red);
+    color: white !important;
+    border: none;
+    transition: transform 0.2s;
+  }
+
+  .btn-remove-guia:hover {
+    transform: scale(1.1);
+    background-color: #c62828;
+  }
+
+  .btn-remove-guia i {
+    font-size: 12px;
+    /* Forzamos que el icono sea visible */
+    display: inline-block !important;
+  }
+
+  .text-nova {
+    color: var(--nova-blue);
+    letter-spacing: 0.5px;
+  }
+
+  #tablaGuias tr:hover {
+    background-color: #f1f3f9 !important;
+  }
+</style>
+
+<div class="container-fluid py-3">
+  <form
+    id="formDevolucion"
+    onsubmit="nsDevolucion.guardarPlanilla(event, this)"
+  >
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div
+          class="card shadow-lg border-0"
+          style="border-radius: 12px; overflow: hidden"
+        >
+          <div class="card-header bg-devolucion py-3">
+            <h5 class="mb-0 fw-bold text-center text-white">
+              <i class="fas fa-box-open me-2"></i>PLANILLA DEVOLUCIONES
+            </h5>
+          </div>
+
+          <div class="card-body p-4">
+            <div class="section-title">Datos de Recepción</div>
+            <div class="row g-3">
+              <div class="col-6 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >N° Planilla</label
+                >
+                <input
+                  type="text"
+                  class="form-control bg-light fw-bold text-center"
+                  id="num_planilla"
+                  readonly
+                  placeholder="PENDIENTE"
+                />
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >Fecha Retorno</label
+                >
+                <input
+                  type="text"
+                  class="form-control bg-light text-center"
+                  id="fecha_creacion"
+                  readonly
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >Responsable Bodega</label
+                >
+                <select
+                  class="form-select border-nova"
+                  id="responsable"
+                  required
+                >
+                  <option value="">Cargando...</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="my-4 opacity-10" />
+
+            <div class="mb-4">
+              <div class="text-center mb-2">
+                <span
+                  class="badge rounded-pill bg-light text-primary border px-3"
+                >
+                  <i class="fas fa-barcode me-2"></i> LECTOR ACTIVO
+                </span>
+              </div>
+              <input
+                type="text"
+                class="form-control py-3 scan-input-dev"
+                id="inputGuia"
+                placeholder="ESCANEAR GUÍA AQUÍ"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <button
+                type="button"
+                class="btn btn-sm text-danger fw-bold"
+                onclick="nsDevolucion.limpiarGuias()"
+              >
+                <i class="fas fa-trash-alt me-1"></i> Limpiar
+              </button>
+              <div class="d-flex align-items-center gap-2">
+                <span class="small fw-bold text-muted">TOTAL ESCANEADO:</span>
+                <span class="badge badge-devolucion" id="contadorGuias">0</span>
+              </div>
+            </div>
+
+            <div
+              class="table-responsive border"
+              style="max-height: 300px; border-radius: 8px"
+            >
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-nova sticky-top">
+                  <tr>
+                    <th class="text-center" style="width: 50px">#</th>
+                    <th>CÓDIGO DE GUÍA</th>
+                    <th class="text-center" style="width: 100px">ACCIÓN</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaGuias"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-footer p-3 bg-light d-flex gap-2">
+            <button
+              type="submit"
+              class="btn btn-primary flex-fill py-3 fw-bold shadow-sm"
+              id="btnGuardar"
+              style="background-color: var(--nova-blue); border: none"
+            >
+              <i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary px-4"
+              id="btnNuevaPlanilla"
+              onclick="nsDevolucion.nuevaPlanilla()"
+              disabled
+            >
+              NUEVA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  var nsDevolucion = (function () {
+    let listaGuias = [];
+
+    function cargarFecha() {
+      const hoy = new Date();
+      const fecha =
+        ("0" + hoy.getDate()).slice(-2) +
+        "/" +
+        ("0" + (hoy.getMonth() + 1)).slice(-2) +
+        "/" +
+        hoy.getFullYear();
+      document.getElementById("fecha_creacion").value = fecha;
+    }
+
+    async function cargarResponsables() {
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        // Reutilizamos el servicio de responsables (operadores de bodega/admins)
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          },
+        );
+        const result = await response.json();
+        const select = document.getElementById("responsable");
+        select.innerHTML = '<option value="">Seleccione quien recibe</option>';
+        result.data.forEach((r) => {
+          select.innerHTML += `<option value="${r.id_persona}">${r.nombres} ${r.apellidos}</option>`;
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Lector de códigos
+    const inputGuia = document.getElementById("inputGuia");
+    inputGuia.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        const guia = this.value.replace(/[^0-9]/g, "");
+        if (!guia) return;
+
+        if (listaGuias.includes(guia)) {
+          alertSMS(`Guía ${guia} ya está en la lista`);
+          this.value = "";
+          return;
+        }
+
+        listaGuias.push(guia);
+        renderGuias();
+        // Dentro del evento keydown de inputGuia, después de renderGuias():
+        const container = document.querySelector(".table-responsive");
+        container.scrollTop = container.scrollHeight;
+        this.value = "";
+        this.focus();
+      }
+    });
+
+    // Dentro de tu función renderGuias(), cambia el template de la fila:
+    function renderGuias() {
+      const tbody = document.getElementById("tablaGuias");
+      tbody.innerHTML = listaGuias
+        .map(
+          (g, i) => `
+    <tr>
+      <td class="text-center text-muted small">${i + 1}</td>
+      <td><span class="fw-bold text-nova">${g}</span></td>
+      <td class="text-center">
+        <button type="button" class="btn-remove-guia" 
+                onclick="nsDevolucion.quitarGuia(${i})" title="Quitar">
+          <i class="fas fa-times"></i>
+        </button>
+      </td>
+    </tr>`,
+        )
+        .join("");
+
+      document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }
+
+    async function guardarPlanilla(event, form) {
+      event.preventDefault();
+      const btnGuardar = document.getElementById("btnGuardar");
+
+      try {
+        if (listaGuias.length === 0)
+          throw new Error("Escanee al menos una guía");
+
+        const responsable = document.getElementById("responsable").value;
+        if (!responsable) throw new Error("Seleccione el responsable");
+
+        // Bloquear botón para evitar doble envío
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i>PROCESANDO...';
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla_devolucion`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              id_responsable: responsable,
+              guias: listaGuias,
+            }),
+          },
+        );
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Error desconocido");
+
+        // 1. Mostrar el número de planilla generado por el RPC
+        if (result.planilla) {
+          document.getElementById("num_planilla").value = result.planilla;
+        }
+
+        // 2. Manejar guías que no estaban en la base de datos (Caso B del RPC)
+        if (result.no_encontradas && result.no_encontradas.length > 0) {
+          const cantidad = result.no_encontradas.length;
+          alertSMS(
+            `Planilla #${result.planilla} creada. ⚠️ ${cantidad} guía(s) no tenían datos previos en el sistema pero fueron registradas.`,
+          );
+          console.warn("Guías sin datos previos:", result.no_encontradas);
+        } else {
+          alertSMS(
+            `¡Éxito! Planilla #${result.planilla} procesada correctamente ✅`,
+          );
+        }
+
+        // 3. Gestionar estado de la interfaz
+        document.getElementById("btnNuevaPlanilla").disabled = false;
+        btnGuardar.innerHTML = '<i class="fas fa-check me-2"></i>PROCESADO';
+      } catch (err) {
+        alertSMS(err.message);
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML =
+          '<i class="fas fa-save me-2"></i>PROCESAR DEVOLUCIÓN';
+      }
+    }
+
+    function nuevaPlanilla() {
+      listaGuias = [];
+      renderGuias();
+      document.getElementById("num_planilla").value = "";
+      document.getElementById("responsable").value = "";
+      document.getElementById("btnGuardar").disabled = false;
+      document.getElementById("btnNuevaPlanilla").disabled = true;
+      document.getElementById("inputGuia").focus();
+    }
+
+    cargarFecha();
+    cargarResponsables();
+
+    return {
+      guardarPlanilla,
+      limpiarGuias: () => {
+        listaGuias = [];
+        renderGuias();
+      },
+      nuevaPlanilla,
+      quitarGuia: (i) => {
+        listaGuias.splice(i, 1);
+        renderGuias();
+      },
+    };
+  })();
+</script>

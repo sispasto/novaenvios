@@ -1,0 +1,273 @@
+<style>
+  /* ==========================================
+     ESTILOS POR DEFECTO (PC / TABLETS)
+     ========================================== */
+  .section-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 15px;
+  }
+
+  /* Tabla normal en PC */
+  .table-sm td,
+  .table-sm th {
+    font-size: 14px;
+    vertical-align: middle;
+    padding: 10px 8px !important;
+  }
+
+  .form-label,
+  label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN PARA MÓVILES (RETRATO)
+     ========================================== */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    /* Reducimos la tabla al máximo en móvil */
+    .table-sm td,
+    .table-sm th {
+      font-size: 11px;
+      padding: 5px 3px !important;
+    }
+
+    /* Hacemos que el botón de consultar use el margen superior en móvil 
+       para no quedar pegado al input */
+    .d-flex.align-items-end {
+      margin-top: 10px;
+    }
+
+    .card-body {
+      padding: 12px;
+    }
+  }
+
+  /* ==========================================
+     OPTIMIZACIÓN MODO HORIZONTAL (LANDSCAPE MÓVIL)
+     ========================================== */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .container-fluid {
+      padding-top: 5px !important;
+    }
+
+    h1 {
+      display: none;
+    } /* Ocultamos el H1 para ganar espacio vertical */
+
+    .table-responsive {
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      font-size: 10.5px !important;
+      padding: 3px 4px !important;
+    }
+
+    .row.justify-content-center {
+      margin-bottom: 0 !important;
+    }
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+          <strong>Consulta de Planillas</strong>
+        </div>
+
+        <div class="card-body">
+          <div class="section-title"><strong>Filtro</strong></div>
+
+          <div class="row">
+            <div class="col-12 col-md-5 mb-2">
+              <label>Fecha de Planilla</label>
+              <input type="date" class="form-control" id="fecha_planilla" />
+            </div>
+
+            <div class="col-12 col-md-3 d-grid d-md-flex align-items-end mb-2">
+              <button
+                class="btn btn-dark w-100"
+                onclick="nsConsultaPlanillas.consultar()"
+              >
+                <i class="fas fa-search me-1"></i> Consultar
+              </button>
+            </div>
+          </div>
+
+          <hr />
+
+          <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover">
+              <thead class="table-dark text-nowrap" style="font-size: 11px">
+                <tr>
+                  <th>N° Planilla</th>
+                  <th>Tipo / Observación</th>
+                  <th>Estado</th>
+                  <th>Responsable</th>
+                  <th># Guías</th>
+                  <th class="text-end">Flete Contraentrega</th>
+                  <th class="text-end">Flete Recaudo</th>
+                </tr>
+              </thead>
+
+              <tbody id="tablaPlanillas"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  var nsConsultaPlanillas = (function () {
+    async function consultar() {
+      try {
+        const fecha = document.getElementById("fecha_planilla").value;
+
+        if (!fecha) {
+          throw new Error("Seleccione una fecha para consultar");
+        }
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultar_planillas`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ fecha: fecha }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Error en la consulta");
+        }
+
+        // VALIDACIÓN CLAVE:  Si data está vacío o no hay resultados
+        if (!result.data || result.data.length === 0) {
+          // Limpiamos la tabla para que no se vea información vieja
+          renderTabla([]);
+          // Notificamos al usuario
+          alertSMS("No se encontraron planillas para la fecha seleccionada.");
+          return; // Detenemos la ejecución
+        }
+
+        // Si llegamos aquí, sí hay datos
+        renderTabla(result.data);
+      } catch (err) {
+        console.error("Error en consulta:", err);
+        alertSMS(err.message);
+      }
+    }
+
+    /* =========================*/
+
+    function renderTabla(data) {
+      const tbody = document.getElementById("tablaPlanillas");
+      tbody.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No hay datos disponibles</td></tr>`;
+        return;
+      }
+
+      data.forEach((p) => {
+        // 1. Lógica para el Badge de Estado (ABIERTA, CERRADA, ANULADA)
+        let claseEstado = "bg-secondary";
+        let textoEstado = p.estado;
+
+        if (p.estado === "AB") {
+          claseEstado = "bg-success";
+          textoEstado = "ABIERTA";
+        } else if (p.estado === "CE") {
+          claseEstado = "bg-dark";
+          textoEstado = "CERRADA";
+        } else if (p.estado === "AN") {
+          claseEstado = "bg-danger";
+          textoEstado = "ANULADA";
+        }
+
+        // 2. Lógica por TIPO_PLANILLA (1: Reparto, 2: Devolución)
+        let badgeTipo = "";
+
+        if (p.tipo_planilla === 2) {
+          // Si es tipo 2 y está cerrada, es que ya se entregó físicamente
+          if (p.estado === "CE") {
+            badgeTipo =
+              '<span class="badge bg-primary"><i class="fas fa-check-double me-1"></i> DEVUELTA Y RECIBIDA</span>';
+          } else {
+            badgeTipo =
+              '<span class="badge bg-danger"><i class="fas fa-undo-alt me-1"></i> DEVOLUCIÓN</span>';
+          }
+        } else {
+          // Caso por defecto: Reparto (Tipo 1)
+          badgeTipo =
+            '<span class="badge bg-info text-dark"><i class="fas fa-truck me-1"></i> REPARTO</span>';
+        }
+
+        // 3. Formateo de moneda (COP)
+        const fleteCE = (parseFloat(p.flete_contraentrega) || 0).toLocaleString(
+          "es-CO",
+          {
+            style: "currency",
+            currency: "COP",
+            maximumFractionDigits: 0,
+          },
+        );
+        const fleteRE = (parseFloat(p.flete_recaudo) || 0).toLocaleString(
+          "es-CO",
+          {
+            style: "currency",
+            currency: "COP",
+            maximumFractionDigits: 0,
+          },
+        );
+
+        // 4. Inserción en la tabla
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${p.num_planilla}</strong></td>
+            <td>${badgeTipo}</td> 
+            <td><span class="badge ${claseEstado}">${textoEstado}</span></td>
+            <td><small>${p.responsable}</small></td>
+            <td class="text-center">
+                <span class="badge bg-light text-dark border">${p.total_guias}</span>
+            </td>
+            <td class="text-end text-primary fw-bold">${fleteCE}</td> 
+            <td class="text-end text-success fw-bold">${fleteRE}</td> 
+          </tr>
+        `;
+      });
+    }
+    /************************************************************************************/
+
+    return {
+      consultar,
+    };
+  })();
+</script>

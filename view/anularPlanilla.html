@@ -1,0 +1,152 @@
+<style>
+  /* --- AJUSTES PARA PC --- */
+  @media (min-width: 992px) {
+    /* Aplicamos el margen solo al contenido dentro de #App */
+    #App .container-fluid {
+      padding-top: 50px;
+    }
+  }
+
+  /* --- AJUSTES PARA MÓVIL --- */
+  @media (max-width: 767px) {
+    /* El padding solo afecta al contenedor del formulario, no al Navbar */
+    #App .container-fluid {
+      padding: 20px 15px;
+    }
+
+    .card-header {
+      text-align: center;
+    }
+
+    #btnAnular {
+      padding: 15px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .mb-3 {
+      margin-bottom: 1rem !important;
+    }
+  }
+
+  /* MODO HORIZONTAL (LANDSCAPE) */
+  @media (orientation: landscape) and (max-height: 500px) {
+    #App .container-fluid {
+      padding-top: 10px;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+  }
+</style>
+<div class="container-fluid">
+  <h1></h1>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white py-3">
+          <h5 class="mb-0 fw-bold">
+            <i class="bi bi-trash"></i> Anular Planilla
+          </h5>
+        </div>
+
+        <div class="card-body p-4">
+          <div class="mb-4">
+            <label class="form-label fw-bold text-muted small"
+              >Número de planilla</label
+            >
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted">#</span>
+              <input
+                type="number"
+                class="form-control form-control-lg"
+                id="num_planilla"
+                placeholder="Ej: 1025"
+              />
+            </div>
+          </div>
+
+          <button
+            id="btnAnular"
+            class="btn btn-danger w-100 shadow-sm fw-bold"
+            onclick="nsAnularPlanilla.anular()"
+          >
+            ANULAR PLANILLA
+          </button>
+        </div>
+      </div>
+
+      <p class="text-center text-muted small mt-3">
+        <i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  var nsAnularPlanilla = (function () {
+    async function anular() {
+      const btn = document.getElementById("btnAnular");
+      const input = document.getElementById("num_planilla");
+      const num = input.value;
+
+      if (!num) {
+        alertSMS("⚠️ Ingrese el número de planilla");
+        return;
+      }
+
+      // Estado de carga
+      btn.disabled = true;
+      btn.innerHTML =
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...';
+
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        if (!session)
+          throw new Error("Sesión expirada. Inicie sesión nuevamente.");
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_anular_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ num_planilla: num }),
+          },
+        );
+
+        const result = await response.json();
+
+        // 1. Validar error de red o de la Edge Function
+        if (!response.ok) {
+          throw new Error(result.error || "Error en el servidor");
+        }
+
+        // 2. Validar respuesta lógica de la RPC (nuestro ok: true/false de Postgres)
+        if (result.ok) {
+          alertSMS(
+            "✅ " + (result.mensaje || "Planilla anulada correctamente"),
+          );
+          input.value = "";
+        } else {
+          // Caso donde la planilla no existe o ya está anulada
+          alertSMS("❌ " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alertSMS("🚀 " + err.message);
+      } finally {
+        // Restaurar botón
+        btn.disabled = false;
+        btn.innerHTML = "ANULAR PLANILLA";
+      }
+    }
+
+    return { anular };
+  })();
+</script>

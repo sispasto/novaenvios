@@ -1,0 +1,577 @@
+<style>
+  /* --- ESTILOS GENERALES (DENTRO DE #App) --- */
+  #App .section-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 10px;
+  }
+
+  #App .table-sm td, 
+  #App .table-sm th {
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  /* --- AJUSTES PARA PC --- */
+  @media (min-width: 992px) {
+    /* Aquí estaba el error: ahora solo afecta al contenido principal */
+    #App .container-fluid {
+      padding: 20px 40px;
+    }
+    #App .card-body {
+      padding: 2rem;
+    }
+    #App .table-sm td { padding: 8px 4px; }
+  }
+
+  /* --- AJUSTES PARA MÓVIL (TABLET Y CELULAR) --- */
+  @media (max-width: 768px) {
+    #App .container-fluid { padding: 10px 5px; }
+    
+    #App #totalContraentrega, 
+    #App #totalRecaudo, 
+    #App #totalElectronico, 
+    #App #totalGeneral {
+      font-size: 14px !important;
+    }
+
+    #App .table-sm td, 
+    #App .table-sm th {
+      padding: 4px 2px !important;
+      font-size: 11px !important;
+    }
+
+    #App .card-footer {
+      flex-direction: column;
+    }
+    #App .card-footer .btn {
+      margin-bottom: 5px;
+    }
+  }
+
+  /* MODO HORIZONTAL MÓVIL (Landscape) */
+  @media (orientation: landscape) and (max-height: 500px) {
+    #App .container-fluid { padding: 5px !important; }
+    #App .card-body { padding: 10px !important; }
+    
+    /* Ocultamos elementos innecesarios en horizontal */
+    #App .section-title, 
+    #App hr, 
+    #App .mb-2 { display: none; } 
+    
+    #App .row.g-2.mb-3 { margin-bottom: 5px !important; }
+    #App .card-total .card-body, 
+    #App .card-total { padding: 2px !important; }
+    
+    #App #totalContraentrega, 
+    #App #totalRecaudo, 
+    #App #totalElectronico, 
+    #App #totalGeneral {
+      font-size: 11px !important;
+    }
+
+    #App .table-responsive {
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+    }
+
+    #App .table-sm td, 
+    #App .table-sm th {
+      font-size: 9px !important;
+      padding: 2px 1px !important;
+    }
+
+    #App .card-footer {
+      padding: 5px !important;
+      flex-direction: row !important;
+    }
+  }
+</style>
+
+<div class="container-fluid">
+  <h1></h1>
+
+  <form id="formPlanilla" onsubmit="nsPlanilla.guardarPlanilla(event,this)">
+    <div class="row justify-content-center">
+      <div class="col-lg-12">
+        <div class="card shadow border-0">
+          <div class="card-header bg-dark text-white">
+            <h5 class="mb-0 fw-bold">Planilla de Reparto</h5>
+          </div>
+
+          <div class="card-body">
+            <div class="section-title"><strong>Datos de Planilla</strong></div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">N° Planilla</label>
+                <input type="number" class="form-control" id="num_planilla">
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Fecha creación</label>
+                <input type="text" class="form-control" id="fecha_creacion" readonly>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Responsable</label>
+                <input type="text" class="form-control" id="responsable" readonly>
+              </div>
+            </div>
+            <hr>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6 col-md-3">
+                <div class="card bg-light border-0">
+                  <div class="card-body p-2 text-center">
+                    <small class="text-muted d-block fw-bold" style="font-size: 10px;">TOTAL CONTRAENTREGA</small>
+                    <h5 class="mb-0 fw-bold text-dark" id="totalContraentrega">$ 0</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card bg-light border-0">
+                  <div class="card-body p-2 text-center">
+                    <small class="text-muted d-block fw-bold" style="font-size: 10px;">TOTAL RECAUDOS</small>
+                    <h5 class="mb-0 fw-bold text-primary" id="totalRecaudo">$ 0</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card bg-info text-white border-0">
+                  <div class="card-body p-2 text-center">
+                    <small class="d-block fw-bold" style="font-size: 10px;">PAGOS ELECTRÓNICOS</small>
+                    <h5 class="mb-0 fw-bold" id="totalElectronico">$ 0</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card bg-dark text-white border-0">
+                  <div class="card-body p-2 text-center">
+                    <small class="d-block fw-bold" style="font-size: 10px;">GRAN TOTAL</small>
+                    <h5 class="mb-0 fw-bold" id="totalGeneral">$ 0</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="fw-semibold">Guías registradas</span>
+              </div>
+              <span class="badge bg-dark badge-counter" id="contadorGuias">0</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-striped">
+                <thead class="table-dark">
+                  <tr>
+                    <th width="60">#</th>
+                    <th>Guía</th>
+                    <th>Estado</th>
+                    <th>Forma Pago</th>
+                    <th>Ciudad Destino</th>
+                    <th>Destinatario</th>
+                    <th>Dirección</th>
+                    <th>Celular</th>
+                    <th>Flete</th>
+                    <th>Valor producto</th>
+                    <th>Pago Elec.</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaGuias"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-footer d-flex gap-2">
+            <button type="button" class="btn btn-dark w-100" id="btnValidar" onclick="nsPlanilla.validarGuias()">
+              VALIDAR
+            </button>
+            <button type="submit" class="btn btn-dark w-100" id="btnGuardar">
+              CERRAR PLANILLA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+
+var nsPlanilla=(function(){
+
+    let listaGuias=[];
+
+    /* =========================
+    EVENTO: BUSCAR PLANILLA POR NÚMERO
+    ========================= */
+    document.getElementById("num_planilla").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const num = e.target.value.trim();
+            
+            if (num) {
+                // Esto habilitará los botones y limpiará la tabla/totales               
+                buscarPlanilla(num);
+            }
+        }
+    });
+
+/**********************************************************************/
+async function buscarPlanilla(num_planilla) {
+    try {
+        limpiarCampos(false); 
+
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) throw new Error("Debe iniciar sesión");
+
+        const response = await fetch(
+            `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({ num_planilla: parseInt(num_planilla) })
+            }
+        );
+
+        const result = await response.json();
+
+        if (!result.ok) {
+            alertSMS(result.error); 
+            limpiarCampos(true);
+            return;
+        }
+
+        const data = result.data;
+        
+        // Validamos estados finales (Anulada o Cerrada)
+        if (data.estado === 'AN' || data.estado === 'CE') {
+            const estadoTexto = data.estado === 'AN' ? 'ANULADA' : 'CERRADA';
+            
+            // Si además de estar cerrada es de tipo Devolución (Tipo 2)
+            if (data.tipo_planilla === 2) {
+                alertSMS(`La planilla N° ${num_planilla} es de DEVOLUCIÓN y ya está ${estadoTexto}.`);
+            } else {
+                alertSMS(`La planilla N° ${num_planilla} está ${estadoTexto}.`);
+            }
+            
+            limpiarCampos(true);
+            return;
+        }
+
+        // Validación de seguridad por tipo: 
+        // Si este módulo NO es para devoluciones y detecta una tipo 2, la detiene.
+        if (data.tipo_planilla === 2) {
+            alertSMS(`La planilla N° ${num_planilla} es de DEVOLUCIÓN. Para cerrarla, debe usar el módulo de "Entregar Planilla Devoluciones".`);
+            limpiarCampos(true);
+            return;
+        }
+
+        // Llenar campos de cabecera
+        document.getElementById("fecha_creacion").value = new Date(data.fecha_planilla).toLocaleDateString('es-CO');
+        document.getElementById("responsable").value = data.nombre_responsable;
+
+        /* ============================================================
+           CAMBIO CLAVE: Mapeo de guías con datos de sincronización
+           ============================================================ */
+        listaGuias = data.guias.map(g => ({
+            guia: g.guia,             
+            sincronizado: g.sincronizado, 
+            estado: g.estado || "",   
+            ciudad: g.ciudad || "",
+            destinatario: g.destinatario || "",
+            direccion: g.direccion || "",
+            celular: g.celular || "",
+            formaPago: g.formaPago || "",            
+            valor_flete: g.valor_flete || "",
+            valor_producto: g.valor_producto || "",
+            pago_electronico: g.pago_electronico || ""
+        }));        
+        
+        calcularTotales(listaGuias);
+        renderGuias();
+
+        /* ============================================================
+           LÓGICA ADICIONAL: ¿Qué hacemos tras cargar?
+           ============================================================ */
+        // Filtrar las guías que aún NO están sincronizadas
+        const pendientes = listaGuias.filter(g => !g.sincronizado).map(g => g.guia);
+
+        /*if (pendientes.length > 0) {
+            console.log("Hay guías pendientes de sincronizar:", pendientes);
+            // Aquí llamarías a tu función de C# enviando solo los números de 'pendientes'
+            // sincronizarConServidorLocal(pendientes);
+        } else {
+            console.log("Planilla totalmente sincronizada. No se requiere consultar al backend local.");
+        }*/
+
+    } catch (err) {
+        console.error(err);
+        alertSMS("Error de conexión con el servidor");
+        limpiarCampos(true);
+    }
+}
+/*********************************************************************/
+
+    /**
+     * Función auxiliar para limpiar los campos si la búsqueda falla o es inválida
+     */
+    function limpiarFormularioBusqueda() {
+        document.getElementById("fecha_creacion").value = "";
+        document.getElementById("responsable").value = "";
+        listaGuias = [];
+        renderGuias();
+    }
+
+    /* =========================
+    RENDER TABLA (Sin cambios)
+    ========================= */
+    function renderGuias() {
+        const tbody = document.getElementById("tablaGuias");
+        tbody.innerHTML = "";
+
+        // Mapeo de códigos de pago a texto/badges
+        const obtenerTextoPago = (codigo) => {
+            const c = parseInt(codigo);
+            if (c === 1 || c === 6) return '<span class="badge bg-success">CONTADO</span>';
+            if (c === 3 || c === 7) return '<span class="badge bg-primary">CONTRAENTREGA</span>';
+            if (c === 4 || c === 8) return '<span class="badge bg-warning text-dark">CRÉDITO</span>';
+            if (c === 5) return '<span class="badge bg-info text-dark">CORTESÍA</span>';
+            return "";
+        };
+
+        // Nueva función para validar Nequi o Daviplata
+        const formatearPagoElectronico = (pago) => {
+            if (!pago) return "";
+            const p = pago.toUpperCase(); // Aseguramos que esté en mayúsculas para comparar
+            if (p.startsWith("NEQ")) return "NEQUI";
+            if (p.startsWith("DAV")) return "DAVIPLATA";
+            return pago; // Si no es ninguno de los dos, muestra el código original
+        };
+
+        listaGuias.forEach((g, i) => {
+            tbody.innerHTML += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${g.guia}</td>
+                <td class="text-nowrap"><small>${g.estado || ""}</small></td>
+                <td>${obtenerTextoPago(g.formaPago)}</td> 
+                <td><small>${g.ciudad || ""}</small></td>
+                <td>${g.destinatario || ""}</td>
+                <td><small>${g.direccion || ""}</small></td>
+                <td>${g.celular || ""}</td>
+                <td class="text-nowrap">${g.valor_flete ? '$ ' + g.valor_flete.toLocaleString() : ""}</td>
+                <td class="text-nowrap">${g.valor_producto ? '$ ' + g.valor_producto.toLocaleString() : ""}</td>
+                <td class="text-nowrap">${formatearPagoElectronico(g.pago_electronico)}</td>
+            </tr>
+            `;
+        });
+
+        document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }
+
+       
+    // Añadimos el parámetro con valor por defecto true
+    async function validarGuias(mostrarAlert = true) {
+        try {
+            if (!listaGuias || listaGuias.length === 0) {
+                calcularTotales([]);
+                renderGuias();
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8081/arrayguias/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                body: JSON.stringify(listaGuias)
+            });
+
+            const resServidor = await response.json();
+
+            if (resServidor.ok) {
+                listaGuias = resServidor.data;                
+                calcularTotales(listaGuias);
+                renderGuias();
+
+                // SOLO muestra el alert si el parámetro es true
+                if (mostrarAlert) {
+                    alertSMS("Validación masiva completada con éxito.");
+                }
+                
+                return true; // Retornamos true para confirmar que todo salió bien
+            } else {
+                alertSMS("El servidor no pudo procesar las guías.");
+                return false;
+            }
+        } catch (err) {
+            console.error("Error en validación:", err);
+            alertSMS("Error al conectar con el servidor local.");
+            return false;
+        }
+    }
+
+/*************************************************************************************/
+    async function calcularTotales(lista) { 
+        const formatoCop = new Intl.NumberFormat('es-CO', {
+            style: 'currency', currency: 'COP', minimumFractionDigits: 0
+        });
+
+        let sumaContraentrega = 0; 
+        let sumaRecaudo = 0;       
+        let sumaElectronicos = 0;  
+
+        if (lista && lista.length > 0) {
+            lista.forEach(g => {
+                const vFlete = parseFloat(g.valor_flete) || 0;
+                const vProd = parseFloat(g.valor_producto) || 0;
+                // FORMA SEGURA DE OBTENER EL ENTERO
+                const fPago = parseInt(String(g.formaPago).trim());
+                
+                const tienePagoElec = g.pago_electronico && g.pago_electronico.toString().trim() !== "";                
+                
+                //console.log(`Guía Original='${g.formaPago}', Procesado=${g.formaPago}, Tipo=${typeof g.formaPago}`);
+                // Lógica de Sumatorias (Electrónicos)
+                if (tienePagoElec) {
+                    if (fPago === 3 || fPago === 7) {
+                        sumaElectronicos += vFlete;
+                    } else if (fPago === 4) {
+                        sumaElectronicos += vProd;
+                    }
+                }
+
+                // Lógica de Totales base
+                if (fPago === 3 || fPago === 7) {
+                    sumaContraentrega += vFlete;
+                } else if (fPago === 4) {
+                    sumaRecaudo += vProd;
+                }
+            });
+        }
+        
+        const granTotal = sumaContraentrega + sumaRecaudo;
+
+        // Actualizar Interfaz
+        document.getElementById("totalContraentrega").innerText = formatoCop.format(sumaContraentrega);
+        document.getElementById("totalRecaudo").innerText = formatoCop.format(sumaRecaudo);
+        document.getElementById("totalElectronico").innerText = formatoCop.format(sumaElectronicos);
+        document.getElementById("totalGeneral").innerText = formatoCop.format(granTotal);
+    }
+/*************************************************************************************/
+
+    /* =========================
+    GUARDAR (Sin cambios)
+    ========================= */
+    
+    async function guardarPlanilla(event, form) {
+      event.preventDefault();
+
+      try {
+          
+          // Llamamos a validar pasándole FALSE para que no interrumpa con el alert
+          const validacionOk = await validarGuias(false); 
+            
+          // Si la validación falló (ej. servidor C# apagado), no seguimos con el guardado
+          if (!validacionOk) {
+                alertSMS(`Ocurrio un error al validar la planilla vuelve a intentarlo.`);
+                return; 
+          }
+
+          const numInput = document.getElementById("num_planilla");
+          const num_planilla = numInput.value;
+          
+          if (!num_planilla) throw new Error("No hay un número de planilla válido");
+
+          // 1. Extraemos los totales de los elementos HTML que ya calculamos
+          const totalCE = parseFloat(document.getElementById("totalContraentrega").innerText.replace(/[^0-9]/g,"")) || 0;
+          const totalRE = parseFloat(document.getElementById("totalRecaudo").innerText.replace(/[^0-9]/g,"")) || 0;
+
+          // 2. Obtenemos sesión
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          if (!session) throw new Error("Sesión no activa");
+
+          // 3. Petición a la Edge Function
+          const response = await fetch(
+              `${SUPABASE_URL}/functions/v1/novaenvios_cerrar_planilla`,
+              {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": `Bearer ${session.access_token}`
+                  },
+                  body: JSON.stringify({
+                      num_planilla: parseInt(num_planilla),
+                      total_ce: totalCE,
+                      total_re: totalRE
+                  })
+              }
+          );
+
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Error al procesar el cierre");
+
+          /* ===================================================
+            ACCIONES POST-CIERRE (Interfaz)
+          =================================================== */
+          alertSMS(`Planilla ${num_planilla} cerrada y guardada con éxito.`);
+          
+          // Deshabilitar botones para evitar clics dobles o validaciones extra
+          document.getElementById("btnGuardar").disabled = true;
+          
+          // --- AQUÍ SE DESHABILITA EL BOTÓN VALIDAR ---
+          const btnValidar = document.querySelector('button[onclick="nsPlanilla.validarGuias()"]');
+          if (btnValidar) btnValidar.disabled = true;
+          
+          // Bloquear el input del número para que no lo cambien
+          numInput.readOnly = true;
+
+      } catch (err) {
+          console.error("Error en el cierre:", err);
+          alertSMS("Error: " + err.message);
+      }
+  }
+    
+    /*********************************************************************/
+  function limpiarCampos(borrarTodo = true) {
+    listaGuias = [];
+    renderGuias();
+    
+    document.getElementById("fecha_creacion").value = "";
+    document.getElementById("responsable").value = "";
+    
+    // Limpiar totales visuales
+    document.getElementById("totalContraentrega").innerText = "$ 0";
+    document.getElementById("totalRecaudo").innerText = "$ 0";
+    document.getElementById("totalElectronico").innerText = "$ 0";
+    document.getElementById("totalGeneral").innerText = "$ 0";
+    
+    // --- REHABILITAR BOTONES ---
+    document.getElementById("btnGuardar").disabled = false;
+    
+    const btnValidar = document.querySelector('button[onclick="nsPlanilla.validarGuias()"]');
+    if (btnValidar) btnValidar.disabled = false;
+
+    if (borrarTodo) {
+        document.getElementById("num_planilla").value = "";
+        document.getElementById("num_planilla").readOnly = false;
+    } else {
+        // Si solo estamos limpiando para una nueva búsqueda, 
+        // nos aseguramos que el input sea escribible
+        document.getElementById("num_planilla").readOnly = false;
+    }
+}
+  
+  return {
+    guardarPlanilla,
+    validarGuias,
+    buscarPlanilla, // EXPORTRAR TAMBIÉN ESTA
+    calcularTotales // EXPORTAR POR SI LA NECESITAS FUERA
+  }
+
+})();

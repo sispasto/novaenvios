@@ -1,0 +1,15 @@
+import "./bienvenida.js";
+import "./vmodal.js";
+import "./acercade.js";
+import "./crearPlanilla.js";
+import "./consultarPersona.js";
+import "./anularPlanilla.js";
+import "./consultarPlanillas.js";
+import "./cerrarPlanilla.js";
+import "./excluirGuias.js";
+import "./consultarPlanilla.js";
+import "./planillasMensajero.js";
+import "./registroPersona.js";
+import "./PlanillaDevolucion.js";
+import "./RecepcionDevolucionComponent.js";
+import "./menuTemplates.js";

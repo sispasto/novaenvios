@@ -1,0 +1,126 @@
+<style>
+  /* Contenedor principal */
+  .container-login100 {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    padding: 15px;
+    padding-bottom: 15vh; /* Elevación estándar PC */
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .titulo-bienvenida {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: #333;
+    margin-bottom: 10px !important;
+    letter-spacing: 1px;
+  }
+
+  .login100-form-avatar {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .login100-form-avatar img {
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .texto-version {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    color: #aaa;
+    margin-top: 12px;
+    display: block;
+    font-size: 13px;
+  }
+
+  /* --- MÓVIL VERTICAL --- */
+  @media (max-width: 768px) and (orientation: portrait) {
+    .container-login100 {
+      padding-bottom: 30vh;
+    }
+    .login100-form-avatar {
+      max-width: 280px;
+    }
+  }
+
+  /* --- MÓVIL HORIZONTAL (LANDSCAPE) - AJUSTADO --- */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .container-login100 {
+      padding-bottom: 0; /* Centramos para aprovechar el alto */
+      align-items: center;
+    }
+
+    /* Aumentamos el tamaño de la imagen en horizontal */
+    .login100-form-avatar {
+      max-width: 220px;
+    }
+
+    .titulo-bienvenida {
+      font-size: 1.4rem; /* Un poco más grande que antes */
+      margin-bottom: 4px !important;
+    }
+
+    .texto-version {
+      margin-top: 4px;
+      font-size: 12px;
+    }
+
+    /* Quitamos el padding del contenedor para ganar espacio */
+    .container {
+      padding: 0;
+    }
+  }
+  .login100-form-avatar img {
+    width: 100%; /* Obliga a la imagen a ajustarse al ancho del div padre */
+    height: auto; /* Mantiene la proporción correcta */
+    display: block;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
+</style>
+
+<div class="container-login100">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 text-center">
+        <!--<div class="mb-0">
+          <h1 class="titulo-bienvenida">Bienvenido</h1>
+        </div>-->
+        <div class="login100-form-avatar shadow-lg rounded-4 overflow-hidden">
+          <picture>
+            <source
+              media="(min-width: 769px)"
+              srcset="assets/bienvenida.webp"
+            />
+            <img
+              id="imgBienvenida"
+              src="assets/bienvenida_android.webp"
+              alt="Bienvenida"
+              fetchpriority="high"
+              loading="eager"
+              width="1024"
+              height="1024"
+            />
+          </picture>
+        </div>
+
+        <div class="mt-2">
+          <span id="version-label" class="texto-version">
+            NovaEnvios v2.5
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
