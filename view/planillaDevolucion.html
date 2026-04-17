@@ -215,6 +215,17 @@
             >
               <i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN
             </button>
+
+            <button
+              type="button"
+              class="btn btn-warning fw-bold px-4"
+              id="btnAdicionar"
+              onclick="nsDevolucion.actualizarPlanilla()"
+              style="display: none; color: var(--nova-blue)"
+            >
+              <i class="fas fa-plus-circle me-1"></i> GUARDAR ADICIONALES
+            </button>
+
             <button
               type="button"
               class="btn btn-outline-secondary px-4"
@@ -322,6 +333,8 @@
     async function guardarPlanilla(event, form) {
       event.preventDefault();
       const btnGuardar = document.getElementById("btnGuardar");
+      const btnAdicionar = document.getElementById("btnAdicionar");
+      const btnNueva = document.getElementById("btnNuevaPlanilla");
 
       try {
         if (listaGuias.length === 0)
@@ -375,16 +388,98 @@
           );
         }
 
-        // 3. Gestionar estado de la interfaz
-        document.getElementById("btnNuevaPlanilla").disabled = false;
+        // 4. Cambio de estado de botones (ESTADO POST-GRABADO)
+        btnGuardar.style.display = "none"; // Desaparece "Procesar"
+
+        btnAdicionar.style.display = "block"; // Aparece "Adicionar"
+        btnAdicionar.disabled = false;
+
+        btnNueva.disabled = false; // Se habilita "Nueva"
+
         btnGuardar.innerHTML = '<i class="fas fa-check me-2"></i>PROCESADO';
       } catch (err) {
+        // Restauración en caso de error
         alertSMS(err.message);
         btnGuardar.disabled = false;
+        btnGuardar.style.display = "block";
         btnGuardar.innerHTML =
           '<i class="fas fa-save me-2"></i>PROCESAR DEVOLUCIÓN';
+
+        btnAdicionar.style.display = "none";
+        btnNueva.disabled = true;
       }
     }
+    /*************************************************************************/
+    async function actualizarPlanilla() {
+      const btnAdicionar = document.getElementById("btnAdicionar");
+      const numPlanilla = document.getElementById("num_planilla").value;
+
+      try {
+        // 1. Validaciones previas
+        if (!numPlanilla)
+          throw new Error("No hay un número de planilla cargado.");
+        if (listaGuias.length === 0)
+          throw new Error("No hay guías en la lista para enviar.");
+
+        // Bloqueo de UI
+        btnAdicionar.disabled = true;
+        btnAdicionar.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i>ACTUALIZANDO...';
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        if (!session)
+          throw new Error("Sesión expirada. Por favor ingresa de nuevo.");
+
+        // 2. Petición al endpoint
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_set_planilla_devolucion`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              num_planilla: numPlanilla,
+              guias: listaGuias,
+            }),
+          },
+        );
+
+        const result = await response.json();
+
+        // 3. Manejo de respuesta
+        if (!response.ok) {
+          // Si el RPC devolvió ok: false, el mensaje vendrá en result.error
+          throw new Error(result.error || "Error desconocido en el servidor");
+        }
+
+        // ÉXITO: Usamos el mensaje dinámico que viene de la Edge Function/RPC
+        alertSMS(
+          result.mensaje ||
+            `Planilla #${numPlanilla} actualizada correctamente ✅`,
+        );
+
+        // Restaurar UI - Ocultamos este botón y dejamos que el usuario decida si "Nueva" o seguir adicionando
+        btnAdicionar.disabled = false;
+        btnAdicionar.innerHTML =
+          '<i class="fas fa-plus-circle me-1"></i> GUARDAR ADICIONALES';
+
+        // Opcional: Podrías ocultar el botón de adicionar hasta que escaneen algo nuevo
+        // btnAdicionar.style.display = 'none';
+      } catch (err) {
+        // CAPTURA DE ERRORES: Mostrará exactamente lo que el RPC diga (ej: "La planilla no existe")
+        console.error("Error en actualización:", err);
+        alertSMS(`Atención: ${err.message}`);
+
+        btnAdicionar.disabled = false;
+        btnAdicionar.innerHTML =
+          '<i class="fas fa-plus-circle me-1"></i> REINTENTAR GUARDAR';
+      }
+    }
+    /*************************************************************************/
 
     function nuevaPlanilla() {
       listaGuias = [];
