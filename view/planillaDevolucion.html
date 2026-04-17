@@ -343,7 +343,6 @@
         const responsable = document.getElementById("responsable").value;
         if (!responsable) throw new Error("Seleccione el responsable");
 
-        // Bloquear botón para evitar doble envío
         btnGuardar.disabled = true;
         btnGuardar.innerHTML =
           '<i class="fas fa-spinner fa-spin me-2"></i>VERIFICANDO...';
@@ -369,44 +368,43 @@
 
         const result = await response.json();
 
-        // MANEJO DE ERRORES (Incluyendo el de guías duplicadas)
+        // --- MANEJO DE ERRORES DEL SERVIDOR (Duplicados, etc.) ---
         if (!response.ok) {
-          // Si el error contiene detalles de las guías duplicadas, los mostramos
-          const mensajeError = result.error || "Error desconocido";
-          throw new Error(mensajeError);
+          // Combinamos el mensaje principal con los detalles si existen
+          const mensajeCompleto = result.details
+            ? `${result.error}\n\nDetalles:\n${result.details.replace(/ \| /g, "\n")}`
+            : result.error || "Error desconocido";
+
+          alertSMS(mensajeCompleto);
+
+          // Restauramos el botón para corregir
+          btnGuardar.disabled = false;
+          btnGuardar.innerHTML =
+            '<i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN';
+          return; // Salimos de la función aquí
         }
 
         // --- FLUJO DE ÉXITO ---
-
-        // 1. Mostrar el número de planilla generado
         if (result.planilla) {
           document.getElementById("num_planilla").value = result.planilla;
         }
 
-        // 2. Notificación de éxito
         alertSMS(
           `¡Éxito! Planilla #${result.planilla} procesada correctamente ✅`,
         );
 
-        // 3. Cambio de estado de botones (ESTADO POST-GRABADO)
         btnGuardar.style.display = "none";
         btnAdicionar.style.display = "block";
         btnAdicionar.disabled = false;
         btnNueva.disabled = false;
       } catch (err) {
-        // --- FLUJO DE ERROR/DUPLICADOS ---
-
-        // Mostramos el mensaje (aquí aparecerá "Guías duplicadas detectadas: ...")
+        // --- ERRORES DE CLIENTE (Red, validaciones locales) ---
+        console.error("Error local:", err);
         alertSMS(err.message);
 
-        // Restauramos el botón para que el usuario pueda corregir la lista y reintentar
         btnGuardar.disabled = false;
-        btnGuardar.style.display = "block";
         btnGuardar.innerHTML =
           '<i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN';
-
-        btnAdicionar.style.display = "none";
-        btnNueva.disabled = true;
       }
     }
     /*************************************************************************/
