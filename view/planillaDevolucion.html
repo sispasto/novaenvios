@@ -482,13 +482,40 @@
     /*************************************************************************/
 
     function nuevaPlanilla() {
+      // 1. Limpiar datos lógicos
       listaGuias = [];
       renderGuias();
+
+      // 2. Limpiar campos visuales
       document.getElementById("num_planilla").value = "";
       document.getElementById("responsable").value = "";
-      document.getElementById("btnGuardar").disabled = false;
-      document.getElementById("btnNuevaPlanilla").disabled = true;
-      document.getElementById("inputGuia").focus();
+      const inputGuia = document.getElementById("inputGuia");
+      inputGuia.value = "";
+
+      // 3. Resetear estado de botones
+      const btnGuardar = document.getElementById("btnGuardar");
+      const btnAdicionar = document.getElementById("btnAdicionar");
+      const btnNueva = document.getElementById("btnNuevaPlanilla");
+
+      // Mostrar el botón principal de Guardar y resetear su texto
+      btnGuardar.style.display = "block";
+      btnGuardar.disabled = false;
+      btnGuardar.innerHTML =
+        '<i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN';
+
+      // Ocultar el botón de Adicionales (porque es una planilla nueva)
+      btnAdicionar.style.display = "none";
+      btnAdicionar.disabled = false;
+      btnAdicionar.innerHTML =
+        '<i class="fas fa-plus-circle me-1"></i> GUARDAR ADICIONALES';
+
+      // Deshabilitar el botón de "Nueva" hasta que se procese la actual
+      btnNueva.disabled = true;
+
+      // 4. Foco automático para empezar a escanear
+      inputGuia.focus();
+
+      alertSMS("Listo para una nueva planilla 📦");
     }
 
     cargarFecha();
