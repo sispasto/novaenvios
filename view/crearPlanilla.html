@@ -400,7 +400,13 @@ GUARDAR
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.error);
+          // AQUÍ ESTÁ EL CAMBIO:
+          // Si el servidor envía details, lo usamos; si no, solo el error.
+          const mensajeCompleto = result.details
+            ? `${result.error}\n\nDetalle: ${result.details}`
+            : result.error;
+
+          throw new Error(mensajeCompleto);
         }
 
         /* MOSTRAR NUMERO PLANILLA */
