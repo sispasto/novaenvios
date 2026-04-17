@@ -346,7 +346,7 @@
         // Bloquear botón para evitar doble envío
         btnGuardar.disabled = true;
         btnGuardar.innerHTML =
-          '<i class="fas fa-spinner fa-spin me-2"></i>PROCESANDO...';
+          '<i class="fas fa-spinner fa-spin me-2"></i>VERIFICANDO...';
 
         const {
           data: { session },
@@ -368,42 +368,42 @@
         );
 
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Error desconocido");
 
-        // 1. Mostrar el número de planilla generado por el RPC
+        // MANEJO DE ERRORES (Incluyendo el de guías duplicadas)
+        if (!response.ok) {
+          // Si el error contiene detalles de las guías duplicadas, los mostramos
+          const mensajeError = result.error || "Error desconocido";
+          throw new Error(mensajeError);
+        }
+
+        // --- FLUJO DE ÉXITO ---
+
+        // 1. Mostrar el número de planilla generado
         if (result.planilla) {
           document.getElementById("num_planilla").value = result.planilla;
         }
 
-        // 2. Manejar guías que no estaban en la base de datos (Caso B del RPC)
-        if (result.no_encontradas && result.no_encontradas.length > 0) {
-          const cantidad = result.no_encontradas.length;
-          alertSMS(
-            `Planilla #${result.planilla} creada. ⚠️ ${cantidad} guía(s) no tenían datos previos en el sistema pero fueron registradas.`,
-          );
-          console.warn("Guías sin datos previos:", result.no_encontradas);
-        } else {
-          alertSMS(
-            `¡Éxito! Planilla #${result.planilla} procesada correctamente ✅`,
-          );
-        }
+        // 2. Notificación de éxito
+        alertSMS(
+          `¡Éxito! Planilla #${result.planilla} procesada correctamente ✅`,
+        );
 
-        // 4. Cambio de estado de botones (ESTADO POST-GRABADO)
-        btnGuardar.style.display = "none"; // Desaparece "Procesar"
-
-        btnAdicionar.style.display = "block"; // Aparece "Adicionar"
+        // 3. Cambio de estado de botones (ESTADO POST-GRABADO)
+        btnGuardar.style.display = "none";
+        btnAdicionar.style.display = "block";
         btnAdicionar.disabled = false;
-
-        btnNueva.disabled = false; // Se habilita "Nueva"
-
-        btnGuardar.innerHTML = '<i class="fas fa-check me-2"></i>PROCESADO';
+        btnNueva.disabled = false;
       } catch (err) {
-        // Restauración en caso de error
+        // --- FLUJO DE ERROR/DUPLICADOS ---
+
+        // Mostramos el mensaje (aquí aparecerá "Guías duplicadas detectadas: ...")
         alertSMS(err.message);
+
+        // Restauramos el botón para que el usuario pueda corregir la lista y reintentar
         btnGuardar.disabled = false;
         btnGuardar.style.display = "block";
         btnGuardar.innerHTML =
-          '<i class="fas fa-save me-2"></i>PROCESAR DEVOLUCIÓN';
+          '<i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN';
 
         btnAdicionar.style.display = "none";
         btnNueva.disabled = true;
