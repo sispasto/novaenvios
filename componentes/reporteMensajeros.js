@@ -10,7 +10,7 @@ class ReporteMensajeroComponent extends HTMLElement {
 
     try {
       // 1. Cargar el archivo HTML de la vista
-      const res = await fetch("view/planillasxmensajero.html");
+      const res = await fetch("view/planillasxfecha.html");
       const html = await res.text();
 
       const template = document.createElement("template");

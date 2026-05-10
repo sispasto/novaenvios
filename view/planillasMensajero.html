@@ -1,497 +1,419 @@
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-/>
 <style>
-  /* Colores de Identidad Nova Envios & Estilo Premium */
-  :root {
-    --nova-blue: #1d438a;
-    --nova-dark-blue: #153266;
-    --nova-light-blue: #f0f4f8;
-    --success-bg: #ecfdf5;
-    --success-text: #10b981;
-    --warning-bg: #fffbeb;
-    --warning-text: #f59e0b;
-    --danger-bg: #fef2f2;
-    --danger-text: #ef4444;
-    --primary-bg: #eef2ff;
-    --primary-text: #4f46e5;
-  }
-
-  /* Contenedor General con padding para despegar del borde */
-  .dashboard-container {
-    background-color: #f9fafb;
-    min-height: 100vh;
-    padding: 1.5rem 1rem;
-  }
-
-  /* --- CABECERA COOL DEL DASHBOARD --- */
-  .dashboard-header-card {
-    background: linear-gradient(
-      135deg,
-      var(--nova-blue) 0%,
-      var(--nova-dark-blue) 100%
-    );
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 10px 25px rgba(29, 67, 138, 0.2);
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .dashboard-header-card h3 {
-    font-size: 1.75rem;
-    letter-spacing: 0.5px;
-  }
-
-  .dashboard-header-card p {
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-size: 0.95rem;
-  }
-
-  /* --- TARJETA DE FILTROS --- */
-  .filter-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5px); /* Efecto cristal sutil */
-    height: 100%;
-  }
-
-  /* Ajuste de labels para filtros */
-  .filter-card label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #4a5568;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 0.25rem;
-    display: block;
-  }
-
-  /* --- TARJETAS KPI (PRO) --- */
-  .kpi-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
+  /* --- CARRUSEL Y TARJETAS --- */
+  .contenedor-carrusel {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    border: 1px solid #f3f4f6;
-    transition:
-      transform 0.2s ease,
-      box-shadow 0.2s ease;
-    height: 100%;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 15px 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
   }
 
-  .kpi-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  /* Centrado inteligente en pantallas grandes */
+  @media (min-width: 992px) {
+    .contenedor-carrusel {
+      justify-content: center;
+    }
   }
 
-  .kpi-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.25rem;
-  }
-
-  .kpi-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #111827;
-  }
-
-  /* Iconos KPI con Soft Background */
-  .kpi-icon-wrapper {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-  }
-
-  .bg-blue-soft {
-    background-color: var(--primary-bg);
-    color: var(--primary-text);
-  }
-  .bg-green-soft {
-    background-color: var(--success-bg);
-    color: var(--success-text);
-  }
-  .bg-amber-soft {
-    background-color: var(--warning-bg);
-    color: var(--warning-text);
-  }
-
-  /* --- LISTA DE MENSAJEROS --- */
-  .section-title-bar {
-    display: flex;
-    align-items: center;
-    margin: 2rem 0 1rem 0;
-    padding-left: 0.5rem;
-  }
-
-  .section-title-bar .title-text {
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: var(--nova-blue);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    margin-right: 1rem;
-  }
-
-  .section-title-bar .title-line {
-    height: 2px;
-    background-color: var(--nova-light-blue);
-    flex-grow: 1;
-  }
-
-  /* Filas de Mensajeros MEJORADAS */
-  .mensajero-row {
-    cursor: pointer;
-    background: white;
-    border-radius: 12px;
-    padding: 1rem 1.5rem;
-    margin-bottom: 0.75rem;
-    border: 1px solid #edf2f7;
+  .card-planilla {
+    flex: 0 0 auto;
+    width: 160px; /* Un poco más estrecha para ver la siguiente */
     transition: all 0.2s ease;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    padding: 12px !important;
   }
 
-  .mensajero-row:hover {
-    border-color: var(--nova-blue);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  .card-planilla.active {
+    border-color: #007bff;
+    background-color: #f8fbff;
+    border-width: 2px;
+    transform: translateY(-3px);
   }
 
-  /* --- AVATAR DEL MENSAJERO (ICONO) --- */
-  .mensajero-avatar-wrapper {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-right: 1.25rem;
-  }
-
-  /* --- BARRA DE EFECTIVIDAD (PRO) --- */
-  .progress-efectividad-bar {
-    height: 8px;
-    border-radius: 4px;
-    background-color: #e9ecef;
-    overflow: hidden;
-  }
-  .progress-efectividad-fill {
-    height: 100%;
-    transition: width 0.5s ease;
-  }
-
-  /* Colores de efectividad */
-  .efectividad-alta {
-    background-color: var(--success-text) !important;
-  }
-  .efectividad-media {
-    background-color: var(--warning-text) !important;
-  }
-  .efectividad-baja {
-    background-color: var(--danger-text) !important;
-  }
-
-  /* Botón de Consulta */
-  .btn-search-nova {
-    background: var(--nova-blue);
-    color: white;
+  /* --- CUADROS DE TOTALES (GRID) --- */
+  .card-total {
     border-radius: 8px;
-    padding: 0.6rem 1.5rem;
-    border: none;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
-    transition:
-      background 0.3s ease,
-      box-shadow 0.3s ease;
+    padding: 8px !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
-  .btn-search-nova:hover {
-    background: var(--nova-dark-blue);
-    box-shadow: 0 4px 10px rgba(29, 67, 138, 0.3);
-    color: white;
+  /* --- RESPONSIVE --- */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 13px;
+    }
+
+    /* Reducimos fuentes de los totales en móvil */
+    .card-total small {
+      font-size: 9px !important;
+    }
+    .card-total h6 {
+      font-size: 13px !important;
+    }
+
+    /* Tabla ultra compacta */
+    .table-sm td,
+    .table-sm th {
+      font-size: 11px !important;
+      padding: 4px 2px !important;
+    }
   }
 
-  /* Estilos para el detalle */
-  .detail-pane {
-    background-color: #f8fafc;
-    border-radius: 0 0 12px 12px;
-    border: 1px solid #edf2f7;
-    border-top: none;
-    margin-top: -10px;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.03);
+  /* MODO HORIZONTAL MÓVIL */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .contenedor-carrusel {
+      padding: 5px;
+    }
+    .card-planilla {
+      width: 140px;
+      padding: 5px !important;
+    }
+    .card-planilla h6 {
+      font-size: 12px;
+    }
+    /* Quitamos icono para ganar altura */
+    .card-planilla .planilla-icon {
+      display: none;
+    }
+
+    .table-responsive {
+      max-height: 180px; /* Ajusta según prefieras el scroll */
+    }
+
+    /* --- AJUSTE SOLICITADO: TEXTO DE TABLA MÁS PEQUEÑO --- */
+    .table-sm td,
+    .table-sm th {
+      font-size: 9px !important; /* Bajamos de 11px a 9px */
+      padding: 2px 1px !important; /* Reducimos padding para que quepan más columnas */
+    }
+
+    /* Ajuste para que los badges (CONTADO, CRÉDITO, etc) no se vean gigantes */
+    .table-sm .badge {
+      font-size: 8px !important;
+      padding: 2px 4px !important;
+    }
+
+    /* En horizontal, los totales ocupan mucho. Los hacemos más pequeños */
+    .row.g-2.mb-3 {
+      margin-bottom: 5px !important;
+    }
+
+    .card-total h6 {
+      font-size: 11px !important;
+    }
+    .card-total small {
+      font-size: 8px !important;
+    }
+  }
+
+  .text-xs {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+  /* Estilo para el mensaje de aviso cuando está vacío */
+  .mensaje-vacio {
+    width: 100%;
+    padding: 40px 20px;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+    color: #6c757d;
   }
 </style>
 
-<div class="dashboard-container">
-  <div class="dashboard-header-card">
-    <div class="row align-items-center">
-      <div class="col-lg-6 mb-3 mb-lg-0">
-        <h3 class="fw-bold text-white mb-1">
-          <i class="fas fa-th-large me-2 opacity-75"></i>Dashboard de Entregas
-        </h3>
-        <p class="mb-0 text-white-50 small">
-          Análisis de rendimiento Nova Envios
-        </p>
-      </div>
-      <div class="col-lg-6">
-        <div class="filter-card mb-0">
-          <div class="row g-2 align-items-end">
-            <div class="col-sm-5">
-              <label>Desde:</label>
-              <input
-                type="date"
-                id="fecha_inicio_rep"
-                class="form-control form-control-sm border-0 bg-light"
-              />
+<div class="container-fluid mt-3">
+  <div class="row mb-2">
+    <div class="col">
+      <h6 class="text-uppercase fw-bold text-muted small text-center mb-2">
+        Mis Planillas Abiertas
+      </h6>
+      <div id="contenedor-planillas" class="contenedor-carrusel"></div>
+    </div>
+  </div>
+
+  <hr class="my-3 opacity-25" />
+
+  <div id="seccion-detalle" class="row d-none">
+    <div class="col-12">
+      <div class="card shadow border-0">
+        <div
+          class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0 fw-bold" id="titulo-detalle" style="font-size: 16px">
+            Detalle de Planilla
+          </h5>
+          <span
+            class="badge bg-light text-dark badge-counter"
+            id="contadorGuias"
+            >0</span
+          >
+        </div>
+
+        <div class="card-body">
+          <div class="row g-2 mb-3">
+            <div class="col-6 col-md-3">
+              <div class="card bg-light border-0 text-center card-total">
+                <small class="text-muted d-block fw-bold text-xs text-uppercase"
+                  >TOTAL CONTRAENTREGA</small
+                >
+                <h6 class="mb-0 fw-bold" id="totalContraentrega">$ 0</h6>
+              </div>
             </div>
-            <div class="col-sm-5">
-              <label>Hasta:</label>
-              <input
-                type="date"
-                id="fecha_fin_rep"
-                class="form-control form-control-sm border-0 bg-light"
-              />
+
+            <div class="col-6 col-md-3">
+              <div class="card bg-light border-0 text-center card-total">
+                <small class="text-muted d-block fw-bold text-xs text-uppercase"
+                  >TOTAL RECAUDOS</small
+                >
+                <h6 class="mb-0 fw-bold text-primary" id="totalRecaudo">$ 0</h6>
+              </div>
             </div>
-            <div class="col-sm-2 d-flex align-items-end">
-              <button
-                class="btn btn-search-nova btn-sm w-100 py-2 rounded-3"
-                onclick="nsReporte.cargarDashboard()"
+
+            <div class="col-6 col-md-3">
+              <div
+                class="card bg-info text-white border-0 text-center card-total"
               >
-                <i class="fas fa-sync-alt"></i>
-              </button>
+                <small class="d-block fw-bold text-xs text-uppercase"
+                  >PAGOS ELECTRÓNICOS</small
+                >
+                <h6 class="mb-0 fw-bold" id="totalElectronico">$ 0</h6>
+              </div>
             </div>
+
+            <div class="col-6 col-md-3">
+              <div
+                class="card bg-dark text-white border-0 text-center card-total"
+              >
+                <small class="d-block fw-bold text-xs text-uppercase"
+                  >GRAN TOTAL</small
+                >
+                <h6 class="mb-0 fw-bold" id="totalGeneral">$ 0</h6>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover">
+              <thead class="table-dark text-xs">
+                <tr>
+                  <th>#</th>
+                  <th>Guía</th>
+                  <th>Estado</th>
+                  <th>Forma Pago</th>
+                  <th>Destinatario</th>
+                  <th>Dirección</th>
+                  <th>Flete</th>
+                  <th>Valor Producto</th>
+                  <th>Pago Elec.</th>
+                </tr>
+              </thead>
+              <tbody id="tablaGuias"></tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
   </div>
-
-  <div class="row mb-4" id="resumenKPIs" style="display: none">
-    <div class="col-md-4 mb-3">
-      <div class="kpi-card">
-        <div>
-          <div class="kpi-label">Mensajeros Activos</div>
-          <div class="kpi-value" id="kpiMensajeros">0</div>
-        </div>
-        <div class="kpi-icon-wrapper bg-blue-soft">
-          <i class="fas fa-motorcycle"></i>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4 mb-3">
-      <div class="kpi-card border-start border-success border-4">
-        <div>
-          <div class="kpi-label fw-bold text-success">Total Entregadas</div>
-          <div class="kpi-value text-success" id="kpiEntregas">0</div>
-        </div>
-        <div class="kpi-icon-wrapper bg-green-soft">
-          <i class="fas fa-box-check"></i>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4 mb-3">
-      <div class="kpi-card border-start border-warning border-4">
-        <div>
-          <div class="kpi-label fw-bold text-warning">% Efectividad Global</div>
-          <div class="kpi-value text-warning" id="kpiEfectividad">0%</div>
-        </div>
-        <div class="kpi-icon-wrapper bg-amber-soft">
-          <i class="fas fa-chart-pie"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-title-bar">
-    <div class="title-text">Análisis Individual por Mensajero</div>
-    <div class="title-line"></div>
-  </div>
-
-  <div id="listaReporte" class="mt-3">
-    <div
-      class="text-center py-5 opacity-50 bg-white rounded-3 shadow-sm border"
-    >
-      <i class="fas fa-folder-open fa-3x mb-3 text-nova-light"></i>
-      <p>
-        Seleccione un rango de fechas para visualizar el rendimiento individual.
-      </p>
-    </div>
-  </div>
 </div>
 
 <script>
-  var nsReporte = (function () {
-    async function cargarDashboard() {
-      const f1 = document.getElementById("fecha_inicio_rep").value;
-      const f2 = document.getElementById("fecha_fin_rep").value;
-      const contenedor = document.getElementById("listaReporte");
+  var nsPlanillasMensajero = (function () {
+    let listaGuias = [];
 
-      if (!f1 || !f2) return alertSMS("Por favor selecciona ambas fechas");
+    // Función para obtener el texto del pago (según tu código)
+    const obtenerTextoPago = (codigo) => {
+      const c = parseInt(codigo);
+      if (c === 1 || c === 6)
+        return '<span class="badge bg-success">CONTADO</span>';
+      if (c === 3 || c === 7)
+        return '<span class="badge bg-primary">CONTRAENTREGA</span>';
+      if (c === 4 || c === 8)
+        return '<span class="badge bg-warning text-dark">CRÉDITO</span>';
+      if (c === 5)
+        return '<span class="badge bg-info text-dark">CORTESÍA</span>';
+      return "";
+    };
 
+    const formatearPagoElectronico = (pago) => {
+      if (!pago) return "";
+      const p = pago.toUpperCase();
+      if (p.startsWith("NEQ")) return "NEQUI";
+      if (p.startsWith("DAV")) return "DAVIPLATA";
+      return pago;
+    };
+
+    // 1. CARGAR TARJETAS INICIALES
+    async function cargarPlanillasMensajero() {
       try {
-        contenedor.innerHTML =
-          '<div class="text-center py-5"><i class="fas fa-sync fa-spin fa-2x text-nova"></i><br>Analizando datos...</div>';
-
+        const personaId = sessionStorage.getItem("personaId"); //
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
 
         const response = await fetch(
-          `${SUPABASE_URL}/functions/v1/novaenvios_planillasxfecha`,
+          `${SUPABASE_URL}/functions/v1/novaenvios_planillas_mensajero`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.access_token}`,
             },
-            body: JSON.stringify({ fecha_inicio: f1, fecha_fin: f2 }),
+            body: JSON.stringify({ personaId: personaId }),
           },
         );
 
         const result = await response.json();
-        if (!result.ok) throw new Error(result.error);
-
-        renderizarDatos(result.data);
-        actualizarKPIs(result.data);
+        if (result.ok) renderizarTarjetas(result.data);
       } catch (err) {
-        contenedor.innerHTML = `<div class="alert alert-danger rounded-3">${err.message}</div>`;
+        console.error(err);
       }
     }
 
-    function renderizarDatos(data) {
-      const contenedor = document.getElementById("listaReporte");
-      if (data.length === 0) {
-        contenedor.innerHTML =
-          '<div class="text-center py-5 bg-white rounded-4 shadow-sm border">No se encontraron datos en el rango seleccionado.</div>';
-        return;
+    function renderizarTarjetas(planillas) {
+      const contenedor = document.getElementById("contenedor-planillas");
+
+      // Validamos si hay planillas en el arreglo
+      if (!planillas || planillas.length === 0) {
+        contenedor.innerHTML = `
+      <div class="mensaje-vacio">
+        <div style="font-size: 24px;">📂</div>
+        <h6 class="fw-bold mt-2">No tienes planillas asignadas</h6>
+        <p class="small mb-0">Comunícate con el despachador si crees que es un error.</p>
+      </div>
+    `;
+        return; // Salimos de la función
       }
 
-      contenedor.innerHTML = data
-        .map((m, idx) => {
-          const totalGuias = m.planillas.reduce((a, b) => a + b.total_guias, 0);
-          const porcentaje =
-            totalGuias > 0
-              ? Math.round((m.total_general_entregadas / totalGuias) * 100)
-              : 0;
-
-          // Lógica de colores según rendimiento (Semáforo)
-          let colorClase = "efectividad-baja";
-          if (porcentaje >= 80) colorClase = "efectividad-alta";
-          else if (porcentaje >= 50) colorClase = "efectividad-media";
-
-          // Obtener inicial del mensajero para el avatar
-          const inicial = m.mensajero.charAt(0).toUpperCase();
-
+      // Si hay planillas, renderizamos el carrusel normal
+      contenedor.innerHTML = planillas
+        .map((p) => {
+          const fecha = new Date(p.fecha_creacion).toISOString().split("T")[0];
           return `
-        <div class="mensajero-row" onclick="nsReporte.toggleDetalle(${idx})">
-          <div class="row align-items-center">
-            <div class="col-md-4">
-              <div class="d-flex align-items-center">
-                <div class="mensajero-avatar-wrapper bg-blue-soft text-nova shadow-inner">
-                  ${inicial}
-                </div>
-                <div>
-                  <span class="fw-bold text-nova d-block">${m.mensajero}</span>
-                  <span class="text-muted smaller"><i class="fas fa-clipboard-list me-1"></i>${m.planillas.length} Planillas procesadas</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 text-center">
-              <span class="h5 fw-bold text-dark mb-0">${m.total_general_entregadas}</span>
-              <span class="text-muted small d-block">entregas exitosas</span>
-            </div>
-            <div class="col-md-4">
-              <div class="d-flex justify-content-between align-items-center mb-1 fw-bold">
-                <span class="small">Efectividad</span>
-                <span class="small badge ${colorClase.replace("efectividad-", "bg-")}">${porcentaje}%</span>
-              </div>
-              <div class="progress-efectividad-bar">
-                <div class="progress-efectividad-fill ${colorClase}" style="width: ${porcentaje}%"></div>
-              </div>
-            </div>
-            <div class="col-md-1 text-end text-muted">
-              <i class="fas fa-chevron-right transition-all icon-arrow" id="icon-${idx}"></i>
-            </div>
-          </div>
+        <div class="card card-planilla p-3" onclick="nsPlanillasMensajero.seleccionarPlanilla(${p.num_planilla}, this)">
+          <div class="planilla-icon">📦</div>
+          <h6 class="fw-bold mb-1">Planilla #${p.num_planilla}</h6>
+          <div class="small text-primary fw-semibold">${p.total_guias || 0} Guías</div>
+          <span class="fecha-planilla small text-muted">${fecha}</span>
         </div>
-        <div id="detalle-${idx}" class="detail-pane mb-3 p-4 shadow-inner" style="display:none">
-          <h6 class="fw-bold mb-3 text-muted small"><i class="fas fa-list me-2"></i>Desglose Detallado por Planilla</h6>
-          <table class="table table-sm table-hover align-middle mb-0">
-            <thead class="text-muted smaller uppercase" style="letter-spacing:1px;">
-              <tr>
-                <th>FOLIO PLANILLA</th>
-                <th class="text-center">GUÍAS EXITOSAS</th>
-                <th class="text-center">TOTAL GUÍAS</th>
-                <th class="text-end">ESTADO</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${m.planillas
-                .map(
-                  (p) => `
-                <tr class="align-middle border-top">
-                  <td class="fw-bold text-nova">#${p.num_planilla}</td>
-                  <td class="text-center text-success fw-bold">${p.entregadas}</td>
-                  <td class="text-center text-muted">${p.total_guias}</td>
-                  <td class="text-end">
-                    <span class="badge ${p.entregadas === p.total_guias ? "bg-success" : "bg-warning text-dark"}" style="font-size:0.65rem; font-weight:700;">
-                      ${p.entregadas === p.total_guias ? "COMPLETADO" : "PENDIENTE"}
-                    </span>
-                  </td>
-                </tr>
-              `,
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </div>`;
+      `;
         })
         .join("");
     }
 
-    function actualizarKPIs(data) {
-      document.getElementById("resumenKPIs").style.display = "flex";
-      let totalE = 0;
-      let totalG = 0;
+    // 2. BUSCAR DETALLE (Al dar clic en tarjeta)
+    async function seleccionarPlanilla(num_planilla, elemento) {
+      // Feedback visual
+      document
+        .querySelectorAll(".card-planilla")
+        .forEach((c) => c.classList.remove("active"));
+      elemento.classList.add("active");
 
-      data.forEach((m) => {
-        totalE += m.total_general_entregadas;
-        m.planillas.forEach((p) => (totalG += p.total_guias));
-      });
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
 
-      document.getElementById("kpiMensajeros").innerText = data.length;
-      document.getElementById("kpiEntregas").innerText = totalE;
-      document.getElementById("kpiEfectividad").innerText =
-        totalG > 0 ? Math.round((totalE / totalG) * 100) + "%" : "0%";
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_validar_planilla`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ num_planilla: parseInt(num_planilla) }),
+          },
+        );
+
+        const result = await response.json();
+        if (!result.ok) {
+          alert(result.error);
+          return;
+        }
+
+        document.getElementById("seccion-detalle").classList.remove("d-none");
+        document.getElementById("titulo-detalle").innerText =
+          `Detalle Planilla #${num_planilla}`;
+
+        listaGuias = result.data.guias;
+        renderTabla();
+        calcularTotales(listaGuias);
+      } catch (err) {
+        console.error(err);
+      }
     }
 
-    return {
-      cargarDashboard,
-      toggleDetalle: (idx) => {
-        const el = document.getElementById(`detalle-${idx}`);
-        const icon = document.getElementById(`icon-${idx}`);
-        const isHidden = el.style.display === "none";
-        el.style.display = isHidden ? "block" : "none";
-        // Rotación de flecha
-        icon.style.transform = isHidden ? "rotate(90deg)" : "rotate(0deg)";
-      },
-    };
+    function renderTabla() {
+      const tbody = document.getElementById("tablaGuias");
+      tbody.innerHTML = listaGuias
+        .map(
+          (g, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${g.guia}</strong></td>
+        <td><small>${g.estado || ""}</small></td>
+        <td>${obtenerTextoPago(g.formaPago)}</td>
+        <td>${g.destinatario || ""}</td>
+        <td><small>${g.direccion || ""}</small></td>
+        <td class="text-nowrap">$ ${parseFloat(g.valor_flete || 0).toLocaleString()}</td>
+        <td class="text-nowrap">$ ${parseFloat(g.valor_producto || 0).toLocaleString()}</td>
+        <td>${formatearPagoElectronico(g.pago_electronico)}</td>
+      </tr>
+    `,
+        )
+        .join("");
+      document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }
+
+    function calcularTotales(lista) {
+      const formatoCop = new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+      });
+      let sumaCE = 0,
+        sumaRE = 0,
+        sumaElec = 0;
+
+      lista.forEach((g) => {
+        const flete = parseFloat(g.valor_flete) || 0;
+        const prod = parseFloat(g.valor_producto) || 0;
+        const fPago = parseInt(g.formaPago);
+        const esElec =
+          g.pago_electronico && g.pago_electronico.toString().trim() !== "";
+
+        if (fPago === 3 || fPago === 7) sumaCE += flete;
+        else if (fPago === 4) sumaRE += prod;
+
+        if (esElec) {
+          if (fPago === 3 || fPago === 7) sumaElec += flete;
+          else if (fPago === 4) sumaElec += prod;
+        }
+      });
+
+      document.getElementById("totalContraentrega").innerText =
+        formatoCop.format(sumaCE);
+      document.getElementById("totalRecaudo").innerText =
+        formatoCop.format(sumaRE);
+      document.getElementById("totalElectronico").innerText =
+        formatoCop.format(sumaElec);
+      document.getElementById("totalGeneral").innerText = formatoCop.format(
+        sumaCE + sumaRE,
+      );
+    }
+
+    cargarPlanillasMensajero();
+
+    return { seleccionarPlanilla };
   })();
 </script>
