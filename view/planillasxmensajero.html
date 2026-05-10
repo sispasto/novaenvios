@@ -1,209 +1,228 @@
 <style>
-  /* Colores de Identidad Nova Envios */
+  /* Colores de Identidad Nova Envios & Estilo Premium */
   :root {
     --nova-blue: #1d438a;
     --nova-dark-blue: #153266;
     --nova-light-blue: #f0f4f8;
-    --nova-accent: #ffc107;
-    --success-green: #28a745;
-    --warning-orange: #fd7e14;
-    --danger-red: #dc3545;
+    --success-bg: #ecfdf5;
+    --success-text: #10b981;
+    --warning-bg: #fffbeb;
+    --warning-text: #f59e0b;
+    --danger-bg: #fef2f2;
+    --danger-text: #ef4444;
+    --primary-bg: #eef2ff;
+    --primary-text: #4f46e5;
   }
 
-  /* Mejora de Cards KPI con gradientes suaves */
+  /* Estilo General del Dashboard */
+  .dashboard-container {
+    background-color: #f9fafb;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  /* Filtros y Cabecera */
+  .filter-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  /* Tarjetas KPI con estilo Aavenir */
   .kpi-card {
     background: white;
     border-radius: 16px;
-    padding: 24px;
-    border: none;
-    box-shadow: 0 10px 25px rgba(29, 67, 138, 0.1);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f3f4f6;
+    transition: transform 0.2s;
     height: 100%;
-  }
-
-  .kpi-card::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 6px;
-    height: 100%;
-    background: var(--nova-blue);
-  }
-
-  .kpi-card.border-success::after {
-    background: var(--success-green);
-  }
-  .kpi-card.border-warning::after {
-    background: var(--warning-orange);
   }
 
   .kpi-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
   }
 
-  .kpi-icon {
-    width: 50px;
-    height: 50px;
+  .kpi-icon-wrapper {
+    width: 56px;
+    height: 56px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    margin-bottom: 10px;
+    font-size: 1.5rem;
   }
 
-  /* Estilo del Botón de Consulta */
-  .btn-search-nova {
-    background: var(--nova-blue);
-    color: white;
-    border: none;
-    font-weight: 600;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 38px; /* Alineado con form-control-sm */
+  /* Clases de utilidad para KPIs */
+  .bg-blue-soft {
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+  }
+  .bg-green-soft {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+  }
+  .bg-amber-soft {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
   }
 
-  .btn-search-nova:hover {
-    background: var(--nova-dark-blue);
-    box-shadow: 0 4px 12px rgba(29, 67, 138, 0.3);
-    color: white;
-  }
-
-  /* Filas de mensajeros */
+  /* Lista de Mensajeros */
   .mensajero-row {
     cursor: pointer;
     background: white;
     border-radius: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #edf2f7;
-    transition: all 0.2s;
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #f3f4f6;
+    transition: all 0.2s ease;
   }
 
   .mensajero-row:hover {
     border-color: var(--nova-blue);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
 
-  .progress-efectividad {
+  .progress-bar-nova {
     height: 8px;
     border-radius: 4px;
-    background-color: #e9ecef;
+    background-color: #e5e7eb;
+    overflow: hidden;
   }
+  .progress-fill {
+    height: 100%;
+    transition: width 0.5s ease;
+  }
+
   .efectividad-alta {
-    background-color: var(--success-green) !important;
+    background-color: var(--success-text);
   }
   .efectividad-media {
-    background-color: var(--warning-orange) !important;
+    background-color: var(--warning-text);
   }
   .efectividad-baja {
-    background-color: var(--danger-red) !important;
+    background-color: var(--danger-text);
   }
 
-  .section-title {
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: var(--nova-blue);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 25px 0 15px 0;
-    border-bottom: 2px solid var(--nova-light-blue);
-    padding-bottom: 8px;
+  .btn-search-nova {
+    background-color: var(--nova-blue);
+    color: white;
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    border: none;
+    font-weight: 600;
+    transition: background 0.2s;
   }
 
-  .detail-pane {
-    background-color: #f8fafc;
-    border-radius: 0 0 12px 12px;
-    border: 1px solid #edf2f7;
-    border-top: none;
-    margin-top: -10px;
+  .btn-search-nova:hover {
+    background-color: var(--nova-dark-blue);
+    color: white;
   }
 </style>
 
-<div class="container-fluid py-4">
-  <div
-    class="row mb-4 align-items-center bg-white p-3 rounded-4 shadow-sm mx-0"
-  >
-    <div class="col-md-6">
-      <h4 class="fw-bold text-nova mb-0">
-        <i class="fas fa-chart-line me-2"></i>DASHBOARD DE ENTREGAS
-      </h4>
-      <p class="text-muted small mb-0">
-        Reporte de efectividad por mensajero y planilla
-      </p>
-    </div>
-    <div class="col-md-6">
-      <div class="row g-2">
-        <div class="col-5">
-          <input
-            type="date"
-            id="fecha_inicio_rep"
-            class="form-control form-control-sm border-0 bg-light"
-          />
-        </div>
-        <div class="col-5">
-          <input
-            type="date"
-            id="fecha_fin_rep"
-            class="form-control form-control-sm border-0 bg-light"
-          />
-        </div>
-        <div class="col-2">
-          <button
-            class="btn btn-search-nova btn-sm w-100 rounded-3"
-            onclick="nsReporte.cargarDashboard()"
-          >
-            <i class="fas fa-search"></i>
-          </button>
+<div class="dashboard-container">
+  <div class="container-fluid">
+    <div class="row align-items-center mb-4">
+      <div class="col-md-6">
+        <h3 class="fw-bold text-dark mb-1">Dashboard de Entregas</h3>
+        <p class="text-muted small">
+          Reporte de efectividad por mensajero y planilla
+        </p>
+      </div>
+      <div class="col-md-6">
+        <div class="filter-card">
+          <div class="row g-2 align-items-end">
+            <div class="col-5">
+              <label class="small fw-bold text-muted mb-1">Fecha Inicio</label>
+              <input
+                type="date"
+                id="fecha_inicio_rep"
+                class="form-control form-control-sm border-0 bg-light"
+              />
+            </div>
+            <div class="col-5">
+              <label class="small fw-bold text-muted mb-1">Fecha Fin</label>
+              <input
+                type="date"
+                id="fecha_fin_rep"
+                class="form-control form-control-sm border-0 bg-light"
+              />
+            </div>
+            <div class="col-2">
+              <button
+                class="btn btn-search-nova w-100"
+                onclick="nsReporte.cargarDashboard()"
+              >
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="row mb-4" id="resumenKPIs" style="display: none">
-    <div class="col-md-4 mb-3">
-      <div class="kpi-card">
-        <div class="kpi-icon bg-nova-light"><i class="fas fa-users"></i></div>
-        <div class="small fw-bold text-muted text-uppercase">
-          Mensajeros Activos
+    <div class="row mb-4" id="resumenKPIs" style="display: none">
+      <div class="col-md-4">
+        <div class="kpi-card">
+          <div>
+            <div class="small fw-bold text-muted text-uppercase mb-1">
+              Mensajeros Activos
+            </div>
+            <div class="h2 fw-bold text-dark mb-0" id="kpiMensajeros">0</div>
+          </div>
+          <div class="kpi-icon-wrapper bg-blue-soft">
+            <i class="fas fa-users"></i>
+          </div>
         </div>
-        <div class="h3 fw-bold text-nova" id="kpiMensajeros">0</div>
+      </div>
+      <div class="col-md-4">
+        <div class="kpi-card">
+          <div>
+            <div class="small fw-bold text-muted text-uppercase mb-1">
+              Total Entregadas
+            </div>
+            <div class="h2 fw-bold text-success mb-0" id="kpiEntregas">0</div>
+          </div>
+          <div class="kpi-icon-wrapper bg-green-soft">
+            <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="kpi-card">
+          <div>
+            <div class="small fw-bold text-muted text-uppercase mb-1">
+              % Efectividad Global
+            </div>
+            <div class="h2 fw-bold text-warning mb-0" id="kpiEfectividad">
+              0%
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper bg-amber-soft">
+            <i class="fas fa-chart-line"></i>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="col-md-4 mb-3">
-      <div class="kpi-card border-success">
-        <div class="kpi-icon bg-light text-success">
-          <i class="fas fa-check-double"></i>
-        </div>
-        <div class="small fw-bold text-muted text-uppercase">
-          Total Entregadas
-        </div>
-        <div class="h3 fw-bold text-success" id="kpiEntregas">0</div>
-      </div>
-    </div>
-    <div class="col-md-4 mb-3">
-      <div class="kpi-card border-warning">
-        <div class="kpi-icon bg-light text-warning">
-          <i class="fas fa-percentage"></i>
-        </div>
-        <div class="small fw-bold text-muted text-uppercase">
-          % Efectividad Global
-        </div>
-        <div class="h3 fw-bold text-warning" id="kpiEfectividad">0%</div>
-      </div>
-    </div>
-  </div>
 
-  <div class="section-title">Detalle por Mensajero</div>
-
-  <div id="listaReporte" class="mt-3">
-    <div class="text-center py-5 text-muted">
-      <i class="fas fa-calendar-alt fa-3x mb-3 opacity-25"></i>
-      <p>Seleccione un rango de fechas para generar el reporte</p>
+    <h6
+      class="fw-bold text-dark mb-3 text-uppercase small"
+      style="letter-spacing: 1px"
+    >
+      Detalle por Mensajero
+    </h6>
+    <div id="listaReporte">
+      <div class="text-center py-5">
+        <i class="fas fa-folder-open fa-3x text-light mb-3"></i>
+        <p class="text-muted">
+          Seleccione fechas para consultar el rendimiento.
+        </p>
+      </div>
     </div>
   </div>
 </div>
@@ -215,11 +234,11 @@
       const f2 = document.getElementById("fecha_fin_rep").value;
       const contenedor = document.getElementById("listaReporte");
 
-      if (!f1 || !f2) return alertSMS("Seleccione ambas fechas");
+      if (!f1 || !f2) return alert("Seleccione ambas fechas");
 
       try {
         contenedor.innerHTML =
-          '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-nova"></i><br>Procesando datos...</div>';
+          '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Analizando datos...</p></div>';
 
         const {
           data: { session },
@@ -243,7 +262,7 @@
         renderizarDatos(result.data);
         actualizarKPIs(result.data);
       } catch (err) {
-        contenedor.innerHTML = `<div class="alert alert-danger rounded-3">${err.message}</div>`;
+        contenedor.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
       }
     }
 
@@ -251,7 +270,7 @@
       const contenedor = document.getElementById("listaReporte");
       if (data.length === 0) {
         contenedor.innerHTML =
-          '<div class="text-center py-5 bg-white rounded-4 shadow-sm">No se encontraron datos en este rango.</div>';
+          '<div class="text-center py-5 bg-white rounded-3 shadow-sm">No hay datos en este periodo.</div>';
         return;
       }
 
@@ -268,51 +287,58 @@
           else if (porcentaje >= 50) colorClase = "efectividad-media";
 
           return `
-        <div class="mensajero-row shadow-sm p-3" onclick="nsReporte.toggleDetalle(${idx})">
+        <div class="mensajero-row" onclick="nsReporte.toggleDetalle(${idx})">
           <div class="row align-items-center">
             <div class="col-md-4">
-              <span class="fw-bold text-nova d-block">${m.mensajero}</span>
-              <span class="small text-muted"><i class="fas fa-clipboard-list me-1"></i>${m.planillas.length} Planillas</span>
+              <div class="d-flex align-items-center">
+                <div class="bg-light rounded-circle p-2 me-3 text-nova fw-bold" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+                  ${m.mensajero.charAt(0)}
+                </div>
+                <div>
+                  <span class="fw-bold text-dark d-block">${m.mensajero}</span>
+                  <span class="text-muted smaller">${m.planillas.length} Planillas procesadas</span>
+                </div>
+              </div>
             </div>
             <div class="col-md-3 text-center">
-              <span class="badge rounded-pill bg-light text-dark border p-2 px-3">
-                <strong class="text-success">${m.total_general_entregadas}</strong> / ${totalGuias} Guías
+              <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
+                <strong class="text-success">${m.total_general_entregadas}</strong> / ${totalGuias} Entregas
               </span>
             </div>
             <div class="col-md-4">
-              <div class="small mb-1 d-flex justify-content-between fw-bold">
+              <div class="d-flex justify-content-between small fw-bold mb-1">
                 <span>Efectividad</span>
                 <span>${porcentaje}%</span>
               </div>
-              <div class="progress progress-efectividad">
-                <div class="progress-bar ${colorClase}" style="width: ${porcentaje}%"></div>
+              <div class="progress-bar-nova">
+                <div class="progress-fill ${colorClase}" style="width: ${porcentaje}%"></div>
               </div>
             </div>
-            <div class="col-md-1 text-end text-muted">
-              <i class="fas fa-chevron-down transition-all" id="icon-${idx}"></i>
+            <div class="col-md-1 text-end">
+              <i class="fas fa-chevron-right text-muted" id="icon-${idx}"></i>
             </div>
           </div>
         </div>
-        <div id="detalle-${idx}" class="detail-pane mb-3 p-3 shadow-inner" style="display:none">
-          <table class="table table-sm table-hover mb-0">
-            <thead>
-              <tr class="text-muted smaller uppercase">
-                <th>N° PLANILLA</th>
-                <th class="text-center">ENTREGADAS</th>
-                <th class="text-center">TOTAL</th>
-                <th class="text-end">ESTADO</th>
+        <div id="detalle-${idx}" class="detail-pane mb-3 p-3 bg-white border-start border-end border-bottom rounded-bottom" style="display:none; margin-top:-0.75rem;">
+          <table class="table table-sm table-borderless align-middle mb-0">
+            <thead class="text-muted small uppercase">
+              <tr>
+                <th>Planilla</th>
+                <th class="text-center">Éxito</th>
+                <th class="text-center">Total</th>
+                <th class="text-end">Estado</th>
               </tr>
             </thead>
             <tbody>
               ${m.planillas
                 .map(
                   (p) => `
-                <tr class="align-middle">
-                  <td class="fw-bold text-nova">#${p.num_planilla}</td>
+                <tr class="border-top">
+                  <td class="fw-bold">#${p.num_planilla}</td>
                   <td class="text-center text-success fw-bold">${p.entregadas}</td>
                   <td class="text-center">${p.total_guias}</td>
                   <td class="text-end">
-                    <span class="badge ${p.entregadas === p.total_guias ? "bg-success" : "bg-warning text-dark"}" style="font-size:0.65rem">
+                    <span class="badge ${p.entregadas === p.total_guias ? "bg-success" : "bg-warning text-dark"}" style="font-size:0.7rem">
                       ${p.entregadas === p.total_guias ? "COMPLETO" : "PENDIENTE"}
                     </span>
                   </td>
@@ -350,7 +376,7 @@
         const icon = document.getElementById(`icon-${idx}`);
         const isHidden = el.style.display === "none";
         el.style.display = isHidden ? "block" : "none";
-        icon.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+        icon.style.transform = isHidden ? "rotate(90deg)" : "rotate(0deg)";
       },
     };
   })();
