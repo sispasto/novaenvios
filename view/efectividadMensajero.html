@@ -352,7 +352,7 @@
         } = await supabaseClient.auth.getSession();
 
         const response = await fetch(
-          `${SUPABASE_URL}/functions/v1/novaenvios_planillasxfecha`,
+          `${SUPABASE_URL}/functions/v1/novaenvios_planillasfiltro_mensajero`,
           {
             method: "POST",
             headers: {
