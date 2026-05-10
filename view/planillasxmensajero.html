@@ -14,23 +14,23 @@
     --primary-text: #4f46e5;
   }
 
-  /* Estilo General del Dashboard */
+  /* Contenedor General */
   .dashboard-container {
     background-color: #f9fafb;
     min-height: 100vh;
-    padding: 2rem;
+    padding: 1.5rem;
   }
 
-  /* Filtros y Cabecera */
+  /* Filtros Superiores */
   .filter-card {
     background: white;
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
   }
 
-  /* Tarjetas KPI con estilo Aavenir */
+  /* Tarjetas KPI Estilo Aavenir */
   .kpi-card {
     background: white;
     border-radius: 16px;
@@ -40,7 +40,7 @@
     justify-content: space-between;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     border: 1px solid #f3f4f6;
-    transition: transform 0.2s;
+    transition: transform 0.2s ease;
     height: 100%;
   }
 
@@ -48,17 +48,32 @@
     transform: translateY(-3px);
   }
 
+  .kpi-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+  }
+
+  .kpi-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  /* Iconos con Soft Background */
   .kpi-icon-wrapper {
-    width: 56px;
-    height: 56px;
+    width: 54px;
+    height: 54px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
 
-  /* Clases de utilidad para KPIs */
   .bg-blue-soft {
     background-color: var(--primary-bg);
     color: var(--primary-text);
@@ -116,113 +131,93 @@
     padding: 0.5rem 1.5rem;
     border: none;
     font-weight: 600;
-    transition: background 0.2s;
-  }
-
-  .btn-search-nova:hover {
-    background-color: var(--nova-dark-blue);
-    color: white;
   }
 </style>
 
 <div class="dashboard-container">
-  <div class="container-fluid">
-    <div class="row align-items-center mb-4">
-      <div class="col-md-6">
-        <h3 class="fw-bold text-dark mb-1">Dashboard de Entregas</h3>
-        <p class="text-muted small">
-          Reporte de efectividad por mensajero y planilla
-        </p>
-      </div>
-      <div class="col-md-6">
-        <div class="filter-card">
-          <div class="row g-2 align-items-end">
-            <div class="col-5">
-              <label class="small fw-bold text-muted mb-1">Fecha Inicio</label>
-              <input
-                type="date"
-                id="fecha_inicio_rep"
-                class="form-control form-control-sm border-0 bg-light"
-              />
-            </div>
-            <div class="col-5">
-              <label class="small fw-bold text-muted mb-1">Fecha Fin</label>
-              <input
-                type="date"
-                id="fecha_fin_rep"
-                class="form-control form-control-sm border-0 bg-light"
-              />
-            </div>
-            <div class="col-2">
-              <button
-                class="btn btn-search-nova w-100"
-                onclick="nsReporte.cargarDashboard()"
-              >
-                <i class="fas fa-search"></i>
-              </button>
-            </div>
+  <div class="row align-items-center mb-4">
+    <div class="col-md-5">
+      <h3 class="fw-bold text-dark mb-0">Dashboard de Entregas</h3>
+      <p class="text-muted small">Análisis de rendimiento Nova Envios</p>
+    </div>
+    <div class="col-md-7">
+      <div class="filter-card mb-0">
+        <div class="row g-2 align-items-end">
+          <div class="col-5">
+            <label class="small fw-bold text-muted mb-1">Desde</label>
+            <input
+              type="date"
+              id="fecha_inicio_rep"
+              class="form-control form-control-sm border-0 bg-light"
+            />
+          </div>
+          <div class="col-5">
+            <label class="small fw-bold text-muted mb-1">Hasta</label>
+            <input
+              type="date"
+              id="fecha_fin_rep"
+              class="form-control form-control-sm border-0 bg-light"
+            />
+          </div>
+          <div class="col-2">
+            <button
+              class="btn btn-search-nova w-100 btn-sm"
+              onclick="nsReporte.cargarDashboard()"
+            >
+              <i class="fas fa-search"></i>
+            </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="row mb-4" id="resumenKPIs" style="display: none">
-      <div class="col-md-4">
-        <div class="kpi-card">
-          <div>
-            <div class="small fw-bold text-muted text-uppercase mb-1">
-              Mensajeros Activos
-            </div>
-            <div class="h2 fw-bold text-dark mb-0" id="kpiMensajeros">0</div>
-          </div>
-          <div class="kpi-icon-wrapper bg-blue-soft">
-            <i class="fas fa-users"></i>
-          </div>
+  <div class="row mb-4" id="resumenKPIs" style="display: none">
+    <div class="col-md-4">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Mensajeros Activos</div>
+          <div class="kpi-value" id="kpiMensajeros">0</div>
         </div>
-      </div>
-      <div class="col-md-4">
-        <div class="kpi-card">
-          <div>
-            <div class="small fw-bold text-muted text-uppercase mb-1">
-              Total Entregadas
-            </div>
-            <div class="h2 fw-bold text-success mb-0" id="kpiEntregas">0</div>
-          </div>
-          <div class="kpi-icon-wrapper bg-green-soft">
-            <i class="fas fa-check-circle"></i>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="kpi-card">
-          <div>
-            <div class="small fw-bold text-muted text-uppercase mb-1">
-              % Efectividad Global
-            </div>
-            <div class="h2 fw-bold text-warning mb-0" id="kpiEfectividad">
-              0%
-            </div>
-          </div>
-          <div class="kpi-icon-wrapper bg-amber-soft">
-            <i class="fas fa-chart-line"></i>
-          </div>
+        <div class="kpi-icon-wrapper bg-blue-soft">
+          <i class="fas fa-motorcycle"></i>
         </div>
       </div>
     </div>
-
-    <h6
-      class="fw-bold text-dark mb-3 text-uppercase small"
-      style="letter-spacing: 1px"
-    >
-      Detalle por Mensajero
-    </h6>
-    <div id="listaReporte">
-      <div class="text-center py-5">
-        <i class="fas fa-folder-open fa-3x text-light mb-3"></i>
-        <p class="text-muted">
-          Seleccione fechas para consultar el rendimiento.
-        </p>
+    <div class="col-md-4">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Total Entregadas</div>
+          <div class="kpi-value text-success" id="kpiEntregas">0</div>
+        </div>
+        <div class="kpi-icon-wrapper bg-green-soft">
+          <i class="fas fa-box-check"></i>
+        </div>
       </div>
+    </div>
+    <div class="col-md-4">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">% Efectividad Global</div>
+          <div class="kpi-value text-warning" id="kpiEfectividad">0%</div>
+        </div>
+        <div class="kpi-icon-wrapper bg-amber-soft">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h6
+    class="fw-bold text-dark mb-3 text-uppercase small"
+    style="letter-spacing: 1px"
+  >
+    Detalle por Mensajero
+  </h6>
+  <div id="listaReporte">
+    <div class="text-center py-5 opacity-50">
+      <i class="fas fa-calendar-alt fa-3x mb-3"></i>
+      <p>Consulta un rango de fechas para ver resultados</p>
     </div>
   </div>
 </div>
@@ -234,11 +229,11 @@
       const f2 = document.getElementById("fecha_fin_rep").value;
       const contenedor = document.getElementById("listaReporte");
 
-      if (!f1 || !f2) return alert("Seleccione ambas fechas");
+      if (!f1 || !f2) return alert("Por favor selecciona ambas fechas");
 
       try {
         contenedor.innerHTML =
-          '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Analizando datos...</p></div>';
+          '<div class="text-center py-5"><i class="fas fa-circle-notch fa-spin fa-2x text-primary"></i></div>';
 
         const {
           data: { session },
@@ -270,7 +265,7 @@
       const contenedor = document.getElementById("listaReporte");
       if (data.length === 0) {
         contenedor.innerHTML =
-          '<div class="text-center py-5 bg-white rounded-3 shadow-sm">No hay datos en este periodo.</div>';
+          '<div class="text-center py-5 bg-white rounded-3 shadow-sm">Sin datos en este rango.</div>';
         return;
       }
 
@@ -290,19 +285,12 @@
         <div class="mensajero-row" onclick="nsReporte.toggleDetalle(${idx})">
           <div class="row align-items-center">
             <div class="col-md-4">
-              <div class="d-flex align-items-center">
-                <div class="bg-light rounded-circle p-2 me-3 text-nova fw-bold" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
-                  ${m.mensajero.charAt(0)}
-                </div>
-                <div>
-                  <span class="fw-bold text-dark d-block">${m.mensajero}</span>
-                  <span class="text-muted smaller">${m.planillas.length} Planillas procesadas</span>
-                </div>
-              </div>
+              <span class="fw-bold text-dark d-block">${m.mensajero}</span>
+              <span class="text-muted smaller">${m.planillas.length} Planillas</span>
             </div>
             <div class="col-md-3 text-center">
               <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
-                <strong class="text-success">${m.total_general_entregadas}</strong> / ${totalGuias} Entregas
+                <strong class="text-success">${m.total_general_entregadas}</strong> / ${totalGuias} Guías
               </span>
             </div>
             <div class="col-md-4">
@@ -319,12 +307,12 @@
             </div>
           </div>
         </div>
-        <div id="detalle-${idx}" class="detail-pane mb-3 p-3 bg-white border-start border-end border-bottom rounded-bottom" style="display:none; margin-top:-0.75rem;">
-          <table class="table table-sm table-borderless align-middle mb-0">
-            <thead class="text-muted small uppercase">
+        <div id="detalle-${idx}" class="p-3 bg-white border-start border-end border-bottom rounded-bottom" style="display:none; margin-top:-0.75rem; margin-bottom:1rem;">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="small text-muted">
               <tr>
-                <th>Planilla</th>
-                <th class="text-center">Éxito</th>
+                <th># Planilla</th>
+                <th class="text-center">Entregadas</th>
                 <th class="text-center">Total</th>
                 <th class="text-end">Estado</th>
               </tr>
@@ -333,12 +321,12 @@
               ${m.planillas
                 .map(
                   (p) => `
-                <tr class="border-top">
+                <tr>
                   <td class="fw-bold">#${p.num_planilla}</td>
                   <td class="text-center text-success fw-bold">${p.entregadas}</td>
                   <td class="text-center">${p.total_guias}</td>
                   <td class="text-end">
-                    <span class="badge ${p.entregadas === p.total_guias ? "bg-success" : "bg-warning text-dark"}" style="font-size:0.7rem">
+                    <span class="badge ${p.entregadas === p.total_guias ? "bg-success" : "bg-warning text-dark"}" style="font-size:0.65rem">
                       ${p.entregadas === p.total_guias ? "COMPLETO" : "PENDIENTE"}
                     </span>
                   </td>
