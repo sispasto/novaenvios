@@ -13,3 +13,4 @@ import "./registroPersona.js";
 import "./PlanillaDevolucion.js";
 import "./RecepcionDevolucionComponent.js";
 import "./menuTemplates.js";
+import "./reporteMensajeros.js";

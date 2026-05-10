@@ -1,0 +1,285 @@
+<style>
+  /* Colores de Identidad Nova Envios */
+  :root {
+    --nova-blue: #1d438a;
+    --nova-dark-blue: #153266;
+    --nova-light-blue: #f0f4f8;
+    --nova-accent: #ffc107;
+    --success-green: #28a745;
+  }
+
+  .kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .kpi-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+  .bg-nova-light {
+    background-color: var(--nova-light-blue);
+    color: var(--nova-blue);
+  }
+
+  .mensajero-row {
+    cursor: pointer;
+    background-color: white;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #eef0f2;
+    transition: all 0.2s;
+  }
+
+  .mensajero-row:hover {
+    border-color: var(--nova-blue);
+    background-color: #fcfdfe;
+  }
+
+  .detail-pane {
+    background-color: #fafbfc;
+    border-radius: 0 0 8px 8px;
+    border: 1px solid #eef0f2;
+    border-top: none;
+    display: none; /* Se activa con JS */
+  }
+
+  .progress-bar-nova {
+    background-color: var(--nova-blue);
+  }
+</style>
+<div class="container-fluid py-4">
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+      <h4 class="fw-bold text-nova mb-0">
+        <i class="fas fa-chart-line me-2"></i>DASHBOARD DE ENTREGAS
+      </h4>
+      <p class="text-muted small">
+        Reporte de efectividad por mensajero y planilla
+      </p>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-2 border-0 shadow-sm">
+        <div class="row g-2">
+          <div class="col-5">
+            <input
+              type="date"
+              id="fecha_inicio_rep"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col-5">
+            <input
+              type="date"
+              id="fecha_fin_rep"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col-2">
+            <button
+              class="btn btn-primary btn-sm w-100"
+              onclick="nsReporte.cargarDashboard()"
+            >
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4" id="resumenKPIs" style="display: none">
+    <div class="col-md-4">
+      <div class="kpi-card">
+        <div class="kpi-icon bg-nova-light"><i class="fas fa-users"></i></div>
+        <div class="small fw-bold text-muted text-uppercase">
+          Mensajeros Activos
+        </div>
+        <div class="h3 fw-bold text-nova" id="kpiMensajeros">0</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="kpi-card">
+        <div class="kpi-icon bg-light text-success">
+          <i class="fas fa-check-double"></i>
+        </div>
+        <div class="small fw-bold text-muted text-uppercase">
+          Total Entregadas
+        </div>
+        <div class="h3 fw-bold text-success" id="kpiEntregas">0</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="kpi-card">
+        <div class="kpi-icon bg-light text-warning">
+          <i class="fas fa-percentage"></i>
+        </div>
+        <div class="small fw-bold text-muted text-uppercase">% Efectividad</div>
+        <div class="h3 fw-bold text-warning" id="kpiEfectividad">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Detalle por Mensajero</div>
+  <div id="listaReporte" class="mt-3">
+    <div class="text-center py-5 text-muted">
+      <i class="fas fa-calendar-alt fa-3x mb-3 opacity-25"></i>
+      <p>Seleccione un rango de fechas para generar el reporte</p>
+    </div>
+  </div>
+</div>
+<script>
+  var nsReporte = (function () {
+    async function cargarDashboard() {
+      const f1 = document.getElementById("fecha_inicio_rep").value;
+      const f2 = document.getElementById("fecha_fin_rep").value;
+      const contenedor = document.getElementById("listaReporte");
+
+      if (!f1 || !f2) return alertSMS("Seleccione ambas fechas");
+
+      try {
+        contenedor.innerHTML =
+          '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-nova"></i><br>Procesando datos...</div>';
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/tu_funcion_reporte`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ fecha_inicio: f1, fecha_fin: f2 }),
+          },
+        );
+
+        const result = await response.json();
+        if (!result.ok) throw new Error(result.error);
+
+        renderizarDatos(result.data);
+        actualizarKPIs(result.data);
+      } catch (err) {
+        contenedor.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      }
+    }
+
+    function renderizarDatos(data) {
+      const contenedor = document.getElementById("listaReporte");
+      if (data.length === 0) {
+        contenedor.innerHTML =
+          '<div class="text-center py-5">No se encontraron datos en este rango.</div>';
+        return;
+      }
+
+      contenedor.innerHTML = data
+        .map((m, idx) => {
+          const porcentaje =
+            m.total_general_entregadas > 0
+              ? Math.round(
+                  (m.total_general_entregadas /
+                    m.planillas.reduce((a, b) => a + b.total_guias, 0)) *
+                    100,
+                )
+              : 0;
+
+          return `
+        <div class="mensajero-row shadow-sm p-3" onclick="nsReporte.toggleDetalle(${idx})">
+          <div class="row align-items-center">
+            <div class="col-md-4">
+              <span class="fw-bold text-nova">${m.mensajero}</span>
+              <div class="small text-muted">${m.planillas.length} Planillas procesadas</div>
+            </div>
+            <div class="col-md-3 text-center">
+              <span class="badge bg-devolucion">${m.total_general_entregadas} Entregadas</span>
+            </div>
+            <div class="col-md-4">
+              <div class="small mb-1 d-flex justify-content-between">
+                <span>Efectividad</span>
+                <span>${porcentaje}%</span>
+              </div>
+              <div class="progress" style="height: 6px;">
+                <div class="progress-bar progress-bar-nova" style="width: ${porcentaje}%"></div>
+              </div>
+            </div>
+            <div class="col-md-1 text-end text-muted">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+        <div id="detalle-${idx}" class="detail-pane mb-3 p-3">
+          <table class="table table-sm table-borderless mb-0">
+            <thead>
+              <tr class="text-muted small">
+                <th>N° PLANILLA</th>
+                <th class="text-center">ENTREGADAS</th>
+                <th class="text-center">TOTAL GUÍAS</th>
+                <th class="text-end">ESTADO</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${m.planillas
+                .map(
+                  (p) => `
+                <tr class="border-top">
+                  <td class="fw-bold">#${p.num_planilla}</td>
+                  <td class="text-center text-success">${p.entregadas}</td>
+                  <td class="text-center">${p.total_guias}</td>
+                  <td class="text-end">
+                    <span class="badge bg-light text-dark">${p.entregadas === p.total_guias ? "COMPLETO" : "PENDIENTE"}</span>
+                  </td>
+                </tr>
+              `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+        })
+        .join("");
+    }
+
+    function actualizarKPIs(data) {
+      document.getElementById("resumenKPIs").style.display = "flex";
+      let totalE = 0;
+      let totalG = 0;
+
+      data.forEach((m) => {
+        totalE += m.total_general_entregadas;
+        m.planillas.forEach((p) => (totalG += p.total_guias));
+      });
+
+      document.getElementById("kpiMensajeros").innerText = data.length;
+      document.getElementById("kpiEntregas").innerText = totalE;
+      document.getElementById("kpiEfectividad").innerText =
+        totalG > 0 ? Math.round((totalE / totalG) * 100) + "%" : "0%";
+    }
+
+    return {
+      cargarDashboard,
+      toggleDetalle: (idx) => {
+        const el = document.getElementById(`detalle-${idx}`);
+        el.style.display = el.style.display === "block" ? "none" : "block";
+      },
+    };
+  })();
+</script>

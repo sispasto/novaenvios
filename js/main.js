@@ -66,6 +66,14 @@ function consultarPlanillas() {
   main.appendChild(frmConsultarPlanillas);
 }
 
+function reporteMensajeros() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const frmReporteMensajeros = document.createElement("reporte-mensajeros");
+  frmReporteMensajeros.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(frmReporteMensajeros);
+}
+
 function entregarDevoluciones() {
   let main = document.getElementById("App");
   removeALLChilds(main);
