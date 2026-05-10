@@ -105,7 +105,7 @@ export const MENUS = {
         </a>
       </li>
       <li class="nav-item mb-2">
-        <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(getPlanillasMensajero)">
+        <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(efectividadMensajero)">
           <i class="bi bi-search"></i> <span>Efectividad reparto</span>
         </a>
       </li>

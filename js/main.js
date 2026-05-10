@@ -74,6 +74,16 @@ function reporteMensajeros() {
   main.appendChild(frmReporteMensajeros);
 }
 
+function efectividadMensajero() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const frmEfectividadMensajero = document.createElement(
+    "efectividad-mensajero",
+  );
+  frmEfectividadMensajero.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(frmEfectividadMensajero);
+}
+
 function entregarDevoluciones() {
   let main = document.getElementById("App");
   removeALLChilds(main);
