@@ -6,15 +6,38 @@
     --nova-light-blue: #f0f4f8;
     --nova-accent: #ffc107;
     --success-green: #28a745;
+    --warning-orange: #fd7e14;
+    --danger-red: #dc3545;
   }
 
+  /* Mejora de Cards KPI con gradientes suaves */
   .kpi-card {
     background: white;
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 24px;
     border: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s;
+    box-shadow: 0 10px 25px rgba(29, 67, 138, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .kpi-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    background: var(--nova-blue);
+  }
+
+  .kpi-card.border-success::after {
+    background: var(--success-green);
+  }
+  .kpi-card.border-warning::after {
+    background: var(--warning-orange);
   }
 
   .kpi-card:hover {
@@ -24,87 +47,125 @@
   .kpi-icon {
     width: 50px;
     height: 50px;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    margin-bottom: 15px;
+    font-size: 22px;
+    margin-bottom: 10px;
   }
 
-  .bg-nova-light {
-    background-color: var(--nova-light-blue);
-    color: var(--nova-blue);
+  /* Estilo del Botón de Consulta */
+  .btn-search-nova {
+    background: var(--nova-blue);
+    color: white;
+    border: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px; /* Alineado con form-control-sm */
   }
 
+  .btn-search-nova:hover {
+    background: var(--nova-dark-blue);
+    box-shadow: 0 4px 12px rgba(29, 67, 138, 0.3);
+    color: white;
+  }
+
+  /* Filas de mensajeros */
   .mensajero-row {
     cursor: pointer;
-    background-color: white;
-    border-radius: 8px;
+    background: white;
+    border-radius: 12px;
     margin-bottom: 10px;
-    border: 1px solid #eef0f2;
+    border: 1px solid #edf2f7;
     transition: all 0.2s;
   }
 
   .mensajero-row:hover {
     border-color: var(--nova-blue);
-    background-color: #fcfdfe;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .progress-efectividad {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+  }
+  .efectividad-alta {
+    background-color: var(--success-green) !important;
+  }
+  .efectividad-media {
+    background-color: var(--warning-orange) !important;
+  }
+  .efectividad-baja {
+    background-color: var(--danger-red) !important;
+  }
+
+  .section-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--nova-blue);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 25px 0 15px 0;
+    border-bottom: 2px solid var(--nova-light-blue);
+    padding-bottom: 8px;
   }
 
   .detail-pane {
-    background-color: #fafbfc;
-    border-radius: 0 0 8px 8px;
-    border: 1px solid #eef0f2;
+    background-color: #f8fafc;
+    border-radius: 0 0 12px 12px;
+    border: 1px solid #edf2f7;
     border-top: none;
-    display: none; /* Se activa con JS */
-  }
-
-  .progress-bar-nova {
-    background-color: var(--nova-blue);
+    margin-top: -10px;
   }
 </style>
+
 <div class="container-fluid py-4">
-  <div class="row mb-4 align-items-center">
+  <div
+    class="row mb-4 align-items-center bg-white p-3 rounded-4 shadow-sm mx-0"
+  >
     <div class="col-md-6">
       <h4 class="fw-bold text-nova mb-0">
         <i class="fas fa-chart-line me-2"></i>DASHBOARD DE ENTREGAS
       </h4>
-      <p class="text-muted small">
+      <p class="text-muted small mb-0">
         Reporte de efectividad por mensajero y planilla
       </p>
     </div>
     <div class="col-md-6">
-      <div class="card p-2 border-0 shadow-sm">
-        <div class="row g-2">
-          <div class="col-5">
-            <input
-              type="date"
-              id="fecha_inicio_rep"
-              class="form-control form-control-sm"
-            />
-          </div>
-          <div class="col-5">
-            <input
-              type="date"
-              id="fecha_fin_rep"
-              class="form-control form-control-sm"
-            />
-          </div>
-          <div class="col-2">
-            <button
-              class="btn btn-primary btn-sm w-100"
-              onclick="nsReporte.cargarDashboard()"
-            >
-              <i class="fas fa-search"></i>
-            </button>
-          </div>
+      <div class="row g-2">
+        <div class="col-5">
+          <input
+            type="date"
+            id="fecha_inicio_rep"
+            class="form-control form-control-sm border-0 bg-light"
+          />
+        </div>
+        <div class="col-5">
+          <input
+            type="date"
+            id="fecha_fin_rep"
+            class="form-control form-control-sm border-0 bg-light"
+          />
+        </div>
+        <div class="col-2">
+          <button
+            class="btn btn-search-nova btn-sm w-100 rounded-3"
+            onclick="nsReporte.cargarDashboard()"
+          >
+            <i class="fas fa-search"></i>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
   <div class="row mb-4" id="resumenKPIs" style="display: none">
-    <div class="col-md-4">
+    <div class="col-md-4 mb-3">
       <div class="kpi-card">
         <div class="kpi-icon bg-nova-light"><i class="fas fa-users"></i></div>
         <div class="small fw-bold text-muted text-uppercase">
@@ -113,8 +174,8 @@
         <div class="h3 fw-bold text-nova" id="kpiMensajeros">0</div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="kpi-card">
+    <div class="col-md-4 mb-3">
+      <div class="kpi-card border-success">
         <div class="kpi-icon bg-light text-success">
           <i class="fas fa-check-double"></i>
         </div>
@@ -124,18 +185,21 @@
         <div class="h3 fw-bold text-success" id="kpiEntregas">0</div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="kpi-card">
+    <div class="col-md-4 mb-3">
+      <div class="kpi-card border-warning">
         <div class="kpi-icon bg-light text-warning">
           <i class="fas fa-percentage"></i>
         </div>
-        <div class="small fw-bold text-muted text-uppercase">% Efectividad</div>
+        <div class="small fw-bold text-muted text-uppercase">
+          % Efectividad Global
+        </div>
         <div class="h3 fw-bold text-warning" id="kpiEfectividad">0%</div>
       </div>
     </div>
   </div>
 
   <div class="section-title">Detalle por Mensajero</div>
+
   <div id="listaReporte" class="mt-3">
     <div class="text-center py-5 text-muted">
       <i class="fas fa-calendar-alt fa-3x mb-3 opacity-25"></i>
@@ -143,6 +207,7 @@
     </div>
   </div>
 </div>
+
 <script>
   var nsReporte = (function () {
     async function cargarDashboard() {
@@ -178,7 +243,7 @@
         renderizarDatos(result.data);
         actualizarKPIs(result.data);
       } catch (err) {
-        contenedor.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+        contenedor.innerHTML = `<div class="alert alert-danger rounded-3">${err.message}</div>`;
       }
     }
 
@@ -186,52 +251,55 @@
       const contenedor = document.getElementById("listaReporte");
       if (data.length === 0) {
         contenedor.innerHTML =
-          '<div class="text-center py-5">No se encontraron datos en este rango.</div>';
+          '<div class="text-center py-5 bg-white rounded-4 shadow-sm">No se encontraron datos en este rango.</div>';
         return;
       }
 
       contenedor.innerHTML = data
         .map((m, idx) => {
+          const totalGuias = m.planillas.reduce((a, b) => a + b.total_guias, 0);
           const porcentaje =
-            m.total_general_entregadas > 0
-              ? Math.round(
-                  (m.total_general_entregadas /
-                    m.planillas.reduce((a, b) => a + b.total_guias, 0)) *
-                    100,
-                )
+            totalGuias > 0
+              ? Math.round((m.total_general_entregadas / totalGuias) * 100)
               : 0;
+
+          let colorClase = "efectividad-baja";
+          if (porcentaje >= 80) colorClase = "efectividad-alta";
+          else if (porcentaje >= 50) colorClase = "efectividad-media";
 
           return `
         <div class="mensajero-row shadow-sm p-3" onclick="nsReporte.toggleDetalle(${idx})">
           <div class="row align-items-center">
             <div class="col-md-4">
-              <span class="fw-bold text-nova">${m.mensajero}</span>
-              <div class="small text-muted">${m.planillas.length} Planillas procesadas</div>
+              <span class="fw-bold text-nova d-block">${m.mensajero}</span>
+              <span class="small text-muted"><i class="fas fa-clipboard-list me-1"></i>${m.planillas.length} Planillas</span>
             </div>
             <div class="col-md-3 text-center">
-              <span class="badge bg-devolucion">${m.total_general_entregadas} Entregadas</span>
+              <span class="badge rounded-pill bg-light text-dark border p-2 px-3">
+                <strong class="text-success">${m.total_general_entregadas}</strong> / ${totalGuias} Guías
+              </span>
             </div>
             <div class="col-md-4">
-              <div class="small mb-1 d-flex justify-content-between">
+              <div class="small mb-1 d-flex justify-content-between fw-bold">
                 <span>Efectividad</span>
                 <span>${porcentaje}%</span>
               </div>
-              <div class="progress" style="height: 6px;">
-                <div class="progress-bar progress-bar-nova" style="width: ${porcentaje}%"></div>
+              <div class="progress progress-efectividad">
+                <div class="progress-bar ${colorClase}" style="width: ${porcentaje}%"></div>
               </div>
             </div>
             <div class="col-md-1 text-end text-muted">
-              <i class="fas fa-chevron-down"></i>
+              <i class="fas fa-chevron-down transition-all" id="icon-${idx}"></i>
             </div>
           </div>
         </div>
-        <div id="detalle-${idx}" class="detail-pane mb-3 p-3">
-          <table class="table table-sm table-borderless mb-0">
+        <div id="detalle-${idx}" class="detail-pane mb-3 p-3 shadow-inner" style="display:none">
+          <table class="table table-sm table-hover mb-0">
             <thead>
-              <tr class="text-muted small">
+              <tr class="text-muted smaller uppercase">
                 <th>N° PLANILLA</th>
                 <th class="text-center">ENTREGADAS</th>
-                <th class="text-center">TOTAL GUÍAS</th>
+                <th class="text-center">TOTAL</th>
                 <th class="text-end">ESTADO</th>
               </tr>
             </thead>
@@ -239,12 +307,14 @@
               ${m.planillas
                 .map(
                   (p) => `
-                <tr class="border-top">
-                  <td class="fw-bold">#${p.num_planilla}</td>
-                  <td class="text-center text-success">${p.entregadas}</td>
+                <tr class="align-middle">
+                  <td class="fw-bold text-nova">#${p.num_planilla}</td>
+                  <td class="text-center text-success fw-bold">${p.entregadas}</td>
                   <td class="text-center">${p.total_guias}</td>
                   <td class="text-end">
-                    <span class="badge bg-light text-dark">${p.entregadas === p.total_guias ? "COMPLETO" : "PENDIENTE"}</span>
+                    <span class="badge ${p.entregadas === p.total_guias ? "bg-success" : "bg-warning text-dark"}" style="font-size:0.65rem">
+                      ${p.entregadas === p.total_guias ? "COMPLETO" : "PENDIENTE"}
+                    </span>
                   </td>
                 </tr>
               `,
@@ -252,8 +322,7 @@
                 .join("")}
             </tbody>
           </table>
-        </div>
-      `;
+        </div>`;
         })
         .join("");
     }
@@ -278,7 +347,10 @@
       cargarDashboard,
       toggleDetalle: (idx) => {
         const el = document.getElementById(`detalle-${idx}`);
-        el.style.display = el.style.display === "block" ? "none" : "block";
+        const icon = document.getElementById(`icon-${idx}`);
+        const isHidden = el.style.display === "none";
+        el.style.display = isHidden ? "block" : "none";
+        icon.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
       },
     };
   })();
