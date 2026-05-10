@@ -161,7 +161,7 @@
         } = await supabaseClient.auth.getSession();
 
         const response = await fetch(
-          `${SUPABASE_URL}/functions/v1/tu_funcion_reporte`,
+          `${SUPABASE_URL}/functions/v1/novaenvios_planillasxfecha`,
           {
             method: "POST",
             headers: {
