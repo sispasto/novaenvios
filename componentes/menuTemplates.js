@@ -42,7 +42,7 @@ export const MENUS = {
             <li><a class="nav-link" href="#" onclick="NovaMenu.ejecutarAccion(consultarPlanilla)">Consultar Planilla</a></li>
             <li><a class="nav-link" href="#" onclick="NovaMenu.ejecutarAccion(consultarPlanillas)">Consultar Planillas</a></li>
             <li><a class="nav-link" href="#" onclick="NovaMenu.ejecutarAccion(excluirGuias)">Excluir Guías</a></li>
-            <li><a class="nav-link" href="#" onclick="NovaMenu.ejecutarAccion(reporteMensajeros)">Reporte de Mensajeros</a></li>
+            <li><a class="nav-link" href="#" onclick="NovaMenu.ejecutarAccion(reporteMensajeros)">Control del reparto</a></li>
           </ul>
         </div>
       </li>
