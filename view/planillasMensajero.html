@@ -212,6 +212,7 @@
                   <th>Forma Pago</th>
                   <th>Destinatario</th>
                   <th>Dirección</th>
+                  <th>Teléfono</th>
                   <th>Flete</th>
                   <th>Valor Producto</th>
                   <th>Pago Elec.</th>
@@ -365,6 +366,7 @@
         <td>${obtenerTextoPago(g.formaPago)}</td>
         <td>${g.destinatario || ""}</td>
         <td><small>${g.direccion || ""}</small></td>
+        <td>${g.celular || ""}</td>
         <td class="text-nowrap">$ ${parseFloat(g.valor_flete || 0).toLocaleString()}</td>
         <td class="text-nowrap">$ ${parseFloat(g.valor_producto || 0).toLocaleString()}</td>
         <td>${formatearPagoElectronico(g.pago_electronico)}</td>
