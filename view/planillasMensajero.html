@@ -357,22 +357,41 @@
     function renderTabla() {
       const tbody = document.getElementById("tablaGuias");
       tbody.innerHTML = listaGuias
-        .map(
-          (g, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td><strong>${g.guia}</strong></td>
-        <td><small>${g.estado || ""}</small></td>
-        <td>${obtenerTextoPago(g.formaPago)}</td>
-        <td>${g.destinatario || ""}</td>
-        <td><small>${g.direccion || ""}</small></td>
-        <td>${g.celular || ""}</td>
-        <td class="text-nowrap">$ ${parseFloat(g.valor_flete || 0).toLocaleString()}</td>
-        <td class="text-nowrap">$ ${parseFloat(g.valor_producto || 0).toLocaleString()}</td>
-        <td>${formatearPagoElectronico(g.pago_electronico)}</td>
-      </tr>
-    `,
-        )
+        .map((g, i) => {
+          // Limpiamos el número por si tiene espacios o guiones (WhatsApp y tel necesitan solo números)
+          const celularLimpio = g.celular ? g.celular.replace(/\D/g, "") : "";
+
+          // Creamos los botones de acción si existe el celular
+          const botonesAccion = celularLimpio
+            ? `
+            <div style="display: inline-block; margin-left: 8px;">
+              <a href="https://wa.me/${celularLimpio}" target="_blank" style="color: #25D366; text-decoration: none; margin-right: 8px;" title="Enviar WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+              </a>
+              <a href="tel:${celularLimpio}" style="color: #007bff; text-decoration: none;" title="Llamar">
+                <i class="fas fa-phone-alt"></i>
+              </a>
+            </div>
+          `
+            : "";
+
+          return `
+          <tr>
+            <td>${i + 1}</td>
+            <td><strong>${g.guia}</strong></td>
+            <td><small>${g.estado || ""}</small></td>
+            <td>${obtenerTextoPago(g.formaPago)}</td>
+            <td>${g.destinatario || ""}</td>
+            <td><small>${g.direccion || ""}</small></td>
+            <td>
+              ${g.celular || ""} ${botonesAccion}
+            </td>
+            <td class="text-nowrap">$ ${parseFloat(g.valor_flete || 0).toLocaleString()}</td>
+            <td class="text-nowrap">$ ${parseFloat(g.valor_producto || 0).toLocaleString()}</td>
+            <td>${formatearPagoElectronico(g.pago_electronico)}</td>
+          </tr>
+        `;
+        })
         .join("");
       document.getElementById("contadorGuias").innerText = listaGuias.length;
     }
