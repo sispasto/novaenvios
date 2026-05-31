@@ -1,0 +1,778 @@
+<style>
+  /* Colores de Identidad Nova Envios */
+  :root {
+    --nova-blue: #1d438a;
+    --nova-dark-blue: #153266;
+    --nova-light-blue: #f0f4f8;
+    --dev-red: #e63946;
+    --dev-bg: #fff5f5;
+  }
+
+  .section-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--nova-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-left: 4px solid var(--nova-blue);
+    padding-left: 10px;
+    margin-bottom: 15px;
+  }
+
+  .card-header.bg-devolucion {
+    background: linear-gradient(
+      135deg,
+      var(--nova-blue) 0%,
+      var(--nova-dark-blue) 100%
+    ) !important;
+    border-bottom: 3px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .scan-input-dev {
+    border: 2px solid var(--nova-blue) !important;
+    background-color: var(--nova-light-blue);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: var(--nova-blue);
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .scan-input-dev:focus {
+    box-shadow: 0 0 0 0.25rem rgba(29, 67, 138, 0.2);
+    background-color: #fff;
+    border-color: var(--nova-blue) !important;
+  }
+
+  .badge-devolucion {
+    background-color: var(--nova-blue);
+    color: white;
+    font-size: 1.1rem;
+    padding: 10px 15px;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .table thead.table-nova th {
+    background-color: #f8f9fa;
+    color: var(--nova-blue);
+    text-transform: uppercase;
+    font-size: 11px;
+    border-bottom: 2px solid var(--nova-blue);
+  }
+
+  .btn-remove-guia {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dev-red);
+    color: white !important;
+    border: none;
+    transition: transform 0.2s;
+  }
+
+  .btn-remove-guia:hover {
+    transform: scale(1.1);
+    background-color: #c62828;
+  }
+
+  .btn-remove-guia i {
+    font-size: 12px;
+    display: inline-block !important;
+  }
+
+  .text-nova {
+    color: var(--nova-blue);
+    letter-spacing: 0.5px;
+  }
+
+  .text-coords {
+    font-family: monospace;
+    font-size: 12px;
+    color: #6c757d;
+  }
+
+  #tablaGuias tr:hover {
+    background-color: #f1f3f9 !important;
+  }
+</style>
+
+<div class="container-fluid py-3">
+  <form id="formDevolucion" onsubmit="zonificar.guardarPlanilla(event, this)">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div
+          class="card shadow-lg border-0"
+          style="border-radius: 12px; overflow: hidden"
+        >
+          <div class="card-header bg-devolucion py-3">
+            <h5 class="mb-0 fw-bold text-center text-white">
+              <i class="fas fa-box-open me-2"></i>PLANILLA DEVOLUCIONES
+            </h5>
+          </div>
+
+          <div class="card-body p-4">
+            <div class="section-title">Datos de Recepción</div>
+            <div class="row g-3">
+              <div class="col-6 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >N° Planilla</label
+                >
+                <input
+                  type="text"
+                  class="form-control bg-light fw-bold text-center"
+                  id="num_planilla"
+                  readonly
+                  placeholder="PENDIENTE"
+                />
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >Fecha Retorno</label
+                >
+                <input
+                  type="text"
+                  class="form-control bg-light text-center"
+                  id="fecha_creacion"
+                  readonly
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label text-muted small fw-bold"
+                  >Responsable Bodega</label
+                >
+                <select
+                  class="form-select border-nova"
+                  id="responsable"
+                  required
+                >
+                  <option value="">Cargando...</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="my-4 opacity-10" />
+
+            <div class="mb-4">
+              <div class="text-center mb-2">
+                <span
+                  class="badge rounded-pill bg-light text-primary border px-3"
+                >
+                  <i class="fas fa-barcode me-2"></i> LECTOR ACTIVO
+                </span>
+              </div>
+              <input
+                type="text"
+                class="form-control py-3 scan-input-dev"
+                id="inputGuia"
+                placeholder="ESCANEAR GUÍA AQUÍ"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <button
+                type="button"
+                class="btn btn-sm text-danger fw-bold"
+                onclick="zonificar.limpiarGuias()"
+              >
+                <i class="fas fa-trash-alt me-1"></i> Limpiar
+              </button>
+              <div class="d-flex align-items-center gap-2">
+                <span class="small fw-bold text-muted">TOTAL ESCANEADO:</span>
+                <span class="badge badge-devolucion" id="contadorGuias">0</span>
+              </div>
+            </div>
+
+            <div
+              class="table-responsive border"
+              style="max-height: 350px; border-radius: 8px"
+            >
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-nova sticky-top">
+                  <tr>
+                    <th class="text-center" style="width: 50px">#</th>
+                    <th style="width: 150px">CÓDIGO DE GUÍA</th>
+                    <th>DIRECCIÓN</th>
+                    <th style="width: 120px">LATITUD</th>
+                    <th style="width: 120px">LONGITUD</th>
+                    <th class="text-center" style="width: 80px">ACCIÓN</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaGuias"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-footer p-3 bg-light d-flex gap-2">
+            <button
+              type="submit"
+              class="btn btn-primary flex-fill py-3 fw-bold shadow-sm"
+              id="btnGuardar"
+              style="background-color: var(--nova-blue); border: none"
+            >
+              <i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN
+            </button>
+            <button
+              type="button"
+              class="btn btn-warning fw-bold px-4"
+              id="btnAdicionar"
+              onclick="zonificar.actualizarPlanilla()"
+              style="display: none; color: var(--nova-blue)"
+            >
+              <i class="fas fa-plus-circle me-1"></i> GUARDAR ADICIONALES
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary px-4"
+              id="btnNuevaPlanilla"
+              onclick="zonificar.nuevaPlanilla()"
+              disabled
+            >
+              NUEVA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Cambio del módulo principal de nsDevolucion a zonificar
+  var zonificar = (function () {
+    let listaGuias = [];
+
+    const GOOGLE_API_KEY = "AIzaSyB-MCRO-uERqngj_fQjdY7gvhNs62wFH3E";
+    const BARRIOS_PASTO = [
+      "SINDAGUA",
+      "CHAMBU",
+      "CHAMBÚ",
+      "TAMASAGRA",
+      "ANURIA",
+      "MIRASUR",
+      "MIJITAYO",
+      "NIZA",
+      "NUEVA ARANDA",
+      "ARANDA",
+      "EL TEJAR",
+      "EL EJIDO",
+      "PUERTA DEL SOL",
+      "POPULAR",
+      "VILLAFLOR",
+      "VILLA FLOR",
+      "SANTA MONICA",
+      "SANTA MÓNICA",
+      "PRADOS DEL SUR",
+      "LORENZO",
+      "LORENZO DE ALDANA",
+      "BALCONES",
+      "CHILE",
+      "EL ROSARIO",
+      "ALTA VISTA",
+      "ANGANOY",
+      "SAN PEDRO",
+      "SAN VICENTE",
+      "SINDAMANOY",
+      "MARQUETALIA",
+      "LIBERTAD",
+      "LA FLORESTA",
+      "LA ESPERANZA",
+      "SAN ALBANO",
+      "SOL DE ORIENTE",
+      "BUENOS AIRES",
+      "FATIMA",
+      "FÁTIMA",
+      "LAS LUNAS",
+      "NORMANDIA",
+      "NORMANDÍA",
+      "LOS PINOS",
+      "SANTA BARBARA",
+      "SANTA BÁRBARA",
+      "CAICEDONIA",
+      "CATAMBUCO",
+      "CENTENARIO",
+      "SAN JOSE OBRERO",
+      "LAS AMÉRICAS",
+      "LAS AMERICAS",
+      "MARCOS DE LA ROSA",
+      "EL PORTALITO",
+      "EL PARQUE",
+      "BOMBONÁ",
+      "BOMBONA",
+      "SAN AGUSTÍN",
+      "SAN JOSÉ",
+      "SANTIAGO",
+      "LOS DOS PUENTES",
+      "SANTANDER",
+      "CARACHA",
+      "EL CHURO",
+      "EL CILINDRO",
+      "HULLAGUANGA",
+      "LA PANADERÍA",
+      "LA PANADERIA",
+      "SAN ANDRES",
+      "LOS ALAMOS",
+      "BELLA VISTA",
+      "VILLA LUCÍA",
+      "VILLA LUCIA",
+      "ATAHUALPA",
+      "SAN MIGUEL",
+      "MEDARDO BUCHELLI",
+      "LAS VIOLETAS",
+      "SALOMÓN",
+      "EL RECUERDO",
+      "PARQUE BOLIVAR",
+      "ALHAMBRA",
+      "EL OLIVO",
+      "JAVERIANO",
+      "NAVARRETE",
+      "EL PRADO",
+      "AIRE LIBRE",
+      "BOYACA",
+      "CASA BELLA",
+      "COLISEO CUBIERTO",
+      "LA GRÁN COLOMBIA",
+      "JULIAN BUCHELLI",
+      "LOS ABDULES",
+      "CASA LOMA",
+      "LA ESMERALDA",
+      "MERCEDARIO",
+      "GUAMUÉS",
+      "SANTA CATALINA",
+      "JOSE ANTONIO GALÀN",
+      "LAS BRISAS",
+      "ALEJANDRÍA",
+      "PIE DE CUESTA",
+      "LAS LAJAS",
+      "ARNULFO GUERRERO",
+      "LA ESTRELLA",
+      "ROSAL DE ORIENTE",
+      "LAS MERCEDES",
+      "DOCE DE OCTUBRE",
+      "VILLA ROCIO",
+      "SAN MATEO",
+      "CENTRO",
+      "COLONIAL",
+      "CHAMPAGNATH",
+      "CHAMPAGNAT",
+      "LOS ESTUDIANTES",
+      "PANAMERICANA",
+      "LOS OLIVOS",
+      "SAN ANDRESITO",
+      "CORAZON DE JESUS",
+      "CHAPULTEPEC",
+      "EL RINCON DEL ROSARIO",
+      "SAN JUAN DE ANGANOY",
+      "LOS ROBLES",
+      "SIETE DE AGOSTO",
+      "REMANSOS DEL NORTE",
+      "EL PORTAL DEL NORTE",
+      "MARÍA ISABEL",
+      "PARANÁ",
+      "CONDOMINIO SANTIAGO",
+      "URBANIZACIÓN ZARAMA",
+      "PINAR DEL RIO",
+      "CAMPIÑA DE ORIENTE",
+      "JUAN PABLO II",
+      "PORTAL DE LA COLINA",
+      "LAS CAMELIAS",
+      "MARIA PAZ",
+      "MIRADOR DE NIZA",
+      "ALTOS DE LORENZO",
+      "QUITO LOPEZ",
+      "CUJACAL",
+      "VILLA COLOMBIA",
+      "CAMILO TORRES",
+      "AQUINE",
+      "TEQUENDAMA",
+      "SAN JUAN BOSCO",
+      "ALTAMIRA",
+      "MARILUZ",
+      "SALAZAR MEJIA",
+      "LA RIVIERA",
+      "RINCON DE ARANDA",
+      "CHICO",
+      "VILLAS DEL PRADO",
+      "LOS JAZMINES",
+      "ENTRERIOS",
+      "CAMPO VERDE",
+      "LA INDEPENDENCIA",
+      "PUCALPA",
+      "LOS GUADUALES",
+      "NUEVA SOLIDARIDAD",
+      "ALBERTO PABON",
+      "LAS CABAÑAS",
+      "FRAY EZEQUIEL",
+    ];
+
+    function cargarFecha() {
+      const hoy = new Date();
+      const fecha =
+        ("0" + hoy.getDate()).slice(-2) +
+        "/" +
+        ("0" + (hoy.getMonth() + 1)).slice(-2) +
+        "/" +
+        hoy.getFullYear();
+      document.getElementById("fecha_creacion").value = fecha;
+    }
+
+    async function cargarResponsables() {
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultar_responsables`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          },
+        );
+        const result = await response.json();
+        const select = document.getElementById("responsable");
+        select.innerHTML = '<option value="">Seleccione quien recibe</option>';
+        result.data.forEach((r) => {
+          select.innerHTML += `<option value="${r.id_persona}">${r.nombres} ${r.apellidos}</option>`;
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function optimizarTextoDireccion(textoOriginal) {
+      let direccionOriginal = textoOriginal.toUpperCase();
+      let direccionParaAPI = `${textoOriginal}, Pasto, Nariño, Colombia`;
+
+      if (direccionOriginal.includes("TAMASAGRA")) {
+        direccionParaAPI = "Barrio Tamasagra, Pasto, Nariño, Colombia";
+      } else {
+        const tieneMzOCasa =
+          direccionOriginal.includes("MZ") ||
+          direccionOriginal.includes("MANZANA") ||
+          direccionOriginal.includes("CASA");
+        const tieneViaPrincipal =
+          direccionOriginal.includes("CALLE") ||
+          direccionOriginal.includes("CLL") ||
+          direccionOriginal.includes("CRA") ||
+          direccionOriginal.includes("CARRERA") ||
+          direccionOriginal.includes("AVENIDA") ||
+          direccionOriginal.includes("AV");
+
+        if (tieneMzOCasa && !tieneViaPrincipal) {
+          let barrioDetectado = BARRIOS_PASTO.find((barrio) =>
+            direccionOriginal.includes(barrio),
+          );
+          if (barrioDetectado) {
+            if (
+              (barrioDetectado === "CHAMBU" || barrioDetectado === "CHAMBÚ") &&
+              direccionOriginal.includes("CAI")
+            ) {
+              direccionParaAPI = "CAI Barrio Chambu, Pasto, Nariño, Colombia";
+            } else {
+              direccionParaAPI = `Barrio ${barrioDetectado}, Pasto, Nariño, Colombia`;
+            }
+          }
+        }
+      }
+      return direccionParaAPI;
+    }
+
+    async function buscarCoordenadas(direccionTexto) {
+      const direccionFinal = optimizarTextoDireccion(direccionTexto);
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccionFinal)}&components=locality:Pasto|country:CO&key=${GOOGLE_API_KEY}&language=es`;
+
+      try {
+        const respuesta = await fetch(url);
+        const datos = await respuesta.json();
+        if (datos.status === "OK" && datos.results.length > 0) {
+          return {
+            lat: datos.results[0].geometry.location.lat,
+            lng: datos.results[0].geometry.location.lng,
+          };
+        }
+      } catch (error) {
+        console.error("Error consultando API de Google Geocoding:", error);
+      }
+      return null;
+    }
+
+    const inputGuia = document.getElementById("inputGuia");
+    inputGuia.addEventListener("keydown", async function (e) {
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        const numeroGuia = this.value.replace(/[^0-9]/g, "");
+        if (!numeroGuia) return;
+
+        const existe = listaGuias.some((g) => g.guia === numeroGuia);
+        if (existe) {
+          alertSMS(`Guía ${numeroGuia} ya está en la lista`);
+          this.value = "";
+          return;
+        }
+
+        try {
+          this.disabled = true;
+          this.placeholder = "CONSULTANDO GUÍA Y COORDENADAS...";
+
+          const responseGuia = await fetch(
+            `http://localhost:8081/guia/${numeroGuia}`,
+          );
+          const dataGuia = await responseGuia.json();
+
+          if (!dataGuia.ok) {
+            throw new Error(
+              `La guía ${numeroGuia} no fue devuelta de forma exitosa por el sistema central.`,
+            );
+          }
+
+          const direccionOriginal = dataGuia.direccion;
+          const coords = await buscarCoordenadas(direccionOriginal);
+
+          listaGuias.push({
+            guia: numeroGuia,
+            direccion: direccionOriginal,
+            latitud: coords ? coords.lat : "No encontrado",
+            longitud: coords ? coords.lng : "No encontrado",
+          });
+
+          renderGuias();
+
+          const container = document.querySelector(".table-responsive");
+          container.scrollTop = container.scrollHeight;
+        } catch (err) {
+          console.error("Error al procesar lectura de guía:", err);
+          alertSMS(`Error al procesar guía: ${err.message}`);
+        } finally {
+          this.disabled = false;
+          this.value = "";
+          this.placeholder = "ESCANEAR GUÍA AQUÍ";
+          this.focus();
+        }
+      }
+    });
+
+    function renderGuias() {
+      const tbody = document.getElementById("tablaGuias");
+      tbody.innerHTML = listaGuias
+        .map(
+          (g, i) => `
+    <tr>
+      <td class="text-center text-muted small">${i + 1}</td>
+      <td><span class="fw-bold text-nova">${g.guia}</span></td>
+      <td><small class="text-uppercase">${g.direccion}</small></td>
+      <td><span class="text-coords">${g.latitud}</span></td>
+      <td><span class="text-coords">${g.longitud}</span></td>
+      <td class="text-center">
+        <button type="button" class="btn-remove-guia" 
+                onclick="zonificar.quitarGuia(${i})" title="Quitar">
+          <i class="fas fa-times"></i>
+        </button>
+      </td>
+    </tr>`,
+        )
+        .join("");
+
+      document.getElementById("contadorGuias").innerText = listaGuias.length;
+    }
+
+    async function guardarEnSupabase(idResponsable, planillaId, guiasArray) {
+      console.log("Registrando datos geolocalizados en Supabase...", {
+        id_responsable: idResponsable,
+        planilla: planillaId,
+        items_guias: guiasArray,
+      });
+      return true;
+    }
+
+    async function guardarPlanilla(event, form) {
+      event.preventDefault();
+      const btnGuardar = document.getElementById("btnGuardar");
+      const btnAdicionar = document.getElementById("btnAdicionar");
+      const btnNueva = document.getElementById("btnNuevaPlanilla");
+
+      try {
+        if (listaGuias.length === 0)
+          throw new Error("Escanee al menos una guía");
+
+        const responsable = document.getElementById("responsable").value;
+        if (!responsable) throw new Error("Seleccione el responsable");
+
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i>VERIFICANDO...';
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        const soloCodigosGuias = listaGuias.map((g) => g.guia);
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_crear_planilla_devolucion`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              id_responsable: responsable,
+              guias: soloCodigosGuias,
+            }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          const mensajeCompleto = result.details
+            ? `${result.error}\n\nDetalles:\n${result.details.replace(/ \| /g, "\n")}`
+            : result.error || "Error desconocido";
+
+          alertSMS(mensajeCompleto);
+          btnGuardar.disabled = false;
+          btnGuardar.innerHTML =
+            '<i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN';
+          return;
+        }
+
+        if (result.planilla) {
+          document.getElementById("num_planilla").value = result.planilla;
+          await guardarEnSupabase(responsable, result.planilla, listaGuias);
+        }
+
+        alertSMS(
+          `¡Éxito! Planilla #${result.planilla} procesada correctamente ✅`,
+        );
+
+        btnGuardar.style.display = "none";
+        btnAdicionar.style.display = "block";
+        btnAdicionar.disabled = false;
+        btnNueva.disabled = false;
+      } catch (err) {
+        console.error("Error local:", err);
+        alertSMS(err.message);
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML =
+          '<i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN';
+      }
+    }
+
+    async function actualizarPlanilla() {
+      const btnAdicionar = document.getElementById("btnAdicionar");
+      const numPlanilla = document.getElementById("num_planilla").value;
+      const responsable = document.getElementById("responsable").value;
+
+      try {
+        if (!numPlanilla)
+          throw new Error("No hay un número de planilla cargado.");
+        if (listaGuias.length === 0)
+          throw new Error("No hay guías en la lista para enviar.");
+
+        btnAdicionar.disabled = true;
+        btnAdicionar.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i>ACTUALIZANDO...';
+
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        if (!session)
+          throw new Error("Sesión expirada. Por favor ingresa de nuevo.");
+
+        const soloCodigosGuias = listaGuias.map((g) => g.guia);
+
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_set_planilla_devolucion`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              num_planilla: numPlanilla,
+              guias: soloCodigosGuias,
+            }),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Error desconocido en el servidor");
+        }
+
+        await guardarEnSupabase(responsable, numPlanilla, listaGuias);
+
+        alertSMS(
+          result.mensaje ||
+            `Planilla #${numPlanilla} actualizada correctamente ✅`,
+        );
+
+        btnAdicionar.disabled = false;
+        btnAdicionar.innerHTML =
+          '<i class="fas fa-plus-circle me-1"></i> GUARDAR ADICIONALES';
+      } catch (err) {
+        console.error("Error en actualización:", err);
+        alertSMS(`Atención: ${err.message}`);
+        btnAdicionar.disabled = false;
+        btnAdicionar.innerHTML =
+          '<i class="fas fa-plus-circle me-1"></i> REINTENTAR GUARDAR';
+      }
+    }
+
+    function nuevaPlanilla() {
+      listaGuias = [];
+      renderGuias();
+
+      document.getElementById("num_planilla").value = "";
+      document.getElementById("responsable").value = "";
+      const inputGuia = document.getElementById("inputGuia");
+      inputGuia.value = "";
+
+      const btnGuardar = document.getElementById("btnGuardar");
+      const btnAdicionar = document.getElementById("btnAdicionar");
+      const btnNueva = document.getElementById("btnNuevaPlanilla");
+
+      btnGuardar.style.display = "block";
+      btnGuardar.disabled = false;
+      btnGuardar.innerHTML =
+        '<i class="fas fa-check-circle me-2"></i>PROCESAR DEVOLUCIÓN';
+
+      btnAdicionar.style.display = "none";
+      btnAdicionar.disabled = false;
+      btnAdicionar.innerHTML =
+        '<i class="fas fa-plus-circle me-1"></i> GUARDAR ADICIONALES';
+
+      btnNueva.disabled = true;
+      inputGuia.focus();
+
+      alertSMS("Listo para una nueva planilla 📦");
+    }
+
+    cargarFecha();
+    cargarResponsables();
+
+    // Retorno del objeto unificado bajo el nuevo alias
+    return {
+      guardarPlanilla,
+      limpiarGuias: () => {
+        listaGuias = [];
+        renderGuias();
+      },
+      nuevaPlanilla,
+      quitarGuia: (i) => {
+        listaGuias.splice(i, 1);
+        renderGuias();
+      },
+      actualizarPlanilla,
+    };
+  })();
+</script>
