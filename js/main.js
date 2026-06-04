@@ -114,6 +114,14 @@ function crearPlanillaDevolucion() {
   main.appendChild(frmCrearPlanillaDevolucion);
 }
 
+function zonificarGuias() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const frmZonificarGuias = document.createElement("zonificar-guias");
+  frmZonificarGuias.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(frmZonificarGuias);
+}
+
 function anularPlanilla() {
   let main = document.getElementById("App");
   removeALLChilds(main);

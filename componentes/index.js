@@ -15,3 +15,4 @@ import "./RecepcionDevolucionComponent.js";
 import "./menuTemplates.js";
 import "./reporteMensajeros.js";
 import "./efectividadMensajero.js";
+import "./zonificar.js";

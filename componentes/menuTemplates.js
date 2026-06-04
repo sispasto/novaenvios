@@ -15,6 +15,7 @@ export const MENUS = {
     </ul>`,
 
   // ROL EMPRESA
+  // ROL EMPRESA (Corregido y Optimizado)
   EMPRESA: `
     <ul class="navbar-nav flex-grow-1 pe-3 custom-menu">
       <li class="nav-item mb-2">
@@ -29,6 +30,21 @@ export const MENUS = {
       </li>
 
       <li class="nav-item menu-section">
+        <a class="nav-link section-header d-flex justify-content-between align-items-center" 
+          href="javascript:void(0)" onclick="NovaMenu.toggleSubMenu('catZonificar', event)">
+          <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt-fill text-info"></i> Zonificar
+          </span>
+          <i class="bi bi-chevron-right chevron-icon" style="font-size: 0.7rem;"></i>
+        </a>
+        <div class="collapse" id="catZonificar">
+          <ul class="list-unstyled submenu-list ms-3 border-start border-secondary-subtle">
+            <li><a class="nav-link" href="#" onclick="NovaMenu.ejecutarAccion(zonificarGuias)">Zonificar Guías</a></li>            
+          </ul>
+        </div>
+      </li>
+
+      <li class="nav-item menu-section mt-2">
         <a class="nav-link section-header d-flex justify-content-between align-items-center" 
           href="javascript:void(0)" onclick="NovaMenu.toggleSubMenu('catOperaciones', event)">
           <span class="d-flex align-items-center gap-2">
