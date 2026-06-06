@@ -80,6 +80,17 @@
   .btn-submit-coords:hover {
     background-color: #1e7268;
   }
+
+  /* --- AJUSTES MÓVILES --- */
+  @media (max-width: 480px) {
+    .box-precision-selector {
+      flex-direction: column;
+      gap: 8px;
+    }
+    .btn-precision-fetch {
+      padding: 12px 8px;
+    }
+  }
 </style>
 
 <div class="container-fluid py-3">
@@ -181,52 +192,59 @@
 
 <script>
   var nsGestionBarrios = (function () {
-    const URL_BASE = "https://pmbxyfketmuzocepllvf.supabase.co";
-    const CLAVE_ANON =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
-
     let filtroActivoActualmente = "";
 
     async function consultarServidor(tipoPrecision) {
       filtroActivoActualmente = tipoPrecision;
 
-      // Actualizar interfaz de botones
+      // Sincronizar UI de inmediato
       alternarBotonesUI(tipoPrecision);
       establecerCargandoDesplegable();
 
       try {
+        // Extraemos la sesión activa de Supabase de igual manera que en tus otras vistas
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) {
+          throw new Error(
+            "No se encontró una sesión activa. Por favor, inicia sesión nuevamente.",
+          );
+        }
+
         const response = await fetch(
-          `${URL_BASE}/functions/v1/novaenvios_consultarBarrios`,
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultarBarrios`,
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${CLAVE_ANON}`,
-              apikey: CLAVE_ANON,
               "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`, // Usando tu Access Token seguro
             },
             body: JSON.stringify({}),
           },
         );
 
-        if (!response.ok)
-          throw new Error("No se pudo obtener respuesta del servidor.");
-
         const respuestaJson = await response.json();
+
+        if (!response.ok)
+          throw new Error(
+            respuestaJson.error || "No se pudo obtener respuesta del servidor.",
+          );
+
         const listaCruda = respuestaJson.data || [];
 
-        // Filtrado en caliente
+        // Filtrado por precisión y pendientes
         let listaFiltrada = listaCruda.filter(
           (item) => item.exactitud === tipoPrecision && item.Verificado !== 1,
         );
 
-        // Ordenar alfabéticamente
+        // Ordenamiento
         listaFiltrada.sort((x, y) => x.barrio.localeCompare(y.barrio));
 
         cargarDatosEnSelect(listaFiltrada);
       } catch (error) {
-        mostrarAlertaError(
-          "Error al sincronizar con el servidor de Supabase. Revisa las configuraciones CORS.",
-        );
+        mostrarAlertaError(error.message);
         limpiarSelectPorError();
       }
     }
@@ -326,14 +344,23 @@
             '<i class="fas fa-cloud-upload-alt fa-spin me-1"></i> Impactando Base de Datos...';
 
           try {
+            const {
+              data: { session },
+            } = await supabaseClient.auth.getSession();
+
+            if (!session) {
+              throw new Error(
+                "Sesión expirada. Por favor vuelve a iniciar sesión.",
+              );
+            }
+
             const resGuardar = await fetch(
-              `${URL_BASE}/functions/v1/novaenvios_guardarBarrios`,
+              `${SUPABASE_URL}/functions/v1/novaenvios_guardarBarrios`,
               {
                 method: "POST",
                 headers: {
-                  Authorization: `Bearer ${CLAVE_ANON}`,
-                  apikey: CLAVE_ANON,
                   "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`, // Pasando el Access Token al guardar
                 },
                 body: JSON.stringify({
                   id: parseInt(idFila),
@@ -345,24 +372,29 @@
               },
             );
 
-            if (!resGuardar.ok)
-              throw new Error("Fallo en la respuesta de la función remota.");
+            const respuestaGuardarJson = await resGuardar.json();
 
-            alert(
+            if (!resGuardar.ok)
+              throw new Error(
+                respuestaGuardarJson.error ||
+                  "Fallo en la respuesta de la función remota.",
+              );
+
+            alertSMS(
               `🎯 ¡Transacción exitosa!\n\nEl barrio "${textoBarrio}" ha sido localizado con éxito y promovido a Alta Precisión.`,
             );
 
-            // Re-consultar para limpiar el selector
+            // Re-consultar el filtro activo para refrescar y remover de la lista el barrio corregido
             consultarServidor(filtroActivoActualmente);
           } catch (err) {
-            alert("Error al intentar guardar coordenadas: " + err.message);
+            alertSMS("Error al intentar guardar coordenadas: " + err.message);
             btn.disabled = false;
             btn.innerHTML =
               '<i class="fas fa-crosshairs me-1"></i> Re-geolocalizar y Validar Barrio';
           }
         },
         (errorGps) => {
-          alert(
+          alertSMS(
             "GPS Bloqueado: Activa la localización de tu teléfono y permite el acceso al navegador web.",
           );
           btn.disabled = false;
@@ -379,7 +411,6 @@
       alerta.style.display = "block";
     }
 
-    // Mapeamos temporalmente cambiarFiltro para prevenir errores residuales si se llama externamente
     function cambiarFiltro(tipo) {
       if (tipo === "Media Precision" || tipo === "media")
         consultarServidor("Media Precision");
@@ -390,7 +421,7 @@
       consultarServidor,
       verificarSeleccion,
       procesarGpsDispositivo,
-      cambiarFiltro, // <-- Agregado aquí para sanar el error de tu captura de pantalla instantáneamente
+      cambiarFiltro,
     };
   })();
 </script>
