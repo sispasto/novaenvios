@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capturador de Coordenadas - Logística Pasto</title>
+    <style>
+        /* --- ESTILOS RESPONSIVOS Y BASE --- */
+        :root {
+            --primary: #1d4ed8;
+            --primary-hover: #1e40af;
+            --success: #10b981;
+            --success-hover: #059669;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            padding: 1rem;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        /* Contenedor principal: se adapta desde pantallas pequeñas hasta monitores */
+        .app-container {
+            width: 100%;
+            max-width: 540px; /* Tamaño ideal para simular una App Móvil nativa */
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #1e3a8a;
+            margin-bottom: 1.25rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* Contenedor de filtros con scroll horizontal si la pantalla es extremadamente pequeña */
+        .filters-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 1.25rem;
+            scrollbar-width: none; /* Ocultar barra en Firefox */
+        }
+        .filters-wrapper::-webkit-scrollbar {
+            display: none; /* Ocultar barra en Chrome/Safari */
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(100px, 1fr));
+            gap: 0.5rem;
+            min-width: 100%;
+        }
+
+        .btn-filter {
+            background: #e2e8f0;
+            border: none;
+            padding: 0.75rem 0.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .btn-filter.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.3);
+        }
+
+        .counter {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+            color: var(--text-muted);
+            background: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px dashed var(--border);
+        }
+
+        /* Tarjetas de Barrios adaptables */
+        .barrio-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .barrio-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .barrio-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+            word-break: break-word; /* Evita que nombres largos rompan el diseño */
+        }
+
+        .barrio-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            background: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+
+        /* Botón de GPS optimizado para dedos (Touch Target Grande) */
+        .btn-gps {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 0.85rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            transition: background 0.2s ease, transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent; /* Elimina flash azul en móviles */
+        }
+
+        .btn-gps:active {
+            transform: scale(0.98);
+            background-color: var(--success-hover);
+        }
+        
+        /* Badges de precisión */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .alta { background: #d1fae5; color: #065f46; }
+        .media { background: #e0f2fe; color: #0369a1; }
+        .baja { background: #fee2e2; color: #991b1b; }
+
+        /* Media Query para pantallas muy pequeñas (Ej: celulares antiguos) */
+        @media (max-width: 360px) {
+            body { padding: 0.5rem; }
+            .app-container { padding: 1rem; }
+            h1 { font-size: 1.3rem; }
+            .barrio-name { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1>📍 Captura de Barrios Pasto</h1>
+    
+    <div class="filters-wrapper">
+        <div class="filters">
+            <button class="btn-filter" id="f-baja" onclick="cambiarFiltroVista('Baja Precision')">Baja Prec.</button>
+            <button class="btn-filter active" id="f-media" onclick="cambiarFiltroVista('Media Precision')">Media Prec.</button>
+            <button class="btn-filter" id="f-alta" onclick="cambiarFiltroVista('Alta Precision')">Alta Prec.</button>
+        </div>
+    </div>
+
+    <div class="counter" id="txtContador">3 barrios de muestra (Vista Maqueta)</div>
+    
+    <div id="listaBarrios">
+        
+        <div class="barrio-card data-item" data-exactitud="Media Precision" data-verificado="null">
+            <div class="card-header">
+                <span class="barrio-name">AVENIDA BOYACA</span>
+                <span class="badge media">Media Precision</span>
+            </div>
+            <div class="barrio-meta">
+                📍 Lat: 1.203200 | Lng: -77.279350<br>
+                📋 Estado: <span style="color: #d97706; font-weight: bold;">⏳ Pendiente (NULL)</span>
+            </div>
+            <button class="btn-gps" onclick="simularCaptura(this)">
+                🎯 Guardar Mi Ubicación Actual
+            </button>
+        </div>
+
+        <div class="barrio-card data-item" data-exactitud="Baja Precision" data-verificado="null" style="display:none;">
+            <div class="card-header">
+                <span class="barrio-name">HULLAGUANGA</span>
+                <span class="badge baja">Baja Precision</span>
+            </div>
+            <div class="barrio-meta">
+                📍 Lat: 1.195488 | Lng: -77.264002<br>
+                📋 Estado: <span style="color: #d97706; font-weight: bold;">⏳ Pendiente (NULL)</span>
+            </div>
+            <button class="btn-gps" onclick="simularCaptura(this)">
+                🎯 Guardar Mi Ubicación Actual
+            </button>
+        </div>
+
+        <div class="barrio-card data-item" data-exactitud="Alta Precision" data-verificado="1" style="display:none;">
+            <div class="card-header">
+                <span class="barrio-name">LAS AMERICAS</span>
+                <span class="badge alta">Alta Precision</span>
+            </div>
+            <div class="barrio-meta">
+                📍 Lat: 1.207629 | Lng: -77.278552<br>
+                📋 Estado: <span style="color: #16a34a; font-weight: bold;">✅ Verificado (1)</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+/* ====================================================================
+   📌 ESPACIO RESERVADO PARA FUTURAS FUNCIONES (COMENTADAS DE MOMENTO)
+   ====================================================================
+   // TODO: Inicializar conexión con el cliente de Supabase
+   // const SUPABASE_URL = "https://tu-proyecto.supabase.co";
+   ...
+   ==================================================================== */
+
+// Lógica básica de la interfaz visual interactiva
+function cambiarFiltroVista(filtroSeleccionado) {
+    document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+    if(filtroSeleccionado === 'Baja Precision') document.getElementById('f-baja').classList.add('active');
+    if(filtroSeleccionado === 'Media Precision') document.getElementById('f-media').classList.add('active');
+    if(filtroSeleccionado === 'Alta Precision') document.getElementById('f-alta').classList.add('active');
+
+    let contador = 0;
+    document.querySelectorAll('.data-item').forEach(card => {
+        if (card.getAttribute('data-exactitud') === filtroSeleccionado) {
+            card.style.display = 'flex';
+            contador++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('txtContador').innerText = `${contador} barrio(s) en vista de muestra`;
+}
+
+function simularCaptura(boton) {
+    boton.disabled = true;
+    boton.innerText = "🛰️ Simulando lectura de GPS...";
+    
+    setTimeout(() => {
+        alert("Simulación de guardado: Aquí se activará la función de actualización en Supabase que cambia las coordenadas y pasa el campo a Verificado (1).");
+        boton.innerText = "🎯 Guardar Mi Ubicación Actual";
+        boton.disabled = false;
+    }, 1000);
+}
+</script>
+
+</body>
+</html>
