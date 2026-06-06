@@ -1,12 +1,12 @@
 <style>
-  /* Variables de Identidad Corporativa - Nova Envíos */
+  /* Paleta Nova Envíos */
   :root {
     --nova-blue: #1d438a;
     --nova-dark-blue: #153266;
     --nova-light-blue: #f0f4f8;
-    --success-green: #2a9d8f;
+    --danger-red: #d90429;
     --warning-orange: #f39c12;
-    --danger-red: #e63946;
+    --success-green: #2a9d8f;
   }
 
   .card-header.bg-nova-gradient {
@@ -15,187 +15,164 @@
       var(--nova-blue) 0%,
       var(--nova-dark-blue) 100%
     ) !important;
-    border-bottom: 3px solid rgba(0, 0, 0, 0.1);
   }
 
-  /* Rejilla de botones principales táctiles */
-  .grid-botones-precision {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+  /* Contenedor de consulta principal */
+  .box-precision-selector {
+    display: flex;
     gap: 12px;
     width: 100%;
   }
 
-  .btn-nova-action {
+  .btn-precision-fetch {
+    flex: 1;
     font-weight: 700;
-    font-size: 0.95rem;
-    padding: 12px 8px;
+    font-size: 0.9rem;
+    padding: 14px 10px;
     border-radius: 8px;
-    transition: all 0.2s ease;
     border: 2px solid #dee2e6;
-    background-color: #fff;
+    background-color: #ffffff;
     color: #495057;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   }
 
-  .btn-nova-action:hover {
-    background-color: #f8f9fa;
-  }
-
-  /* Estados activos con colores de precisión */
-  .btn-nova-action.active-baja {
+  /* Estados activos por tipo de precisión */
+  .btn-precision-fetch.active-baja {
     background-color: var(--danger-red) !important;
-    color: white !important;
-    border-color: #b32430 !important;
-    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.2);
+    color: #ffffff !important;
+    border-color: #b3001b !important;
+    box-shadow: 0 4px 10px rgba(217, 4, 41, 0.25);
   }
 
-  .btn-nova-action.active-media {
+  .btn-precision-fetch.active-media {
     background-color: var(--warning-orange) !important;
-    color: white !important;
+    color: #ffffff !important;
     border-color: #d35400 !important;
-    box-shadow: 0 4px 8px rgba(243, 156, 18, 0.2);
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.25);
   }
 
-  /* Selector Desplegable Pro de Nova Envíos */
-  .select-nova {
+  .select-barrios-nova {
     border: 2px solid var(--nova-blue) !important;
     background-color: var(--nova-light-blue) !important;
     border-radius: 8px;
     color: var(--nova-dark-blue);
     font-weight: 700;
     padding: 12px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
   }
 
-  .select-nova:focus {
-    box-shadow: 0 0 0 0.25rem rgba(29, 67, 138, 0.25) !important;
+  .select-barrios-nova:focus {
+    box-shadow: 0 0 0 0.25rem rgba(29, 67, 138, 0.2) !important;
     background-color: #fff !important;
   }
 
-  /* Botón GPS de captura */
-  .btn-gps-submit {
+  .btn-submit-coords {
     background-color: var(--success-green);
     color: white;
     font-weight: 700;
     padding: 12px;
     border: none;
     border-radius: 8px;
-    transition: background-color 0.2s;
     width: 100%;
+    transition: background-color 0.2s;
   }
 
-  .btn-gps-submit:hover {
-    background-color: #218376;
-  }
-
-  .btn-gps-submit:disabled {
-    background-color: #a8dadc;
+  .btn-submit-coords:hover {
+    background-color: #1e7268;
   }
 </style>
 
 <div class="container-fluid py-3">
   <div class="row justify-content-center">
     <div class="col-12 col-md-10 col-lg-8">
-      <!-- Contenedor Principal Formulario Nova Envíos -->
       <div
         class="card shadow-lg border-0"
         style="border-radius: 12px; overflow: hidden"
       >
         <div class="card-header bg-nova-gradient py-3 text-center">
           <h5 class="mb-0 fw-bold text-white">
-            <i class="fas fa-satellite-dish me-2"></i> ASIGNACIÓN DE COORDENADAS
-            GPS
+            <i class="fas fa-map-pin me-2"></i> ACTUALIZACIÓN BAJO DEMANDA
           </h5>
         </div>
 
         <div class="card-body p-4">
-          <!-- Alerta de estado / Errores CORS o Conexión -->
-          <div id="alertaSistema" class="mb-3" style="display: none"></div>
+          <div
+            id="alertaServidor"
+            class="alert alert-danger small fw-bold text-center"
+            style="display: none"
+          ></div>
 
-          <!-- Paso 1: Selección de Categoría de Precisión (Botones Independientes) -->
           <label
-            class="form-label fw-bold text-secondary small text-uppercase tracking-wider mb-2"
+            class="form-label fw-bold text-muted small text-uppercase mb-2"
           >
-            1. Seleccione nivel de precisión a consultar:
+            1. Presione para consultar e importar de la Base de Datos:
           </label>
-          <div class="grid-botones-precision mb-4">
+          <div class="box-precision-selector mb-4">
             <button
               type="button"
-              id="btnBaja"
-              class="btn btn-nova-action"
-              onclick="
-                nsGeolocalizacion.consultarPorCategoria('Baja Precision')
-              "
+              id="btnFetchBaja"
+              class="btn-precision-fetch"
+              onclick="nsGestionBarrios.consultarServidor('Baja Precision')"
             >
-              <i class="fas fa-exclamation-triangle me-1"></i> Baja Precisión
+              <i class="fas fa-bolt me-1"></i> Baja Precisión
             </button>
             <button
               type="button"
-              id="btnMedia"
-              class="btn btn-nova-action"
-              onclick="
-                nsGeolocalizacion.consultarPorCategoria('Media Precision')
-              "
+              id="btnFetchMedia"
+              class="btn-precision-fetch"
+              onclick="nsGestionBarrios.consultarServidor('Media Precision')"
             >
-              <i class="fas fa-history me-1"></i> Media Precisión
+              <i class="fas fa-layer-group me-1"></i> Media Precisión
             </button>
           </div>
 
-          <!-- Paso 2: Menú Desplegable Dinámico -->
           <div class="mb-4">
             <label
-              for="selectBarrios"
-              class="form-label fw-bold text-secondary small text-uppercase tracking-wider mb-2"
+              for="selectBarriosDinamico"
+              class="form-label fw-bold text-muted small text-uppercase mb-2"
             >
-              2. Listado de barrios encontrados (<span id="contadorBarrios"
+              2. Barrios pendientes encontrados (<span id="txtCantidadBarrios"
                 >0</span
               >):
             </label>
             <select
-              id="selectBarrios"
-              class="form-select select-nova"
+              id="selectBarriosDinamico"
+              class="form-select select-barrios-nova"
               disabled
-              onchange="nsGeolocalizacion.eventoBarrioSeleccionado()"
+              onchange="nsGestionBarrios.verificarSeleccion()"
             >
               <option value="" selected disabled>
-                Seleccione primero una categoría...
+                Presione un botón de arriba para cargar...
               </option>
             </select>
           </div>
 
-          <!-- Paso 3: Botón de Guardado e Información -->
-          <div id="bloqueAccion" class="mt-2" style="display: none">
+          <div id="wrapperPanelGps" style="display: none">
             <div
-              class="alert alert-info py-2 px-3 mb-3 border-0 bg-light text-dark small rounded d-flex align-items-center"
+              class="alert alert-secondary py-2 px-3 mb-3 border-0 bg-light text-dark small rounded d-flex align-items-center"
             >
-              <i class="fas fa-info-circle me-2 text-primary fs-5"></i>
+              <i class="fas fa-satellite text-primary fs-5 me-2"></i>
               <div>
-                Se capturará la ubicación exacta del celular para actualizar el
-                barrio seleccionado.
+                Se capturará el punto GPS de este dispositivo para guardarlo en
+                la fila del barrio seleccionado.
               </div>
             </div>
             <button
               type="button"
-              id="btnCapturarGps"
-              class="btn btn-gps-submit shadow-sm"
-              onclick="nsGeolocalizacion.guardarUbicacionCelular()"
+              id="btnEjecutarActualizacion"
+              class="btn btn-submit-coords shadow-sm"
+              onclick="nsGestionBarrios.procesarGpsDispositivo()"
             >
-              <i class="fas fa-crosshairs me-1"></i> Capturar Coordenadas y
-              Validar Barrio
+              <i class="fas fa-crosshairs me-1"></i> Re-geolocalizar y Validar
+              Barrio
             </button>
           </div>
         </div>
 
-        <!-- Pie de tarjeta corporativo -->
         <div class="card-footer p-3 bg-light text-center">
-          <span
-            class="badge rounded-pill bg-white text-primary border px-3 py-2 small fw-bold"
+          <small class="text-secondary fw-bold"
+            >Plataforma de Envíos Pasto 2026</small
           >
-            <i class="fas fa-map-marked-alt me-1"></i> COBERTURA DE LOGÍSTICA
-            NOVA
-          </span>
         </div>
       </div>
     </div>
@@ -203,70 +180,72 @@
 </div>
 
 <script>
-  var nsGeolocalizacion = (function () {
-    const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
-    const SUPABASE_ANON_KEY =
+  // Cambiado a nsGestionBarrios para corregir el error de inicialización de tus logs
+  var nsGestionBarrios = (function () {
+    const URL_BASE = "https://pmbxyfketmuzocepllvf.supabase.co";
+    const CLAVE_ANON =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
 
-    let categoriaActual = "";
+    let filtroActivoActualmente = "";
 
-    async function consultarPorCategoria(precision) {
-      categoriaActual = precision;
+    async function consultarServidor(tipoPrecision) {
+      filtroActivoActualmente = tipoPrecision;
 
-      // Estilizar visualmente el botón seleccionado
-      uiAlternarBotones(precision);
-      mostrarEstadoCargando();
+      // Actualizar interfaz de botones instantáneamente
+      alternarBotonesUI(tipoPrecision);
+      establecerCargandoDesplegable();
 
       try {
-        // Petición directa que solicita la información en tiempo real a la Edge Function
-        const res = await fetch(
-          `${SUPABASE_URL}/functions/v1/novaenvios_consultarBarrios`,
+        // Petición directa a la Edge Function ya corregida con CORS sin bloqueos de navegador
+        const response = await fetch(
+          `${URL_BASE}/functions/v1/novaenvios_consultarBarrios`,
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${CLAVE_ANON}`,
+              apikey: CLAVE_ANON,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({}),
           },
         );
 
-        if (!res.ok)
-          throw new Error("Error en la consulta de barrios de " + precision);
+        if (!response.ok)
+          throw new Error("No se pudo obtener respuesta del servidor.");
 
-        const resultado = await res.json();
-        let todosLosBarrios = resultado.data || [];
+        const respuestaJson = await response.json();
+        const listaCruda = respuestaJson.data || [];
 
-        // Filtrar según la categoría solicitada por el botón presionado
-        let barriosFiltrados = [];
-        if (precision === "Media Precision") {
-          // Filtra los de Media Precisión que sigan sin verificar (Verificado nulo o diferente de 1)
-          barriosFiltrados = todosLosBarrios.filter(
-            (b) => b.exactitud === "Media Precision" && b.Verificado !== 1,
+        // Filtrado en caliente según el botón presionado por el operador/mensajero
+        let listaFiltrada = [];
+        if (tipoPrecision === "Media Precision") {
+          listaFiltrada = listaCruda.filter(
+            (item) =>
+              item.exactitud === "Media Precision" && item.Verificado !== 1,
           );
         } else {
-          barriosFiltrados = todosLosBarrios.filter(
-            (b) => b.exactitud === "Baja Precision",
+          listaFiltrada = listaCruda.filter(
+            (item) =>
+              item.exactitud === "Baja Precision" && item.Verificado !== 1,
           );
         }
 
-        // Ordenar alfabéticamente para comodidad del usuario móvil
-        barriosFiltrados.sort((a, b) => a.barrio.localeCompare(b.barrio));
+        // Ordenar alfabéticamente de la A a la Z
+        listaFiltrada.sort((x, y) => x.barrio.localeCompare(y.barrio));
 
-        llenarDesplegable(barriosFiltrados);
-      } catch (err) {
-        mostrarMensajeError(
-          "Error de comunicación (CORS / Conexión). Verifica la configuración de tu Edge Function.",
+        cargarDatosEnSelect(listaFiltrada);
+      } catch (error) {
+        mostrarAlertaError(
+          "Error al sincronizar con el servidor de Supabase. Revisa las configuraciones CORS.",
         );
-        resetearDesplegable();
+        limpiarSelectPorError();
       }
     }
 
-    function llenarDesplegable(barrios) {
-      const select = document.getElementById("selectBarrios");
-      const contador = document.getElementById("contadorBarrios");
-      const alerta = document.getElementById("alertaSistema");
+    function cargarDatosEnSelect(barrios) {
+      const select = document.getElementById("selectBarriosDinamico");
+      const contador = document.getElementById("txtCantidadBarrios");
+      const alerta = document.getElementById("alertaServidor");
 
       alerta.style.display = "none";
       select.innerHTML = "";
@@ -274,14 +253,14 @@
 
       if (barrios.length === 0) {
         select.innerHTML =
-          '<option value="" selected disabled>No se encontraron barrios pendientes...</option>';
+          '<option value="" selected disabled>🎉 No quedan barrios pendientes en esta categoría</option>';
         select.disabled = true;
-        document.getElementById("bloqueAccion").style.display = "none";
+        document.getElementById("wrapperPanelGps").style.display = "none";
         return;
       }
 
       select.innerHTML =
-        '<option value="" selected disabled>--- Seleccione un barrio de la lista ---</option>';
+        '<option value="" selected disabled>-- Selecciona el barrio a corregir --</option>';
       barrios.forEach((b) => {
         select.innerHTML += `<option value="${b.id}">${b.barrio.toUpperCase()}</option>`;
       });
@@ -289,9 +268,9 @@
       select.disabled = false;
     }
 
-    function uiAlternarBotones(precision) {
-      const btnBaja = document.getElementById("btnBaja");
-      const btnMedia = document.getElementById("btnMedia");
+    function alternarBotonesUI(precision) {
+      const btnBaja = document.getElementById("btnFetchBaja");
+      const btnMedia = document.getElementById("btnFetchMedia");
 
       btnBaja.classList.remove("active-baja");
       btnMedia.classList.remove("active-media");
@@ -303,125 +282,118 @@
       }
     }
 
-    function mostrarEstadoCargando() {
-      const select = document.getElementById("selectBarrios");
+    function establecerCargandoDesplegable() {
+      const select = document.getElementById("selectBarriosDinamico");
       select.disabled = true;
       select.innerHTML =
-        '<option value="" selected>🔄 Consultando base de datos, espere...</option>';
-      document.getElementById("bloqueAccion").style.display = "none";
-      document.getElementById("contadorBarrios").innerText = "...";
+        '<option value="" selected>🔄 Solicitando datos a Supabase...</option>';
+      document.getElementById("wrapperPanelGps").style.display = "none";
+      document.getElementById("txtCantidadBarrios").innerText = "...";
     }
 
-    function resetearDesplegable() {
-      const select = document.getElementById("selectBarrios");
+    function limpiarSelectPorError() {
+      const select = document.getElementById("selectBarriosDinamico");
       select.disabled = true;
       select.innerHTML =
-        '<option value="" selected disabled>Error al cargar registros.</option>';
-      document.getElementById("contadorBarrios").innerText = "0";
-      document.getElementById("bloqueAccion").style.display = "none";
+        '<option value="" selected disabled>Error de enlace de datos.</option>';
+      document.getElementById("txtCantidadBarrios").innerText = "0";
+      document.getElementById("wrapperPanelGps").style.display = "none";
     }
 
-    function eventoBarrioSeleccionado() {
-      const select = document.getElementById("selectBarrios");
-      const bloqueAccion = document.getElementById("bloqueAccion");
-
-      if (select.value) {
-        bloqueAccion.style.display = "block";
-      } else {
-        bloqueAccion.style.display = "none";
-      }
+    function verificarSeleccion() {
+      const select = document.getElementById("selectBarriosDinamico");
+      const panel = document.getElementById("wrapperPanelGps");
+      panel.style.display = select.value ? "block" : "none";
     }
 
-    function guardarUbicacionCelular() {
-      const select = document.getElementById("selectBarrios");
-      const idBarrio = select.value;
-      const nombreBarrio = select.options[select.selectedIndex].text;
-      const btnGps = document.getElementById("btnCapturarGps");
+    function procesarGpsDispositivo() {
+      const select = document.getElementById("selectBarriosDinamico");
+      const idFila = select.value;
+      const textoBarrio = select.options[select.selectedIndex].text;
+      const btn = document.getElementById("btnEjecutarActualizacion");
 
-      if (!idBarrio) return;
+      if (!idFila) return;
 
-      btnGps.disabled = true;
-      btnGps.innerHTML =
-        '<i class="fas fa-spinner fa-spin me-1"></i> Obteniendo satélites GPS...';
+      btn.disabled = true;
+      btn.innerHTML =
+        '<i class="fas fa-spinner fa-spin me-1"></i> Sincronizando satélites móviles...';
 
       if (!navigator.geolocation) {
         alert(
-          "Tu teléfono móvil no es compatible con el hardware de Geolocalización.",
+          "Este dispositivo móvil no cuenta con hardware o soporte de geolocalización activa.",
         );
-        btnGps.disabled = false;
-        btnGps.innerHTML =
-          '<i class="fas fa-crosshairs me-1"></i> Capturar Coordenadas y Validar Barrio';
+        btn.disabled = false;
+        btn.innerHTML =
+          '<i class="fas fa-crosshairs me-1"></i> Re-geolocalizar y Validar Barrio';
         return;
       }
 
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
+        async (pos) => {
+          const latitudCelular = pos.coords.latitude;
+          const longitudCelular = pos.coords.longitude;
 
-          btnGps.innerHTML =
-            '<i class="fas fa-sync fa-spin me-1"></i> Guardando en Nova Envíos...';
+          btn.innerHTML =
+            '<i class="fas fa-cloud-upload-alt fa-spin me-1"></i> Impactando Base de Datos...';
 
           try {
-            const response = await fetch(
-              `${SUPABASE_URL}/functions/v1/novaenvios_guardarBarrios`,
+            const resGuardar = await fetch(
+              `${URL_BASE}/functions/v1/novaenvios_guardarBarrios`,
               {
                 method: "POST",
                 headers: {
-                  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-                  apikey: SUPABASE_ANON_KEY,
+                  Authorization: `Bearer ${CLAVE_ANON}`,
+                  apikey: CLAVE_ANON,
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  id: parseInt(idBarrio),
-                  latitud: lat,
-                  longitud: lng,
+                  id: parseInt(idFila),
+                  latitud: latitudCelular,
+                  longitud: longitudCelular,
                   exactitud: "Alta Precision",
                   Verificado: 1,
                 }),
               },
             );
 
-            if (!response.ok)
-              throw new Error("Error interno en la Edge Function de guardado.");
+            if (!resGuardar.ok)
+              throw new Error("Fallo en la respuesta de la función remota.");
 
             alert(
-              `✅ ¡Ubicación guardada con éxito!\n\nEl barrio "${nombreBarrio}" fue promovido a Alta Precisión.`,
+              `🎯 ¡Transacción exitosa!\n\nEl barrio "${textoBarrio}" ha sido localizado con éxito y promovido a Alta Precisión.`,
             );
 
-            // Recargar automáticamente la lista de la categoría actual para remover el barrio recién corregido
-            consultarPorCategoria(categoriaActual);
+            // Re-consultar de inmediato para actualizar el selector sin el elemento modificado
+            consultarServidor(filtroActivoActualmente);
           } catch (err) {
-            alert("No se pudo guardar la ubicación: " + err.message);
-            btnGps.disabled = false;
-            btnGps.innerHTML =
-              '<i class="fas fa-crosshairs me-1"></i> Capturar Coordenadas y Validar Barrio';
+            alert("Error al intentar guardar coordenadas: " + err.message);
+            btn.disabled = false;
+            btn.innerHTML =
+              '<i class="fas fa-crosshairs me-1"></i> Re-geolocalizar y Validar Barrio';
           }
         },
-        (error) => {
+        (errorGps) => {
           alert(
-            "Error de GPS: Por favor activa la ubicación de tu celular y otorga los permisos necesarios al navegador web.",
+            "GPS Bloqueado: Activa la localización de tu teléfono y permite el acceso al navegador web para continuar.",
           );
-          btnGps.disabled = false;
-          btnGps.innerHTML =
-            '<i class="fas fa-crosshairs me-1"></i> Capturar Coordenadas y Validar Barrio';
+          btn.disabled = false;
+          btn.innerHTML =
+            '<i class="fas fa-crosshairs me-1"></i> Re-geolocalizar y Validar Barrio';
         },
-        { enableHighAccuracy: true, timeout: 15000 },
+        { enableHighAccuracy: true, timeout: 12000 },
       );
     }
 
-    function mostrarMensajeError(msg) {
-      const alerta = document.getElementById("alertaSistema");
-      alerta.className =
-        "alert alert-danger py-2 px-3 small fw-bold text-center";
-      alerta.innerHTML = `⚠️ ${msg}`;
+    function mostrarAlertaError(texto) {
+      const alerta = document.getElementById("alertaServidor");
+      alerta.innerHTML = `⚠️ ${texto}`;
       alerta.style.display = "block";
     }
 
     return {
-      consultarPorCategoria,
-      eventoBarrioSeleccionado,
-      guardarUbicacionCelular,
+      consultarServidor,
+      verificarSeleccion,
+      procesarGpsDispositivo,
     };
   })();
 </script>
