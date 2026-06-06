@@ -42,17 +42,21 @@ class GestionBarriosComponent extends HTMLElement {
         container.appendChild(s);
       });
 
-      // 7. Retardo milimétrico seguro para que el DOM se asiente y llamamos a tu módulo de barrios
+      // 7. Retardo milimétrico seguro para que el módulo JS se registre en el objeto global windows
       setTimeout(() => {
         if (typeof nsGestionBarrios !== "undefined") {
-          nsGestionBarrios.cambiarFiltro("Media Precision");
-          nsGestionBarrios.cargar();
+          // Si deseas que al entrar a la pantalla cargue por defecto una categoría, descomenta la siguiente línea:
+          // nsGestionBarrios.consultarServidor("Baja Precision");
+
+          console.log(
+            "Componente 'gestion-barrios' e interfaz bajo demanda vinculados con éxito.",
+          );
         } else {
           console.error(
-            "El espacio de nombres 'nsGestionBarrios' no se ha inicializado correctamente.",
+            "El espacio de nombres 'nsGestionBarrios' no se ha inicializado correctamente en el DOM global.",
           );
         }
-      }, 60);
+      }, 80); // Subido a 80ms para garantizar lectura asíncrona estable en móviles
     } catch (e) {
       console.error("Error crítico cargando GestionBarriosComponent:", e);
     }
