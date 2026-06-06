@@ -11,7 +11,7 @@ class GestionBarriosComponent extends HTMLElement {
 
     try {
       // 1. Apuntamos a tu archivo HTML que guardaste en el repositorio
-      const res = await fetch("geolocalizar.html");
+      const res = await fetch("view/geolocalizar.html");
       if (!res.ok)
         throw new Error("No se pudo obtener el archivo geolocalizar.html");
 
