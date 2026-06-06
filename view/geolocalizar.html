@@ -180,7 +180,6 @@
 </div>
 
 <script>
-  // Cambiado a nsGestionBarrios para corregir el error de inicialización de tus logs
   var nsGestionBarrios = (function () {
     const URL_BASE = "https://pmbxyfketmuzocepllvf.supabase.co";
     const CLAVE_ANON =
@@ -191,12 +190,11 @@
     async function consultarServidor(tipoPrecision) {
       filtroActivoActualmente = tipoPrecision;
 
-      // Actualizar interfaz de botones instantáneamente
+      // Actualizar interfaz de botones
       alternarBotonesUI(tipoPrecision);
       establecerCargandoDesplegable();
 
       try {
-        // Petición directa a la Edge Function ya corregida con CORS sin bloqueos de navegador
         const response = await fetch(
           `${URL_BASE}/functions/v1/novaenvios_consultarBarrios`,
           {
@@ -216,21 +214,12 @@
         const respuestaJson = await response.json();
         const listaCruda = respuestaJson.data || [];
 
-        // Filtrado en caliente según el botón presionado por el operador/mensajero
-        let listaFiltrada = [];
-        if (tipoPrecision === "Media Precision") {
-          listaFiltrada = listaCruda.filter(
-            (item) =>
-              item.exactitud === "Media Precision" && item.Verificado !== 1,
-          );
-        } else {
-          listaFiltrada = listaCruda.filter(
-            (item) =>
-              item.exactitud === "Baja Precision" && item.Verificado !== 1,
-          );
-        }
+        // Filtrado en caliente
+        let listaFiltrada = listaCruda.filter(
+          (item) => item.exactitud === tipoPrecision && item.Verificado !== 1,
+        );
 
-        // Ordenar alfabéticamente de la A a la Z
+        // Ordenar alfabéticamente
         listaFiltrada.sort((x, y) => x.barrio.localeCompare(y.barrio));
 
         cargarDatosEnSelect(listaFiltrada);
@@ -320,7 +309,7 @@
 
       if (!navigator.geolocation) {
         alert(
-          "Este dispositivo móvil no cuenta con hardware o soporte de geolocalización activa.",
+          "Este dispositivo móvil no cuenta con soporte de geolocalización activa.",
         );
         btn.disabled = false;
         btn.innerHTML =
@@ -363,7 +352,7 @@
               `🎯 ¡Transacción exitosa!\n\nEl barrio "${textoBarrio}" ha sido localizado con éxito y promovido a Alta Precisión.`,
             );
 
-            // Re-consultar de inmediato para actualizar el selector sin el elemento modificado
+            // Re-consultar para limpiar el selector
             consultarServidor(filtroActivoActualmente);
           } catch (err) {
             alert("Error al intentar guardar coordenadas: " + err.message);
@@ -374,7 +363,7 @@
         },
         (errorGps) => {
           alert(
-            "GPS Bloqueado: Activa la localización de tu teléfono y permite el acceso al navegador web para continuar.",
+            "GPS Bloqueado: Activa la localización de tu teléfono y permite el acceso al navegador web.",
           );
           btn.disabled = false;
           btn.innerHTML =
@@ -390,10 +379,18 @@
       alerta.style.display = "block";
     }
 
+    // Mapeamos temporalmente cambiarFiltro para prevenir errores residuales si se llama externamente
+    function cambiarFiltro(tipo) {
+      if (tipo === "Media Precision" || tipo === "media")
+        consultarServidor("Media Precision");
+      else consultarServidor("Baja Precision");
+    }
+
     return {
       consultarServidor,
       verificarSeleccion,
       procesarGpsDispositivo,
+      cambiarFiltro, // <-- Agregado aquí para sanar el error de tu captura de pantalla instantáneamente
     };
   })();
 </script>
