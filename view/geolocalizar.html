@@ -4,23 +4,11 @@
     --nova-blue: #1d438a;
     --nova-dark-blue: #153266;
     --nova-light-blue: #f0f4f8;
-    --dev-red: #e63946;
-    --dev-bg: #fff5f5;
     --success-green: #2a9d8f;
+    --warning-orange: #f39c12;
+    --danger-red: #e63946;
   }
 
-  .section-title {
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--nova-blue);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-left: 4px solid var(--nova-blue);
-    padding-left: 10px;
-    margin-bottom: 15px;
-  }
-
-  /* Header Premium con degradado Nova Envíos */
   .card-header.bg-nova-gradient {
     background: linear-gradient(
       135deg,
@@ -30,224 +18,183 @@
     border-bottom: 3px solid rgba(0, 0, 0, 0.1);
   }
 
-  /* Buscador Estilizado */
-  .search-input-nova {
-    border: 2px solid var(--nova-blue) !important;
-    background-color: var(--nova-light-blue);
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    color: var(--nova-blue);
-    font-weight: bold;
-  }
-
-  .search-input-nova:focus {
-    box-shadow: 0 0 0 0.25rem rgba(29, 67, 138, 0.2);
-    background-color: #fff;
-    border-color: var(--nova-blue) !important;
-  }
-
-  /* Contenedor e indicadores de filtros superiores */
-  .filters-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .filters-wrapper::-webkit-scrollbar {
-    display: none;
-  }
-
-  .filters-grid {
+  /* Rejilla de botones principales táctiles */
+  .grid-botones-precision {
     display: grid;
-    grid-template-columns: repeat(3, minmax(100px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
     width: 100%;
   }
 
-  .btn-filter-nova {
+  .btn-nova-action {
     font-weight: 700;
-    font-size: 0.85rem;
-    white-space: nowrap;
-    text-align: center;
+    font-size: 0.95rem;
+    padding: 12px 8px;
     border-radius: 8px;
     transition: all 0.2s ease;
     border: 2px solid #dee2e6;
     background-color: #fff;
-    color: #6c757d;
+    color: #495057;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
-  .btn-filter-nova:hover {
+  .btn-nova-action:hover {
     background-color: #f8f9fa;
-    border-color: #ced4da;
   }
 
-  .btn-filter-nova.active {
-    background-color: var(--nova-blue) !important;
+  /* Estados activos con colores de precisión */
+  .btn-nova-action.active-baja {
+    background-color: var(--danger-red) !important;
     color: white !important;
-    border-color: var(--nova-dark-blue) !important;
-    box-shadow: 0 4px 6px rgba(29, 67, 138, 0.15);
+    border-color: #b32430 !important;
+    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.2);
   }
 
-  /* Tabla con estilo Nova */
-  .table thead.table-nova th {
-    background-color: #f8f9fa;
-    color: var(--nova-blue);
-    text-transform: uppercase;
-    font-size: 11px;
-    border-bottom: 2px solid var(--nova-blue);
-    padding: 12px 8px;
+  .btn-nova-action.active-media {
+    background-color: var(--warning-orange) !important;
+    color: white !important;
+    border-color: #d35400 !important;
+    box-shadow: 0 4px 8px rgba(243, 156, 18, 0.2);
   }
 
-  .tabla-barrios {
-    font-size: 0.95rem;
-  }
-
-  .tabla-barrios tbody tr {
-    transition: background-color 0.2s;
-  }
-
-  .tabla-barrios tbody tr:hover {
-    background-color: #f1f3f9 !important;
-  }
-
-  .text-nova {
-    color: var(--nova-blue);
-    letter-spacing: 0.5px;
-  }
-
-  /* Botón GPS táctil de acción móvil */
-  .btn-gps-nova {
+  /* Selector Desplegable Pro de Nova Envíos */
+  .select-nova {
+    border: 2px solid var(--nova-blue) !important;
+    background-color: var(--nova-light-blue) !important;
+    border-radius: 8px;
+    color: var(--nova-dark-blue);
     font-weight: 700;
-    border-radius: 6px;
-    padding: 6px 14px;
+    padding: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .select-nova:focus {
+    box-shadow: 0 0 0 0.25rem rgba(29, 67, 138, 0.25) !important;
+    background-color: #fff !important;
+  }
+
+  /* Botón GPS de captura */
+  .btn-gps-submit {
     background-color: var(--success-green);
-    border: none;
     color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition:
-      transform 0.2s,
-      background-color 0.2s;
-    -webkit-tap-highlight-color: transparent;
+    font-weight: 700;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    width: 100%;
   }
 
-  .btn-gps-nova:hover {
+  .btn-gps-submit:hover {
     background-color: #218376;
-    transform: scale(1.03);
   }
 
-  .btn-gps-nova:disabled {
+  .btn-gps-submit:disabled {
     background-color: #a8dadc;
-    color: #f1faee;
-  }
-
-  /* --- AJUSTES RESPONSIVE --- */
-  @media (min-width: 992px) {
-    .container-fluid {
-      padding: 2rem 5rem;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .card-header-flex {
-      flex-direction: column;
-      align-items: stretch !important;
-      gap: 12px;
-    }
-
-    .search-input-nova {
-      width: 100% !important;
-      font-size: 16px; /* Evita zoom automático en iOS */
-    }
-
-    .tabla-barrios {
-      font-size: 0.85rem;
-    }
-
-    .tabla-barrios td,
-    .tabla-barrios th {
-      padding: 12px 6px !important;
-    }
-  }
-
-  @media (orientation: landscape) and (max-height: 500px) {
-    .table-responsive {
-      max-height: 230px;
-      overflow-y: auto;
-    }
   }
 </style>
 
 <div class="container-fluid py-3">
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-10 col-xl-8">
-      <div class="filters-wrapper mb-3">
-        <div class="filters-grid">
-          <button
-            class="btn btn-filter-nova"
-            id="f-baja"
-            onclick="nsGestionBarrios.cambiarFiltro('Baja Precision')"
-          >
-            <i class="fas fa-exclamation-triangle me-1 small"></i> Baja Prec.
-          </button>
-          <button
-            class="btn btn-filter-nova active"
-            id="f-media"
-            onclick="nsGestionBarrios.cambiarFiltro('Media Precision')"
-          >
-            <i class="fas fa-history me-1 small"></i> Media (Sin Verif)
-          </button>
-          <button
-            class="btn btn-filter-nova"
-            id="f-alta"
-            onclick="nsGestionBarrios.cambiarFiltro('Alta Precision')"
-          >
-            <i class="fas fa-check-double me-1 small"></i> Alta Prec.
-          </button>
-        </div>
-      </div>
-
+    <div class="col-12 col-md-10 col-lg-8">
+      <!-- Contenedor Principal Formulario Nova Envíos -->
       <div
         class="card shadow-lg border-0"
         style="border-radius: 12px; overflow: hidden"
       >
-        <div
-          class="card-header bg-nova-gradient py-3 d-flex justify-content-between align-items-center card-header-flex"
-        >
-          <h5 class="mb-0 fw-bold text-white d-flex align-items-center">
-            <i class="fas fa-map-marked-alt me-2"></i>
-            <span id="tituloVista">GEOLOCALIZACIÓN DE BARRIOS</span>
+        <div class="card-header bg-nova-gradient py-3 text-center">
+          <h5 class="mb-0 fw-bold text-white">
+            <i class="fas fa-satellite-dish me-2"></i> ASIGNACIÓN DE COORDENADAS
+            GPS
           </h5>
-          <input
-            type="text"
-            class="form-control form-control-sm w-50 shadow-sm search-input-nova py-2 px-3"
-            placeholder="🔎 Buscar barrio por nombre..."
-            onkeyup="nsGestionBarrios.filtrar(this.value)"
-          />
         </div>
 
-        <div class="card-body p-0">
-          <div id="alertaConsulta"></div>
+        <div class="card-body p-4">
+          <!-- Alerta de estado / Errores CORS o Conexión -->
+          <div id="alertaSistema" class="mb-3" style="display: none"></div>
 
-          <div class="table-responsive" style="max-height: 380px">
-            <table class="table table-hover align-middle mb-0 tabla-barrios">
-              <thead class="table-nova sticky-top">
-                <tr>
-                  <th class="ps-3" style="width: 40%">Barrio</th>
-                  <th style="width: 30%">Coordenadas (Lat, Lng)</th>
-                  <th class="text-center" style="width: 15%">Estado</th>
-                  <th class="text-center pe-3" style="width: 15%">Acción</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyBarrios"></tbody>
-            </table>
+          <!-- Paso 1: Selección de Categoría de Precisión (Botones Independientes) -->
+          <label
+            class="form-label fw-bold text-secondary small text-uppercase tracking-wider mb-2"
+          >
+            1. Seleccione nivel de precisión a consultar:
+          </label>
+          <div class="grid-botones-precision mb-4">
+            <button
+              type="button"
+              id="btnBaja"
+              class="btn btn-nova-action"
+              onclick="
+                nsGeolocalizacion.consultarPorCategoria('Baja Precision')
+              "
+            >
+              <i class="fas fa-exclamation-triangle me-1"></i> Baja Precisión
+            </button>
+            <button
+              type="button"
+              id="btnMedia"
+              class="btn btn-nova-action"
+              onclick="
+                nsGeolocalizacion.consultarPorCategoria('Media Precision')
+              "
+            >
+              <i class="fas fa-history me-1"></i> Media Precisión
+            </button>
+          </div>
+
+          <!-- Paso 2: Menú Desplegable Dinámico -->
+          <div class="mb-4">
+            <label
+              for="selectBarrios"
+              class="form-label fw-bold text-secondary small text-uppercase tracking-wider mb-2"
+            >
+              2. Listado de barrios encontrados (<span id="contadorBarrios"
+                >0</span
+              >):
+            </label>
+            <select
+              id="selectBarrios"
+              class="form-select select-nova"
+              disabled
+              onchange="nsGeolocalizacion.eventoBarrioSeleccionado()"
+            >
+              <option value="" selected disabled>
+                Seleccione primero una categoría...
+              </option>
+            </select>
+          </div>
+
+          <!-- Paso 3: Botón de Guardado e Información -->
+          <div id="bloqueAccion" class="mt-2" style="display: none">
+            <div
+              class="alert alert-info py-2 px-3 mb-3 border-0 bg-light text-dark small rounded d-flex align-items-center"
+            >
+              <i class="fas fa-info-circle me-2 text-primary fs-5"></i>
+              <div>
+                Se capturará la ubicación exacta del celular para actualizar el
+                barrio seleccionado.
+              </div>
+            </div>
+            <button
+              type="button"
+              id="btnCapturarGps"
+              class="btn btn-gps-submit shadow-sm"
+              onclick="nsGeolocalizacion.guardarUbicacionCelular()"
+            >
+              <i class="fas fa-crosshairs me-1"></i> Capturar Coordenadas y
+              Validar Barrio
+            </button>
           </div>
         </div>
 
+        <!-- Pie de tarjeta corporativo -->
         <div class="card-footer p-3 bg-light text-center">
           <span
             class="badge rounded-pill bg-white text-primary border px-3 py-2 small fw-bold"
           >
-            <i class="fas fa-satellite-dish me-1"></i> COBERTURA LOGÍSTICA NOVA
-            ENVÍOS
+            <i class="fas fa-map-marked-alt me-1"></i> COBERTURA DE LOGÍSTICA
+            NOVA
           </span>
         </div>
       </div>
@@ -256,20 +203,22 @@
 </div>
 
 <script>
-  var nsGestionBarrios = (function () {
-    /***********************************************/
+  var nsGeolocalizacion = (function () {
     const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
-    /***********************************************/
 
-    let barriosMemoria = [];
-    let filtroActual = "Media Precision";
+    let categoriaActual = "";
 
-    async function cargar() {
+    async function consultarPorCategoria(precision) {
+      categoriaActual = precision;
+
+      // Estilizar visualmente el botón seleccionado
+      uiAlternarBotones(precision);
+      mostrarEstadoCargando();
+
       try {
-        mostrarCargando();
-
+        // Petición directa que solicita la información en tiempo real a la Edge Function
         const res = await fetch(
           `${SUPABASE_URL}/functions/v1/novaenvios_consultarBarrios`,
           {
@@ -283,153 +232,125 @@
           },
         );
 
-        const result = await res.json();
-
         if (!res.ok)
-          throw new Error(
-            result.error || "Error al consultar la lista de barrios",
+          throw new Error("Error en la consulta de barrios de " + precision);
+
+        const resultado = await res.json();
+        let todosLosBarrios = resultado.data || [];
+
+        // Filtrar según la categoría solicitada por el botón presionado
+        let barriosFiltrados = [];
+        if (precision === "Media Precision") {
+          // Filtra los de Media Precisión que sigan sin verificar (Verificado nulo o diferente de 1)
+          barriosFiltrados = todosLosBarrios.filter(
+            (b) => b.exactitud === "Media Precision" && b.Verificado !== 1,
           );
+        } else {
+          barriosFiltrados = todosLosBarrios.filter(
+            (b) => b.exactitud === "Baja Precision",
+          );
+        }
 
-        barriosMemoria = result.data.sort((a, b) =>
-          a.barrio.localeCompare(b.barrio),
-        );
+        // Ordenar alfabéticamente para comodidad del usuario móvil
+        barriosFiltrados.sort((a, b) => a.barrio.localeCompare(b.barrio));
 
-        procesarYRenderizar();
+        llenarDesplegable(barriosFiltrados);
       } catch (err) {
-        mostrarError(err.message);
+        mostrarMensajeError(
+          "Error de comunicación (CORS / Conexión). Verifica la configuración de tu Edge Function.",
+        );
+        resetearDesplegable();
       }
     }
 
-    function procesarYRenderizar() {
-      const filtradosPorEstado = barriosMemoria.filter((b) => {
-        if (filtroActual === "Media Precision") {
-          return (
-            b.exactitud === "Media Precision" &&
-            (b.Verificado === null || b.Verificado === undefined)
-          );
-        } else if (filtroActual === "Baja Precision") {
-          return b.exactitud === "Baja Precision";
-        } else if (filtroActual === "Alta Precision") {
-          return b.exactitud === "Alta Precision";
-        }
-        return false;
-      });
+    function llenarDesplegable(barrios) {
+      const select = document.getElementById("selectBarrios");
+      const contador = document.getElementById("contadorBarrios");
+      const alerta = document.getElementById("alertaSistema");
 
-      render(filtradosPorEstado);
-    }
+      alerta.style.display = "none";
+      select.innerHTML = "";
+      contador.innerText = barrios.length;
 
-    function render(data) {
-      const tbody = document.getElementById("tbodyBarrios");
-      tbody.innerHTML = "";
-
-      if (!data.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="4" class="text-center text-muted py-5 bg-white">
-              <i class="fas fa-box-open d-block mb-2 text-muted opacity-50" style="font-size: 24px;"></i>
-              <span class="small fw-bold text-muted">No hay barrios en esta categoría</span>
-            </td>
-          </tr>
-        `;
+      if (barrios.length === 0) {
+        select.innerHTML =
+          '<option value="" selected disabled>No se encontraron barrios pendientes...</option>';
+        select.disabled = true;
+        document.getElementById("bloqueAccion").style.display = "none";
         return;
       }
 
-      data.forEach((b) => {
-        let badgeClass = "";
-        let statusText = "";
-
-        if (b.exactitud === "Alta Precision") {
-          badgeClass = "bg-success";
-          statusText = "✅ VERIFICADO";
-        } else if (b.exactitud === "Media Precision") {
-          badgeClass = "bg-warning text-dark";
-          statusText = "⏳ SIN VERIFICAR";
-        } else {
-          badgeClass = "bg-danger";
-          statusText = "🚨 CORREGIR";
-        }
-
-        const botonAccion =
-          b.exactitud !== "Alta Precision"
-            ? `<button class="btn btn-sm btn-gps-nova shadow-sm" onclick="nsGestionBarrios.capturarUbicacion(${b.id}, '${b.barrio}', this)"><i class="fas fa-crosshairs me-1"></i> Guardar</button>`
-            : `<span class="text-muted small fw-bold"><i class="fas fa-lock me-1"></i> Fijado</span>`;
-
-        const coordenadasTexto =
-          b.latitud && b.longitud
-            ? `<span class="font-monospace text-dark bg-light px-2 py-1 rounded small border d-inline-block"><i class="fas fa-globe-americas me-1 text-secondary"></i> ${Number(b.latitud).toFixed(6)}, ${Number(b.longitud).toFixed(6)}</span>`
-            : `<span class="text-danger small fw-bold"><i class="fas fa-map-marker-alt me-1"></i> Sin coordenadas</span>`;
-
-        tbody.innerHTML += `
-          <tr>
-            <td class="ps-3 valign-middle"><span class="fw-bold text-nova">${b.barrio}</span></td>
-            <td>${coordenadasTexto}</td>
-            <td class="text-center">
-              <span class="badge ${badgeClass} d-block mb-1" style="font-size: 10px; letter-spacing: 0.3px;">${b.exactitud.toUpperCase()}</span>
-              <small class="fw-bold text-muted" style="font-size: 9px;">${statusText}</small>
-            </td>
-            <td class="text-center pe-3">${botonAccion}</td>
-          </tr>
-        `;
-      });
-    }
-
-    function filtrar(txt) {
-      txt = txt.toLowerCase();
-
-      const filtrados = barriosMemoria.filter((b) => {
-        const cumpleBusqueda = b.barrio.toLowerCase().includes(txt);
-        let cumpleFiltro = false;
-
-        if (filtroActual === "Media Precision") {
-          cumpleFiltro =
-            b.exactitud === "Media Precision" &&
-            (b.Verificado === null || b.Verificado === undefined);
-        } else if (filtroActual === "Baja Precision") {
-          cumpleFiltro = b.exactitud === "Baja Precision";
-        } else if (filtroActual === "Alta Precision") {
-          cumpleFiltro = b.exactitud === "Alta Precision";
-        }
-
-        return cumpleBusqueda && cumpleFiltro;
+      select.innerHTML =
+        '<option value="" selected disabled>--- Seleccione un barrio de la lista ---</option>';
+      barrios.forEach((b) => {
+        select.innerHTML += `<option value="${b.id}">${b.barrio.toUpperCase()}</option>`;
       });
 
-      render(filtrados);
+      select.disabled = false;
     }
 
-    function cambiarFiltro(nuevoFiltro) {
-      filtroActual = nuevoFiltro;
+    function uiAlternarBotones(precision) {
+      const btnBaja = document.getElementById("btnBaja");
+      const btnMedia = document.getElementById("btnMedia");
 
-      document
-        .querySelectorAll(".btn-filter-nova")
-        .forEach((btn) => btn.classList.remove("active"));
+      btnBaja.classList.remove("active-baja");
+      btnMedia.classList.remove("active-media");
 
-      if (nuevoFiltro === "Baja Precision") {
-        document.getElementById("f-baja").classList.add("active");
-        document.getElementById("tituloVista").innerHTML =
-          '<i class="fas fa-exclamation-triangle me-2"></i> BARRIOS - BAJA PRECISIÓN';
+      if (precision === "Baja Precision") {
+        btnBaja.classList.add("active-baja");
+      } else {
+        btnMedia.classList.add("active-media");
       }
-      if (nuevoFiltro === "Media Precision") {
-        document.getElementById("f-media").classList.add("active");
-        document.getElementById("tituloVista").innerHTML =
-          '<i class="fas fa-map-marked-alt me-2"></i> BARRIOS - MEDIA PRECISIÓN';
-      }
-      if (nuevoFiltro === "Alta Precision") {
-        document.getElementById("f-alta").classList.add("active");
-        document.getElementById("tituloVista").innerHTML =
-          '<i class="fas fa-check-double me-2"></i> BARRIOS - ALTA PRECISIÓN';
-      }
-
-      procesarYRenderizar();
     }
 
-    function capturarUbicacion(id, nombreBarrio, boton) {
-      boton.disabled = true;
-      boton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> GPS...';
+    function mostrarEstadoCargando() {
+      const select = document.getElementById("selectBarrios");
+      select.disabled = true;
+      select.innerHTML =
+        '<option value="" selected>🔄 Consultando base de datos, espere...</option>';
+      document.getElementById("bloqueAccion").style.display = "none";
+      document.getElementById("contadorBarrios").innerText = "...";
+    }
+
+    function resetearDesplegable() {
+      const select = document.getElementById("selectBarrios");
+      select.disabled = true;
+      select.innerHTML =
+        '<option value="" selected disabled>Error al cargar registros.</option>';
+      document.getElementById("contadorBarrios").innerText = "0";
+      document.getElementById("bloqueAccion").style.display = "none";
+    }
+
+    function eventoBarrioSeleccionado() {
+      const select = document.getElementById("selectBarrios");
+      const bloqueAccion = document.getElementById("bloqueAccion");
+
+      if (select.value) {
+        bloqueAccion.style.display = "block";
+      } else {
+        bloqueAccion.style.display = "none";
+      }
+    }
+
+    function guardarUbicacionCelular() {
+      const select = document.getElementById("selectBarrios");
+      const idBarrio = select.value;
+      const nombreBarrio = select.options[select.selectedIndex].text;
+      const btnGps = document.getElementById("btnCapturarGps");
+
+      if (!idBarrio) return;
+
+      btnGps.disabled = true;
+      btnGps.innerHTML =
+        '<i class="fas fa-spinner fa-spin me-1"></i> Obteniendo satélites GPS...';
 
       if (!navigator.geolocation) {
-        alert("Tu dispositivo móvil no permite acceso a geolocalización.");
-        boton.disabled = false;
-        boton.innerHTML = '<i class="fas fa-crosshairs me-1"></i> Guardar';
+        alert(
+          "Tu teléfono móvil no es compatible con el hardware de Geolocalización.",
+        );
+        btnGps.disabled = false;
+        btnGps.innerHTML =
+          '<i class="fas fa-crosshairs me-1"></i> Capturar Coordenadas y Validar Barrio';
         return;
       }
 
@@ -438,8 +359,8 @@
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
 
-          boton.innerHTML =
-            '<i class="fas fa-sync fa-spin me-1"></i> Sincronizando...';
+          btnGps.innerHTML =
+            '<i class="fas fa-sync fa-spin me-1"></i> Guardando en Nova Envíos...';
 
           try {
             const response = await fetch(
@@ -452,7 +373,7 @@
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  id: id,
+                  id: parseInt(idBarrio),
                   latitud: lat,
                   longitud: lng,
                   exactitud: "Alta Precision",
@@ -461,65 +382,46 @@
               },
             );
 
-            const dataGuardado = await response.json();
-
             if (!response.ok)
-              throw new Error(dataGuardado.error || "No se pudo sincronizar.");
+              throw new Error("Error interno en la Edge Function de guardado.");
 
             alert(
-              `✅ ¡Ubicación de '${nombreBarrio}' asignada y promovida a Alta Precisión con éxito!`,
+              `✅ ¡Ubicación guardada con éxito!\n\nEl barrio "${nombreBarrio}" fue promovido a Alta Precisión.`,
             );
-            cargar();
+
+            // Recargar automáticamente la lista de la categoría actual para remover el barrio recién corregido
+            consultarPorCategoria(categoriaActual);
           } catch (err) {
-            alert("Error en la sincronización: " + err.message);
-            boton.disabled = false;
-            boton.innerHTML = '<i class="fas fa-crosshairs me-1"></i> Guardar';
+            alert("No se pudo guardar la ubicación: " + err.message);
+            btnGps.disabled = false;
+            btnGps.innerHTML =
+              '<i class="fas fa-crosshairs me-1"></i> Capturar Coordenadas y Validar Barrio';
           }
         },
         (error) => {
           alert(
-            "Error de GPS: Por favor activa la ubicación del celular y concede permisos al navegador de internet.",
+            "Error de GPS: Por favor activa la ubicación de tu celular y otorga los permisos necesarios al navegador web.",
           );
-          boton.disabled = false;
-          boton.innerHTML = '<i class="fas fa-crosshairs me-1"></i> Guardar';
+          btnGps.disabled = false;
+          btnGps.innerHTML =
+            '<i class="fas fa-crosshairs me-1"></i> Capturar Coordenadas y Validar Barrio';
         },
-        { enableHighAccuracy: true, timeout: 12000 },
+        { enableHighAccuracy: true, timeout: 15000 },
       );
     }
 
-    function mostrarCargando() {
-      document.getElementById("alertaConsulta").innerHTML = "";
-      document.getElementById("tbodyBarrios").innerHTML = `
-        <tr>
-          <td colspan="4" class="text-center py-5 bg-white">
-            <div class="spinner-border text-primary mb-2" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
-            <div class="text-muted small fw-bold">Conectando de forma segura con NovaEnvíos...</div>
-          </td>
-        </tr>
-      `;
-    }
-
-    function mostrarError(msg) {
-      document.getElementById("alertaConsulta").innerHTML = `
-        <div class="alert alert-danger mx-3 mt-3 shadow-sm text-center fw-bold small">⚠️ Error: ${msg}</div>
-      `;
-      document.getElementById("tbodyBarrios").innerHTML = `
-        <tr>
-          <td colspan="4" class="text-center text-danger py-4 bg-white fw-bold small">Error de enlace con el servidor.</td>
-        </tr>
-      `;
+    function mostrarMensajeError(msg) {
+      const alerta = document.getElementById("alertaSistema");
+      alerta.className =
+        "alert alert-danger py-2 px-3 small fw-bold text-center";
+      alerta.innerHTML = `⚠️ ${msg}`;
+      alerta.style.display = "block";
     }
 
     return {
-      cargar,
-      filtrar,
-      cambiarFiltro,
-      capturarUbicacion,
+      consultarPorCategoria,
+      eventoBarrioSeleccionado,
+      guardarUbicacionCelular,
     };
   })();
-
-  document.addEventListener("DOMContentLoaded", () => {
-    nsGestionBarrios.cambiarFiltro("Media Precision");
-    nsGestionBarrios.cargar();
-  });
 </script>
