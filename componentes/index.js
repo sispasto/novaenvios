@@ -16,4 +16,4 @@ import "./menuTemplates.js";
 import "./reporteMensajeros.js";
 import "./efectividadMensajero.js";
 import "./zonificar.js";
-import "./gestionBarrio.js";
+import "./gestionBarrios.js";
