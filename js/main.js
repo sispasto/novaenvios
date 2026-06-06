@@ -122,6 +122,14 @@ function zonificarGuias() {
   main.appendChild(frmZonificarGuias);
 }
 
+function geolocalizar() {
+  let main = document.getElementById("App");
+  removeALLChilds(main);
+  const gestionBarrios = document.createElement("gestion-barrios");
+  gestionBarrios.setAttribute("container", "#App"); // <-- aquí pasas el parámetro
+  main.appendChild(gestionBarrios);
+}
+
 function anularPlanilla() {
   let main = document.getElementById("App");
   removeALLChilds(main);

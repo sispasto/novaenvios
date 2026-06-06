@@ -125,6 +125,11 @@ export const MENUS = {
           <i class="bi bi-search"></i> <span>Efectividad reparto</span>
         </a>
       </li>
+      <li class="nav-item mb-2">
+        <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(geolocalizar)">
+          <i class="bi bi-pin-map"></i> <span>Geolocalizar barrios</span>
+        </a>
+      </li>
       <li class="nav-item mt-4 border-top border-secondary pt-3">
         <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="NovaMenu.ejecutarAccion(showChangePasswordModal)">
           <i class="bi bi-key"></i> <span>Cambiar Clave</span>

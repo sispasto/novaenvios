@@ -1,0 +1,428 @@
+<style>
+  .tabla-barrios {
+    font-size: 0.95rem;
+  }
+
+  /* Contenedor de filtros con scroll horizontal si la pantalla es muy angosta */
+  .filters-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filters-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(100px, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+  .btn-filter {
+    font-weight: bold;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* --- AJUSTES PARA PC Y TABLET --- */
+  @media (min-width: 992px) {
+    .container-fluid {
+      padding: 2rem 5rem;
+    }
+  }
+
+  /* --- AJUSTES PARA MÓVIL --- */
+  @media (max-width: 768px) {
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 10px;
+    }
+
+    .card-header input {
+      width: 100% !important;
+      font-size: 16px; /* Evita zoom automático en iOS */
+    }
+
+    .tabla-barrios {
+      font-size: 0.85rem;
+    }
+
+    .tabla-barrios td,
+    .tabla-barrios th {
+      padding: 10px 5px !important;
+    }
+  }
+
+  /* MODO HORIZONTAL (LANDSCAPE) */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .table-responsive {
+      max-height: 250px;
+      overflow-y: auto;
+    }
+  }
+
+  .tabla-barrios tbody tr {
+    transition: background-color 0.2s;
+  }
+
+  /* Botón GPS táctil grande para móviles */
+  .btn-gps {
+    -webkit-tap-highlight-color: transparent;
+  }
+</style>
+
+<div class="container-fluid mt-3">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      <div class="filters-wrapper mb-3">
+        <div class="filters-grid">
+          <button
+            class="btn btn-outline-secondary btn-filter"
+            id="f-baja"
+            onclick="nsGestionBarrios.cambiarFiltro('Baja Precision')"
+          >
+            Baja Prec.
+          </button>
+          <button
+            class="btn btn-outline-secondary btn-filter active"
+            id="f-media"
+            onclick="nsGestionBarrios.cambiarFiltro('Media Precision')"
+          >
+            Media Prec. (Sin Verif)
+          </button>
+          <button
+            class="btn btn-outline-secondary btn-filter"
+            id="f-alta"
+            onclick="nsGestionBarrios.cambiarFiltro('Alta Precision')"
+          >
+            Alta Prec.
+          </button>
+        </div>
+      </div>
+
+      <div class="card shadow border-0">
+        <div
+          class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3"
+        >
+          <h5 class="mb-0 fw-bold" id="tituloVista">
+            📍 Barrios (Media Precision)
+          </h5>
+          <input
+            type="text"
+            class="form-control form-control-sm w-50 shadow-sm"
+            placeholder="🔎 Buscar barrio..."
+            onkeyup="nsGestionBarrios.filtrar(this.value)"
+          />
+        </div>
+
+        <div class="card-body p-0">
+          <div id="alertaConsulta"></div>
+
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 tabla-barrios">
+              <thead class="table-dark">
+                <tr>
+                  <th class="ps-3">Barrio</th>
+                  <th>Coordenadas (Lat, Lng)</th>
+                  <th>Estado</th>
+                  <th class="text-center pe-3">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBarrios"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var nsGestionBarrios = (function () {
+    /***********************************************/
+    const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
+    /***********************************************/
+
+    let barriosMemoria = [];
+    let filtroActual = "Media Precision"; // Por defecto arranca en Media Precisión
+
+    async function cargar() {
+      try {
+        mostrarCargando();
+
+        // Llamada a tu Edge Function para consultar barrios
+        const res = await fetch(
+          `${SUPABASE_URL}/functions/v1/novaenvios_consultarBarrios`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              apikey: SUPABASE_ANON_KEY,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}),
+          },
+        );
+
+        const result = await res.json();
+
+        if (!res.ok)
+          throw new Error(
+            result.error || "Error al consultar la lista de barrios",
+          );
+
+        barriosMemoria = result.data.sort((a, b) =>
+          a.barrio.localeCompare(b.barrio),
+        );
+
+        procesarYRenderizar();
+      } catch (err) {
+        mostrarError(err.message);
+      }
+    }
+
+    function procesarYRenderizar() {
+      // Aplicamos las reglas de negocio solicitadas sobre los datos del servidor
+      const filtradosPorEstado = barriosMemoria.filter((b) => {
+        if (filtroActual === "Media Precision") {
+          // Media Precisión sin verificar (Verificado NULL)
+          return (
+            b.exactitud === "Media Precision" &&
+            (b.Verificado === null || b.Verificado === undefined)
+          );
+        } else if (filtroActual === "Baja Precision") {
+          // Todos los de baja precisión para corregir en campo
+          return b.exactitud === "Baja Precision";
+        } else if (filtroActual === "Alta Precision") {
+          // Todos los verificados con éxito
+          return b.exactitud === "Alta Precision";
+        }
+        return false;
+      });
+
+      render(filtradosPorEstado);
+    }
+
+    function render(data) {
+      const tbody = document.getElementById("tbodyBarrios");
+      tbody.innerHTML = "";
+
+      if (!data.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center text-muted py-4">
+              ✨ No hay barrios pendientes en esta sección
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      data.forEach((b) => {
+        const badgeClass =
+          b.exactitud === "Alta Precision"
+            ? "bg-success"
+            : b.exactitud === "Media Precision"
+              ? "bg-info text-dark"
+              : "bg-danger";
+        const statusText =
+          b.Verificado === 1 ? "✅ Verificado" : "⏳ Pendiente";
+
+        // El botón GPS solo se renderiza si el barrio no es de Alta Precisión
+        const botonAccion =
+          b.exactitud !== "Alta Precision"
+            ? `<button class="btn btn-sm btn-success btn-gps fw-bold shadow-sm" onclick="nsGestionBarrios.capturarUbicacion(${b.id}, '${b.barrio}', this)">🎯 Guardar</button>`
+            : `<span class="text-muted small">Sin acciones</span>`;
+
+        tbody.innerHTML += `
+          <tr>
+            <td class="fw-bold ps-3 valign-middle">${b.barrio}</td>
+            <td class="text-monospace small">
+              ${b.latitud && b.longitud ? `🌐 ${Number(b.latitud).toFixed(6)}, ${Number(b.longitud).toFixed(6)}` : "❌ Sin Ubicación"}
+            </td>
+            <td>
+              <span class="badge ${badgeClass} mb-1 d-block text-center">${b.exactitud}</span>
+              <small class="text-muted d-block text-center">${statusText}</small>
+            </td>
+            <td class="text-center pe-3">${botonAccion}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function filtrar(txt) {
+      txt = txt.toLowerCase();
+
+      // Buscador interactivo sobre el conjunto de datos filtrado actual
+      const filtrados = barriosMemoria.filter((b) => {
+        // Validación de coincidencia de buscador
+        const cumpleBusqueda = b.barrio.toLowerCase().includes(txt);
+
+        // Validación de coincidencia de pestaña
+        let cumpleFiltro = false;
+        if (filtroActual === "Media Precision") {
+          cumpleFiltro =
+            b.exactitud === "Media Precision" &&
+            (b.Verificado === null || b.Verificado === undefined);
+        } else if (filtroActual === "Baja Precision") {
+          cumpleFiltro = b.exactitud === "Baja Precision";
+        } else if (filtroActual === "Alta Precision") {
+          cumpleFiltro = b.exactitud === "Alta Precision";
+        }
+
+        return cumpleBusqueda && cumpleFiltro;
+      });
+
+      render(filtrados);
+    }
+
+    function cambiarFiltro(nuevoFiltro) {
+      filtroActual = nuevoFiltro;
+
+      // Actualizar clases de botones de control superior
+      document
+        .querySelectorAll(".btn-filter")
+        .forEach((btn) => btn.classList.remove("btn-dark", "active"));
+      document
+        .querySelectorAll(".btn-filter")
+        .forEach((btn) => btn.classList.add("btn-outline-secondary"));
+
+      if (nuevoFiltro === "Baja Precision") {
+        document
+          .getElementById("f-baja")
+          .classList.remove("btn-outline-secondary");
+        document.getElementById("f-baja").classList.add("btn-dark", "active");
+        document.getElementById("tituloVista").innerText =
+          "📍 Barrios (Baja Precision)";
+      }
+      if (nuevoFiltro === "Media Precision") {
+        document
+          .getElementById("f-media")
+          .classList.remove("btn-outline-secondary");
+        document.getElementById("f-media").classList.add("btn-dark", "active");
+        document.getElementById("tituloVista").innerText =
+          "📍 Barrios (Media Precision)";
+      }
+      if (nuevoFiltro === "Alta Precision") {
+        document
+          .getElementById("f-alta")
+          .classList.remove("btn-outline-secondary");
+        document.getElementById("f-alta").classList.add("btn-dark", "active");
+        document.getElementById("tituloVista").innerText =
+          "📍 Barrios (Alta Precision)";
+      }
+
+      procesarYRenderizar();
+    }
+
+    function capturarUbicacion(id, nombreBarrio, boton) {
+      boton.disabled = true;
+      boton.innerText = "🛰️ GPS...";
+
+      if (!navigator.geolocation) {
+        alert("Tu dispositivo móvil no permite acceso a geolocalización.");
+        boton.disabled = false;
+        boton.innerText = "🎯 Guardar";
+        return;
+      }
+
+      // Solicitud al hardware GPS del celular del mensajero
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          boton.innerText = "💾 Sincronizando...";
+
+          try {
+            // Llamada a tu Edge Function para guardar la coordenada corregida
+            const response = await fetch(
+              `${SUPABASE_URL}/functions/v1/novaenvios_guardarBarrios`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+                  apikey: SUPABASE_ANON_KEY,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  id: id,
+                  latitud: lat,
+                  longitud: lng,
+                  exactitud: "Alta Precision", // Escala automáticamente de categoría
+                  Verificado: 1,
+                }),
+              },
+            );
+
+            const dataGuardado = await response.json();
+
+            if (!response.ok)
+              throw new Error(
+                dataGuardado.error || "No se pudo guardar la ubicación.",
+              );
+
+            alert(
+              `✅ ¡Barrio ${nombreBarrio} verificado con éxito! Subió a Alta Precisión.`,
+            );
+
+            // Volvemos a consultar la base de datos para refrescar la lista global
+            cargar();
+          } catch (err) {
+            alert("Error en el guardado: " + err.message);
+            boton.disabled = false;
+            boton.innerText = "🎯 Guardar";
+          }
+        },
+        (error) => {
+          alert(
+            "Error de GPS: Por favor activa la localización de tu celular y concede permisos al navegador.",
+          );
+          boton.disabled = false;
+          boton.innerText = "🎯 Guardar";
+        },
+        { enableHighAccuracy: true, timeout: 12000 }, // Fuerza el uso del chip GPS de alta precisión en calle
+      );
+    }
+
+    function mostrarCargando() {
+      document.getElementById("alertaConsulta").innerHTML = "";
+      document.getElementById("tbodyBarrios").innerHTML = `
+        <tr>
+          <td colspan="4" class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-dark" role="status"></div>
+            <span class="ms-2 text-muted">Conectando con NovaEnvíos Server...</span>
+          </td>
+        </tr>
+      `;
+    }
+
+    function mostrarError(msg) {
+      document.getElementById("alertaConsulta").innerHTML = `
+        <div class="alert alert-danger mx-3 mt-3 shadow-sm">⚠️ ${msg}</div>
+      `;
+      document.getElementById("tbodyBarrios").innerHTML = `
+        <tr>
+          <td colspan="4" class="text-center text-danger py-3">Error de comunicación.</td>
+        </tr>
+      `;
+    }
+
+    return {
+      cargar,
+      filtrar,
+      cambiarFiltro,
+      capturarUbicacion,
+    };
+  })();
+
+  // Autoejecución del flujo limpio al cargar la página
+  document.addEventListener("DOMContentLoaded", () => {
+    nsGestionBarrios.cambiarFiltro("Media Precision");
+    nsGestionBarrios.cargar();
+  });
+</script>
